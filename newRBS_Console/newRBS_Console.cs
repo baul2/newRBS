@@ -8,6 +8,8 @@ namespace newRBS_Console
 
         static void Main(string[] args)
         {
+            Classes.DataSpectrum spectrum = new Classes.DataSpectrum(1, 0);
+            spectrum.SpectrumY = new int[2] { 1, 2};
             TraceSource trace = new TraceSource("newRBS_Console");
             NamespaceCAEN_x730.CAEN_x730 cAENx730 = new NamespaceCAEN_x730.CAEN_x730();
             cAENx730.StartAcquisition(0);
