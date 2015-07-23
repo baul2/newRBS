@@ -19,7 +19,7 @@ namespace newRBS_Console
             { Sum += (int)hist[i]; }
             Console.WriteLine(Sum);
 
-            //Test
+            //Testsdsd
             //Logger.Info("Measurement running", "Main");
             //Logger.Error("sdf", "Main");
 
