@@ -20,7 +20,6 @@ namespace newRBS_Console
             Console.WriteLine(Sum);
 
             //Testsdsd
-            //asdf
             //Logger.Info("Measurement running", "Main");
             //Logger.Error("sdf", "Main");
 
