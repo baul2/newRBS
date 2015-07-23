@@ -2,27 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Linq;
 
 namespace NamespaceCAEN_x730
 {
-    public struct WaveformParams
-    {
-        public int AP1;
-        public int AP2;
-        public int DP1;
-        public int DP2;
-        public int AUTO;
-        public WaveformParams(int AP1, int AP2, int DP1, int DP2, int AUTO)
-        {
-            this.AP1 = AP1;
-            this.AP2 = AP2;
-            this.DP1 = DP1;
-            this.DP2 = DP2;
-            this.AUTO = AUTO;
-        }
-
-    }
-
     /// <summary>
     /// Class that controls the CAEN N6730 device.
     /// </summary>
@@ -30,13 +13,11 @@ namespace NamespaceCAEN_x730
     {
         int handle;
         int bID;
-        int acqMode = 1; // 0 = Waveform; 1 = Histogram
+        CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
+        int waveformAutoTrigger = 1;
         CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
         List<int> activeChannels = new List<int>();
         int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
-        string stopType = "Manual";
-        int stopValue = 0;
-        WaveformParams waveformParams = new WaveformParams(4, 1, 5, 1, 1);
 
         TraceSource trace = new TraceSource("CAEN_x730");
 
@@ -55,6 +36,8 @@ namespace NamespaceCAEN_x730
         public static extern int CAENDPP_StopAcquisition(int handle, int channel);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         public static extern int CAENDPP_GetCurrentHistogram(int handle, int channel, UInt32[] h1, ref UInt32 counts, ref UInt64 realTime, ref UInt64 deadTime, ref int acqStatus);
+        [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int CAENDPP_GetWaveform(int handle, int channel, Int16 Auto, Int16[] AT1, Int16[] AT2, byte[] DT1, byte[] DT2, ref UInt32 numSample, ref double lenSample);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         public static extern int CAENDPP_EndLibrary(int handle);
 
@@ -111,25 +94,55 @@ namespace NamespaceCAEN_x730
         /// </remarks>
         public void SendConfig()
         {
-            int ret = CAENDPP_SetBoardConfiguration(handle, bID, acqMode, dgtzParams);
+            int ret = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
             if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
             else { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
         }
 
-        public void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2)
+        /// <summary>
+        /// Function that sends the waveform configuration.
+        /// </summary>
+        /// <param name="AP1">Enum for analog probe 1.</param>
+        /// <param name="AP2">Enum for analog probe 2.</param>
+        /// <param name="DP1">Enum for digital probe 1.</param>
+        /// <param name="DP2">Enum for digital probe 2.</param>
+        /// <param name="AutoTrigger">Sets AutoTrigger to on (true) of off (false).</param>
+        public void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2, bool AutoTrigger)
         {
             dgtzParams.WFParams.ap1 = AP1;
+            dgtzParams.WFParams.ap2 = AP2;
+            dgtzParams.WFParams.dp1 = DP1;
+            dgtzParams.WFParams.dp2 = DP2;
+            waveformAutoTrigger = Convert.ToInt32(AutoTrigger);
+
+            SendConfig();
         }
 
         /// <summary>
-        /// Function that starts the measurement for theselected channel.
+        /// Function that sends the acquisition mode.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to start the measurement.</param>
+        /// <param name="acquisitionMode">Acquisition mode (Waveform/Histogram).</param>
+        public void SetMeasurementMode(CAENDPP_AcqMode_t acquisitionMode)
+        {
+            acqMode = acquisitionMode;
+
+            SendConfig();
+        }
+
         public void StartAcquisition(int channel)
         {
+            if (activeChannels.Contains(channel)) // Checks if measurement is already running
+            {
+                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}, channel");
+                return;
+            }
             int ret = CAENDPP_StartAcquisition(handle, channel);
             if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel {0}", channel); }
+            else
+            {
+                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel {0}", channel);
+                activeChannels.Add(channel); // Adds channel to the active channels
+            }
         }
 
         /// <summary>
@@ -151,15 +164,56 @@ namespace NamespaceCAEN_x730
             return h1;
         }
 
+        public Tuple<int[], int[], int[], int[], int> GetWaveform(int channel)
+        {
+            int[] error = new int[1];
+            error[0] = 0;
+            Tuple<int[], int[], int[], int[], int> errorTuple = Tuple.Create(error, error, error, error, 0);
+
+            Int16[] AT1 = new Int16[dgtzParams.WFParams.recordLength];
+            Int16[] AT2 = new Int16[dgtzParams.WFParams.recordLength];
+            byte[] DT1 = new byte[dgtzParams.WFParams.recordLength];
+            byte[] DT2 = new byte[dgtzParams.WFParams.recordLength];
+            UInt32 numSample = 0;
+            double lenSample = 0;
+
+            for (int i = 0; i < 100; i++)
+            {
+                int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, AT1, AT2, DT1, DT2, ref numSample, ref lenSample);
+                if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return errorTuple; }
+                else
+                {
+                    if (numSample == 0) { continue; }
+                    trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
+                    int[] AT1int = AT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    int[] AT2int = AT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    int[] DT1int = DT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    int[] DT2int = DT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    return Tuple.Create(AT1int, AT2int, DT1int, DT2int, (int)numSample);
+                }
+            }
+            trace.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel {0}", channel);
+            return errorTuple;
+        }
+
         /// <summary>
         /// Function that stops the measurement for the selected channel.
         /// </summary>
         /// <param name="channel">Channel (0...7) to start the measurement.</param>
         public void StopAcquisition(int channel)
         {
+            if (!activeChannels.Contains(channel)) // Checks if measurement is not running
+            {
+                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}, channel");
+                return;
+            }
             int ret = CAENDPP_StopAcquisition(handle, channel);
             if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel {0}", channel); }
+            else
+            {
+                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel {0}", channel);
+                activeChannels.Remove(channel); // Removes channel from the active channels
+            }
         }
 
         /// <summary>

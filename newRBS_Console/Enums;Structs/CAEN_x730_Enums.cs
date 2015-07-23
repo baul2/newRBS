@@ -1,5 +1,17 @@
 ﻿namespace NamespaceCAEN_x730
 {
+    /// <summary>
+    /// Enum for the acquisition mode
+    /// </summary>
+    public enum CAENDPP_AcqMode_t
+    {
+        CAENDPP_AcqMode_Waveform,
+        CAENDPP_AcqMode_Histogram,
+    };
+
+    /// <summary>
+    /// Enum for the analog probe 1
+    /// </summary>
     public enum CAENDPP_PHA_AnalogProbe1_t
     {
         CAENDPP_PHA_VIRTUALPROBE1_Input,
@@ -13,6 +25,9 @@
         CAENDPP_PHA_VIRTUALPROBE1_None,
     };
 
+    /// <summary>
+    /// Enum for the analog probe 2
+    /// </summary>
     public enum CAENDPP_PHA_AnalogProbe2_t
     {
         CAENDPP_PHA_VIRTUALPROBE2_Input,
@@ -27,6 +42,9 @@
         CAENDPP_PHA_VIRTUALPROBE2_EnergyOut,
     };
 
+    /// <summary>
+    /// Enum for the digital probe 1
+    /// </summary>
     public enum CAENDPP_PHA_DigitalProbe1_t
     {
         CAENDPP_PHA_DigitalProbe1_TrgWin,
@@ -48,6 +66,9 @@
         CAENDPP_PHA_DigitalProbe1_Reset,
     };
 
+    /// <summary>
+    /// Enum for the digital probe 2
+    /// </summary>
     public enum CAENDPP_PHA_DigitalProbe2_t
     {
         CAENDPP_PHA_DigitalProbe2_Trigger,
