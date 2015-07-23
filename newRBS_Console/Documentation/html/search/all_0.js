@@ -2,6 +2,7 @@ var searchData=
 [
   ['caen_5fx730',['CAEN_x730',['../class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html',1,'NamespaceCAEN_x730']]],
   ['caen_5fx730',['CAEN_x730',['../class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#a2c768825aaf8b952432a363b8e2f8edb',1,'NamespaceCAEN_x730::CAEN_x730']]],
+  ['caendpp_5facqmode_5ft',['CAENDPP_AcqMode_t',['../namespace_namespace_c_a_e_n__x730.html#abd6bac3964950e54c3adf99d76b7de9a',1,'NamespaceCAEN_x730']]],
   ['caendpp_5fchannelextraparameters',['CAENDPP_ChannelExtraParameters',['../struct_namespace_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___channel_extra_parameters.html',1,'NamespaceCAEN_x730']]],
   ['caendpp_5fcoincparams_5ft',['CAENDPP_CoincParams_t',['../struct_namespace_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___coinc_params__t.html',1,'NamespaceCAEN_x730']]],
   ['caendpp_5fdgtzparams_5ft',['CAENDPP_DgtzParams_t',['../struct_namespace_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___dgtz_params__t.html',1,'NamespaceCAEN_x730']]],

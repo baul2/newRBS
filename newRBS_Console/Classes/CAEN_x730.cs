@@ -129,6 +129,10 @@ namespace NamespaceCAEN_x730
             SendConfig();
         }
 
+        /// <summary>
+        /// Function that starts the measurement for the selected channel.
+        /// </summary>
+        /// <param name="channel">Channel (0...7) to start the measurement.</param>
         public void StartAcquisition(int channel)
         {
             if (activeChannels.Contains(channel)) // Checks if measurement is already running
@@ -164,11 +168,14 @@ namespace NamespaceCAEN_x730
             return h1;
         }
 
-        public Tuple<int[], int[], int[], int[], int> GetWaveform(int channel)
+        /// <summary>
+        /// Function that reads the waveforms from selected channel.
+        /// </summary>
+        /// <param name="channel">Channel (0...7) to read the waveforms from.</param>
+        /// <returns>Structure <see cref="Waveform"/> that holds the waveforms and number of samples.</returns>
+        public Waveform GetWaveform(int channel)
         {
-            int[] error = new int[1];
-            error[0] = 0;
-            Tuple<int[], int[], int[], int[], int> errorTuple = Tuple.Create(error, error, error, error, 0);
+            Waveform waveform = new Waveform();
 
             Int16[] AT1 = new Int16[dgtzParams.WFParams.recordLength];
             Int16[] AT2 = new Int16[dgtzParams.WFParams.recordLength];
@@ -180,26 +187,27 @@ namespace NamespaceCAEN_x730
             for (int i = 0; i < 100; i++)
             {
                 int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, AT1, AT2, DT1, DT2, ref numSample, ref lenSample);
-                if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return errorTuple; }
+                if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return waveform; }
                 else
                 {
                     if (numSample == 0) { continue; }
                     trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
-                    int[] AT1int = AT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    int[] AT2int = AT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    int[] DT1int = DT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    int[] DT2int = DT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    return Tuple.Create(AT1int, AT2int, DT1int, DT2int, (int)numSample);
+                    waveform.AT1 = AT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    waveform.AT2 = AT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    waveform.DT1 = DT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    waveform.DT2 = DT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
+                    waveform.numSamples = (int)numSample;
+                    return waveform;
                 }
             }
             trace.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel {0}", channel);
-            return errorTuple;
+            return waveform;
         }
 
         /// <summary>
         /// Function that stops the measurement for the selected channel.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to start the measurement.</param>
+        /// <param name="channel">Channel (0...7) to stop the measurement.</param>
         public void StopAcquisition(int channel)
         {
             if (!activeChannels.Contains(channel)) // Checks if measurement is not running

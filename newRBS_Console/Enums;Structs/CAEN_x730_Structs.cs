@@ -4,6 +4,18 @@ using System.Runtime.InteropServices;
 
 namespace NamespaceCAEN_x730
 {
+    /// <summary>
+    /// Struct that contains waveforms (AT1, AT2, DT1, DT2) and the number of samples
+    /// </summary>
+    public struct Waveform
+    {
+        public int[] AT1;
+        public int[] AT2;
+        public int[] DT1;
+        public int[] DT2;
+        public int numSamples;
+    }
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct ConnParam
     {

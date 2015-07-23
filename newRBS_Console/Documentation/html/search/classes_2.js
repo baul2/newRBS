@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['waveformparams',['WaveformParams',['../structnew_r_b_s___console_1_1_waveform_params.html',1,'newRBS_Console']]]
+  ['waveform',['Waveform',['../struct_namespace_c_a_e_n__x730_1_1_waveform.html',1,'NamespaceCAEN_x730']]]
 ];
