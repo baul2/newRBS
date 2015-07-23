@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace newRBS_Console
+namespace NamespaceCAEN_x730
 {
     public struct WaveformParams
     {
@@ -100,7 +100,7 @@ namespace newRBS_Console
             dgtzParams = new CAENDPP_DgtzParams_t();
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
-            SetConfig();
+            SendConfig();
         }
 
         /// <summary>
@@ -109,11 +109,16 @@ namespace newRBS_Console
         /// <remarks>
         /// The variables int acqMode and <see cref="CAENDPP_DgtzParams_t"/> dgtzParams of the class <see cref="CAEN_x730"/> are used.
         /// </remarks>
-        public void SetConfig()
+        public void SendConfig()
         {
             int ret = CAENDPP_SetBoardConfiguration(handle, bID, acqMode, dgtzParams);
             if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
             else { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
+        }
+
+        public void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2)
+        {
+            dgtzParams.WFParams.ap1 = AP1;
         }
 
         /// <summary>

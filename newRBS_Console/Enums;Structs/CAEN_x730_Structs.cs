@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace newRBS_Console
+namespace NamespaceCAEN_x730
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct ConnParam
@@ -100,56 +100,11 @@ namespace newRBS_Console
     public struct CAENDPP_WaveformParams_t
     {
         public int dualTraceMode; // if true dual trace is enabled
-        public int vp1; // First Analog Probe
-                        // CAENDPP_PHA_VIRTUALPROBE1_Input             = 0L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE1_Delta             = 1L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE1_Delta2            = 2L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE1_Trapezoid         = 3L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE1_FastTrap          = 4L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE1_TrapBaseline      = 5L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE1_EnergyOut         = 6L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE1_TrapBLCorr        = 7L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE1_None              = 8L,
-                        // CAENDPP_PHA_VIRTUALPROBE1_Deconvolved       = 9L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE1_Dev2FastTrap      = 10L, // X770 ONLY
-        public int vp2; // Second Analog Probe, ignored if dualTraceMode=false
-                        // CAENDPP_PHA_VIRTUALPROBE2_Input             = 0L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE2_S3                = 1L, // X724 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_TrapBLCorr        = 2L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE2_TrapBaseline      = 3L, // BOTH X724 AND X770
-                        // CAENDPP_PHA_VIRTUALPROBE2_None              = 4L, // X724 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_Delta             = 5L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_FastTrap          = 6L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_Delta2            = 7L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_Trapezoid         = 8L, // X770 ONLY
-                        // CAENDPP_PHA_VIRTUALPROBE2_EnergyOut         = 9L, // X770 ONLY
-        public int dp1; // First Digital probe
-                        // CAENDPP_PHA_DigitalProbe1_TrgWin      = 0L,
-                        // CAENDPP_PHA_DigitalProbe1_Armed       = 1L,
-                        // CAENDPP_PHA_DigitalProbe1_PkRun       = 2L,
-                        // CAENDPP_PHA_DigitalProbe1_PURFlag     = 3L,
-                        // CAENDPP_PHA_DigitalProbe1_Peaking     = 4L,
-                        // CAENDPP_PHA_DigitalProbe1_TVAW        = 5L,
-                        // CAENDPP_PHA_DigitalProbe1_BLHoldoff   = 6L,
-                        // CAENDPP_PHA_DigitalProbe1_TRGHoldoff  = 7L,
-                        // CAENDPP_PHA_DigitalProbe1_TRGVal      = 8L,
-                        // CAENDPP_PHA_DigitalProbe1_ACQVeto           = 9L,
-                        // CAENDPP_PHA_DigitalProbe1_BFMVeto           = 10L,
-                        // CAENDPP_PHA_DigitalProbe1_ExtTRG            = 11L,
-                        // CAENDPP_PHA_DigitalProbe1_Trigger           = 12L,
-                        // CAENDPP_PHA_DigitalProbe1_None              = 13L,
-                        // CAENDPP_PHA_DigitalProbe1_EnergyAccepted    = 14L,
-                        // CAENDPP_PHA_DigitalProbe1_Saturation        = 15L,
-                        // CAENDPP_PHA_DigitalProbe1_Reset             = 16L,
-        public int dp2; // Second Digital probe
-                        // CAENDPP_PHA_DigitalProbe2_Trigger   = 0L,
-                        // CAENDPP_PHA_DigitalProbe2_None      = 1L,
-                        // CAENDPP_PHA_DigitalProbe2_Peaking     = 2L,
-                        // CAENDPP_PHA_DigitalProbe2_BLHoldoff   = 3L,
-                        // CAENDPP_PHA_DigitalProbe2_PURFlag     = 4L,
-                        // CAENDPP_PHA_DigitalProbe2_EnergyAccepted    = 5L,
-                        // CAENDPP_PHA_DigitalProbe2_Saturation = 6L,
-                        // CAENDPP_PHA_DigitalProbe2_Reset = 7L,
+        public CAENDPP_PHA_AnalogProbe1_t ap1; // First Analog Probe
+        public CAENDPP_PHA_AnalogProbe2_t ap2; // Second Analog Probe, ignored if dualTraceMode=false
+        public CAENDPP_PHA_DigitalProbe1_t dp1; // First Digital probe
+        public CAENDPP_PHA_DigitalProbe2_t dp2; // Second Digital probe
+
 
         public int recordLength;
         public int preTrigger;
@@ -312,31 +267,10 @@ namespace newRBS_Console
 
             // Waveform parameters default settings
             WFParams.dualTraceMode = 1;
-            WFParams.vp1 = 2;
-            // CAENDPP_PHA_VIRTUALPROBE1_Input
-            // CAENDPP_PHA_VIRTUALPROBE1_Delta
-            // CAENDPP_PHA_VIRTUALPROBE1_Delta2
-            // CAENDPP_PHA_VIRTUALPROBE1_Trapezoid
-            WFParams.vp2 = 0;
-            // CAENDPP_PHA_VIRTUALPROBE2_Input
-            // CAENDPP_PHA_VIRTUALPROBE2_S3
-            // CAENDPP_PHA_VIRTUALPROBE2_TrapBLCorr
-            // CAENDPP_PHA_VIRTUALPROBE2_TrapBaseline
-            // CAENDPP_PHA_VIRTUALPROBE2_None
-            WFParams.dp1 = 4;
-            // CAENDPP_PHA_DigitalProbe1_TrgWin
-            // CAENDPP_PHA_DigitalProbe1_Armed 
-            // CAENDPP_PHA_DigitalProbe1_PkRun 
-            // CAENDPP_PHA_DigitalProbe1_PURFlag 
-            // CAENDPP_PHA_DigitalProbe1_Peaking 
-            // CAENDPP_PHA_DigitalProbe1_TVAW
-            // CAENDPP_PHA_DigitalProbe1_BLHoldoff 
-            // CAENDPP_PHA_DigitalProbe1_TRGHoldoff 
-            // CAENDPP_PHA_DigitalProbe1_TRGVal 
-            // CAENDPP_PHA_DigitalProbe1_ACQVeto 
-            // CAENDPP_PHA_DigitalProbe1_BFMVeto 
-            // CAENDPP_PHA_DigitalProbe1_ExtTRG
-            WFParams.dp2 = 0;
+            WFParams.ap1 = CAENDPP_PHA_AnalogProbe1_t.CAENDPP_PHA_VIRTUALPROBE1_Delta2;
+            WFParams.ap2 = CAENDPP_PHA_AnalogProbe2_t.CAENDPP_PHA_VIRTUALPROBE2_Input;
+            WFParams.dp1 = CAENDPP_PHA_DigitalProbe1_t.CAENDPP_PHA_DigitalProbe1_Peaking;
+            WFParams.dp2 = CAENDPP_PHA_DigitalProbe2_t.CAENDPP_PHA_DigitalProbe2_Trigger;
             WFParams.recordLength = 16384; //8192
             WFParams.preTrigger = 1000; //1000
             WFParams.probeSelfTriggerVal = 1482; //150
