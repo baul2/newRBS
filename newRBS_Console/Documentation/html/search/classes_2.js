@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['waveform',['Waveform',['../struct_namespace_c_a_e_n__x730_1_1_waveform.html',1,'NamespaceCAEN_x730']]]
+  ['energycalibration',['EnergyCalibration',['../structnew_r_b_s_1_1_energy_calibration.html',1,'newRBS']]],
+  ['expdetails',['ExpDetails',['../structnew_r_b_s_1_1_exp_details.html',1,'newRBS']]]
 ];

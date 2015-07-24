@@ -50,6 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\CAEN_x730.cs" />
+    <Compile Include="Classes\ControllerSpectra.cs" />
+    <Compile Include="Classes\DataSpectra.cs" />
+    <Compile Include="Classes\DataSpectrum.cs" />
+    <Compile Include="Classes\MeasureSpectra.cs" />
     <Compile Include="newRBS_Console.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums%3bStructs\CAEN_x730_Structs.cs" />

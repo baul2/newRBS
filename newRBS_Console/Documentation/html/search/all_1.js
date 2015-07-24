@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['gethistogram',['GetHistogram',['../class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#adbabdbebc52f9bc9888856791b455da7',1,'NamespaceCAEN_x730::CAEN_x730']]],
-  ['getwaveform',['GetWaveform',['../class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#a04483fb06d3604ab166505fa1f965f2c',1,'NamespaceCAEN_x730::CAEN_x730']]]
+  ['dataspectra',['DataSpectra',['../classnew_r_b_s_1_1_spectra_1_1_data_spectra.html',1,'newRBS::Spectra']]],
+  ['dataspectrum',['DataSpectrum',['../classnew_r_b_s_1_1_data_spectrum.html#a269140bf6662bd6b2401107554392f31',1,'newRBS::DataSpectrum']]],
+  ['dataspectrum',['DataSpectrum',['../classnew_r_b_s_1_1_data_spectrum.html',1,'newRBS']]]
 ];

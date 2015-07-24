@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 
-namespace newRBS_Console
+namespace newRBS
 {
     class newRBS_Console
     {
 
         static void Main(string[] args)
         {
-            TraceSource trace = new TraceSource("newRBS_Console");
-            NamespaceCAEN_x730.CAEN_x730 cAENx730 = new NamespaceCAEN_x730.CAEN_x730();
-            cAENx730.StartAcquisition(0);
+            CAEN_x730.CAEN_x730 cAEN_x730 = new CAEN_x730.CAEN_x730();
+            Spectra.DataSpectra dataSpectra = new Spectra.DataSpectra();
+            Spectra.MeasureSpectra measureSpectra = new Spectra.MeasureSpectra(cAEN_x730, dataSpectra);
+
+            measureSpectra.StartMeasurements(); // Default is channel 0
+
             System.Threading.Thread.Sleep(2000);
-            uint[] hist = cAENx730.GetHistogram(0);
-            int Sum = 0;
-            for (int i = 0; i < hist.Length; i++)
-            { Sum += (int)hist[i]; }
-            Console.WriteLine(Sum);
 
-            trace.TraceEvent(TraceEventType.Information, 0, "{0} counts", Sum);
+            measureSpectra.StopMeasurements();
 
-            cAENx730.StopAcquisition(0);
-            cAENx730.Close();
+            cAEN_x730.Close();
             Console.ReadKey();
         }
     }

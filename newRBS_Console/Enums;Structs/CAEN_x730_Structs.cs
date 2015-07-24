@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace NamespaceCAEN_x730
+namespace newRBS.CAEN_x730
 {
     /// <summary>
     /// Struct that contains waveforms (AT1, AT2, DT1, DT2) and the number of samples
