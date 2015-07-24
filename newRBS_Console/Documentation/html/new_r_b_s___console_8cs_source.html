@@ -92,34 +92,36 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="keyword">using</span> <a class="code" href="namespace_system.html">System</a>;</div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="keyword">using</span> <a class="code" href="namespace_system.html">System</a>.Diagnostics;</div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
-<div class="line"><a name="l00004"></a><span class="lineno"><a class="line" href="namespacenew_r_b_s___console.html">    4</a></span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacenew_r_b_s___console.html">newRBS_Console</a></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacenew_r_b_s___console.html">newRBS_Console</a></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;{</div>
 <div class="line"><a name="l00006"></a><span class="lineno"><a class="line" href="classnew_r_b_s___console_1_1new_r_b_s___console.html">    6</a></span>&#160;    <span class="keyword">class </span><a class="code" href="namespacenew_r_b_s___console.html">newRBS_Console</a></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;    {</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> Main(<span class="keywordtype">string</span>[] args)</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        {</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;            TraceSource trace = <span class="keyword">new</span> TraceSource(<span class="stringliteral">&quot;newRBS_Console&quot;</span>);</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;            <a class="code" href="namespace_namespace_c_a_e_n__x730.html">NamespaceCAEN_x730</a>.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html">CAEN_x730</a> cAENx730 = <span class="keyword">new</span> <a class="code" href="namespace_namespace_c_a_e_n__x730.html">NamespaceCAEN_x730</a>.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html">CAEN_x730</a>();</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;            cAENx730.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#aaee942b52d8458fd8084e6b190024f06">StartAcquisition</a>(0);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;            <a class="code" href="namespace_system.html">System</a>.Threading.Thread.Sleep(2000);</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;            uint[] hist = cAENx730.GetHistogram(0);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;            <span class="keywordtype">int</span> Sum = 0;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; hist.Length; i++)</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;            { Sum += (int)hist[i]; }</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;            Console.WriteLine(Sum);</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;            trace.TraceEvent(TraceEventType.Information, 0, <span class="stringliteral">&quot;{0} counts&quot;</span>, Sum);</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;            Classes.DataSpectrum spectrum = <span class="keyword">new</span> Classes.DataSpectrum(1, 0);</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;            spectrum.SpectrumY = <span class="keyword">new</span> <span class="keywordtype">int</span>[2] { 1, 2};</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;            TraceSource trace = <span class="keyword">new</span> TraceSource(<span class="stringliteral">&quot;newRBS_Console&quot;</span>);</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;            <a class="code" href="namespace_namespace_c_a_e_n__x730.html">NamespaceCAEN_x730</a>.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html">CAEN_x730</a> cAENx730 = <span class="keyword">new</span> <a class="code" href="namespace_namespace_c_a_e_n__x730.html">NamespaceCAEN_x730</a>.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html">CAEN_x730</a>();</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;            cAENx730.<a class="code" href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#aaee942b52d8458fd8084e6b190024f06">StartAcquisition</a>(0);</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;            <a class="code" href="namespace_system.html">System</a>.Threading.Thread.Sleep(2000);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;            uint[] hist = cAENx730.GetHistogram(0);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;            <span class="keywordtype">int</span> Sum = 0;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; hist.Length; i++)</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;            { Sum += (int)hist[i]; }</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;            Console.WriteLine(Sum);</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;            cAENx730.StopAcquisition(0);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;            cAENx730.Close();</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            Console.ReadKey();</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        }</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;}</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;            trace.TraceEvent(TraceEventType.Information, 0, <span class="stringliteral">&quot;{0} counts&quot;</span>, Sum);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            cAENx730.StopAcquisition(0);</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;            cAENx730.Close();</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;            Console.ReadKey();</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        }</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    }</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;}</div>
 <div class="ttc" id="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730_html"><div class="ttname"><a href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html">NamespaceCAEN_x730.CAEN_x730</a></div><div class="ttdoc">Class that controls the CAEN N6730 device. </div><div class="ttdef"><b>Definition:</b> <a href="_c_a_e_n__x730_8cs_source.html#l00012">CAEN_x730.cs:12</a></div></div>
 <div class="ttc" id="namespace_system_html"><div class="ttname"><a href="namespace_system.html">System</a></div></div>
-<div class="ttc" id="namespacenew_r_b_s___console_html"><div class="ttname"><a href="namespacenew_r_b_s___console.html">newRBS_Console</a></div><div class="ttdef"><b>Definition:</b> <a href="new_r_b_s___console_8cs_source.html#l00004">newRBS_Console.cs:4</a></div></div>
+<div class="ttc" id="namespacenew_r_b_s___console_html"><div class="ttname"><a href="namespacenew_r_b_s___console.html">newRBS_Console</a></div></div>
 <div class="ttc" id="namespace_namespace_c_a_e_n__x730_html"><div class="ttname"><a href="namespace_namespace_c_a_e_n__x730.html">NamespaceCAEN_x730</a></div><div class="ttdef"><b>Definition:</b> <a href="_c_a_e_n__x730_8cs_source.html#l00007">CAEN_x730.cs:7</a></div></div>
 <div class="ttc" id="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730_html_aaee942b52d8458fd8084e6b190024f06"><div class="ttname"><a href="class_namespace_c_a_e_n__x730_1_1_c_a_e_n__x730.html#aaee942b52d8458fd8084e6b190024f06">NamespaceCAEN_x730.CAEN_x730.StartAcquisition</a></div><div class="ttdeci">void StartAcquisition(int channel)</div><div class="ttdoc">Function that starts the measurement for the selected channel. </div><div class="ttdef"><b>Definition:</b> <a href="_c_a_e_n__x730_8cs_source.html#l00136">CAEN_x730.cs:136</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

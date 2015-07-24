@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['namespacecaen_5fx730',['NamespaceCAEN_x730',['../namespace_namespace_c_a_e_n__x730.html',1,'']]],
-  ['newrbs_5fconsole',['newRBS_Console',['../namespacenew_r_b_s___console.html',1,'']]]
+  ['caen_5fx730',['CAEN_x730',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html',1,'newRBS']]],
+  ['newrbs',['newRBS',['../namespacenew_r_b_s.html',1,'']]],
+  ['spectra',['Spectra',['../namespacenew_r_b_s_1_1_spectra.html',1,'newRBS']]]
 ];

@@ -4,42 +4,54 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace newRBS_Console.Classes
+namespace newRBS
 {
-    public delegate void NewSpectrumHandler(object o, NewSpectrumArgs e);
-
-    public class NewSpectrumArgs : EventArgs
-    {
-        public readonly int ID;
-        public NewSpectrumArgs(int id) { ID = id; }
-    }
-
-    public class NewSpectrumListener // Has to move to controller
-    {
-        public void ShowOnScreen(object o, NewSpectrumArgs e) { Console.WriteLine("New spectrum for measurement {0}", e.ID); }
-    }
-
-    enum Ion
+    public enum EnumIon
     {
         H,
         He,
         Li,
     };
 
+    /// <summary>
+    /// Experimental details
+    /// </summary>
+    public struct ExpDetails
+    {
+        public EnumIon ion;
+        public int ionEnergy;
+        public int theta;
+    }
+
+    public struct EnergyCalibration
+    {
+        public float energyCalOffset;
+        public float energyCalSlope;
+    }
+
+    public struct Stop
+    {
+        public string type;
+        public double value;
+    }
+
+    /// <summary>
+    /// Class responsible for storing a single spectrum.
+    /// </summary>
     class DataSpectrum
     {
         public int ID;
         public int channel;
         public string name;
-        public Ion ion;
-        public int ionEnergy;
-        public DateTime startTime;
-        public DateTime stopTime;
-        public DateTime duration;
-        public float progress;
+        public ExpDetails expDetails_;
+        public EnergyCalibration energyCalibration_;
+        public Stop stop_;
+        public DateTime startTime, stopTime;
+        public TimeSpan duration;
+        public double progress;
         public bool runs;
-        public float energyCalOffset = 0;
-        public float energyCalSlope = 1;
+        public string chamber;
+        public float x, y, z, phi, psi;
 
         public readonly int[] SpectrumX = new int[16384];
         public float[] SpectrumCalX
@@ -48,11 +60,11 @@ namespace newRBS_Console.Classes
             {
                 float[] temp = new float[SpectrumX.Length];
                 for (int i = 0; i < SpectrumX.Length; i++)
-                    temp[i] = energyCalSlope * SpectrumX[i] + energyCalOffset;
+                    temp[i] = energyCalibration_.energyCalSlope * SpectrumX[i] + energyCalibration_.energyCalOffset;
                 return temp;
             }
         }
-        private int[] spectrumY;
+        private int[] spectrumY = new int[16384];
 
         public int[] SpectrumY
         {
@@ -60,21 +72,27 @@ namespace newRBS_Console.Classes
             set
             {
                 spectrumY = value;
-                NewSpectrumArgs e1 = new NewSpectrumArgs(ID);
-                if (EventNewSpectrum != null) EventNewSpectrum(this, e1);
+
             }
         }
 
-        public static event NewSpectrumHandler EventNewSpectrum;
-
-        public DataSpectrum(int id, int ch)
+        /// <summary>
+        /// Initiate a new spectrum with the given parameters. 
+        /// </summary>
+        /// <param name="id">ID of the spectrum</param>
+        /// <param name="Channel">Channel where the spectrum is measured</param>
+        /// <param name="expDetails">Experimental details</param>
+        /// <param name="energyCalibration">Energy calibration</param>
+        /// <param name="stop">Stop condition</param>
+        public DataSpectrum(int id, int Channel, ExpDetails expDetails, EnergyCalibration energyCalibration, Stop stop)
         {
             ID = id;
-            channel = ch;
+            channel = Channel;
+            expDetails_ = expDetails;
+            energyCalibration_ = energyCalibration;
+            stop_ = stop;
             startTime = DateTime.Now;
             for (int i = 0; i < 16384; i++) { SpectrumX[i] = i; }
-            NewSpectrumListener listener = new NewSpectrumListener(); // Has to move to controller
-            EventNewSpectrum = new NewSpectrumHandler(listener.ShowOnScreen); // Has to move to controller
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
 
-namespace NamespaceCAEN_x730
+namespace newRBS.CAEN_x730
 {
     /// <summary>
     /// Class that controls the CAEN N6730 device.
@@ -154,7 +154,7 @@ namespace NamespaceCAEN_x730
         /// </summary>
         /// <param name="channel">Channel (0...7) to read the histogram from.</param>
         /// <returns>Array of the obtained histogram. Type: UInt32[]. Length: 16384.</returns>
-        public UInt32[] GetHistogram(int channel)
+        public int[] GetHistogram(int channel)
         {
             UInt32[] h1 = new UInt32[16384];
             UInt32 counts = 0;
@@ -165,7 +165,7 @@ namespace NamespaceCAEN_x730
             if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
             else { trace.TraceEvent(TraceEventType.Verbose, 0, "Histogram read on channel {0}", channel); }
 
-            return h1;
+            return (int[])(object)h1;
         }
 
         /// <summary>

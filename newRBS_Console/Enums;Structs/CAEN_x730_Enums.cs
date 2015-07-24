@@ -1,4 +1,4 @@
-﻿namespace NamespaceCAEN_x730
+﻿namespace newRBS.CAEN_x730
 {
     /// <summary>
     /// Enum for the acquisition mode
