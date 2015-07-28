@@ -1,9 +1,15 @@
-﻿namespace newRBS.CAEN_x730
+﻿namespace newRBS.Devices
 {
-    /// <summary>
-    /// Enum for the acquisition mode
-    /// </summary>
-    public enum CAENDPP_AcqMode_t
+    public enum InputRange
+    {
+        CAENDPP_InputRange_2_0Vpp = 9,
+        CAENDPP_InputRange_0_5Vpp = 10 
+    }
+
+        /// <summary>
+        /// Enum for the acquisition mode
+        /// </summary>
+        public enum CAENDPP_AcqMode_t
     {
         CAENDPP_AcqMode_Waveform,
         CAENDPP_AcqMode_Histogram,

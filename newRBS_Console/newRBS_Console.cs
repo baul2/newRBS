@@ -9,9 +9,13 @@ namespace newRBS
 
         static void Main(string[] args)
         {
-            CAEN_x730.CAEN_x730 cAEN_x730 = new CAEN_x730.CAEN_x730();
+            Devices.CAEN_x730 cAEN_x730 = new Devices.CAEN_x730();
             Spectra.DataSpectra dataSpectra = new Spectra.DataSpectra();
             Spectra.MeasureSpectra measureSpectra = new Spectra.MeasureSpectra(cAEN_x730, dataSpectra);
+
+            //Devices.ChannelParams channelParams = new Devices.ChannelParams();
+            //channelParams.DCoffset = 1000;
+            //cAEN_x730.SetChannelConfig(0, channelParams);
 
             measureSpectra.StartMeasurements(); // Default is channel 0
 

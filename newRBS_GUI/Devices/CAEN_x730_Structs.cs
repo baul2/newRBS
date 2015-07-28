@@ -2,8 +2,29 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace newRBS.CAEN_x730
+namespace newRBS.Devices
 {
+    public struct ChannelParams
+    {
+        public int? DCoffset;
+        public InputRange inputRange;
+        public int? InputSignalDecayTime;
+        public int? TrapezoidFlatTopTime;
+        public int? TrapezoidRiseTime;
+        public int? TrapezoidPeakingDelay;
+        public int? TriggerFilterSmoothingFactor;
+        public int? InputSignalRiseTime;
+        public int? TriggerThreshold;
+        public int? NumSamplesBaselineMean;
+        public int? NumSamplesPeakMean;
+        public int? PeakHoldOff;
+        public int? BaseLineHoldOff;
+        public int? TriggerHoldOff;
+        public int? DigitalGain;
+        public float? EnergyNormalizationFactor;
+        public int? InputSignalDecimation;
+    }
+
     /// <summary>
     /// Struct that contains waveforms (AT1, AT2, DT1, DT2) and the number of samples
     /// </summary>

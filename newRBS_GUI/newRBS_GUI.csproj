@@ -55,7 +55,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Structures\CAEN_x730_Structs.cs" />
+    <Compile Include="DataSpectrum.cs" />
+    <Compile Include="Devices\CAEN_x730.cs" />
+    <Compile Include="Devices\CAEN_x730_Enums.cs" />
+    <Compile Include="Devices\CAEN_x730_Structs.cs" />
+    <Compile Include="MainTabs\Spectra.xaml.cs">
+      <DependentUpon>Spectra.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MeasurePanel.xaml.cs">
+      <DependentUpon>MeasurePanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Spectra\ControllerSpectra.cs" />
+    <Compile Include="Spectra\DataSpectra.cs" />
+    <Compile Include="Spectra\MeasureSpectra.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -64,11 +76,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\CAEN_x730.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MainTabs\Spectra.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MeasurePanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
