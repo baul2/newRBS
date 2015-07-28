@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
 
-namespace newRBS.CAEN_x730
+namespace newRBS.Devices
 {
     /// <summary>
     /// Class that controls the CAEN N6730 device.
@@ -16,30 +16,32 @@ namespace newRBS.CAEN_x730
         CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
         int waveformAutoTrigger = 1;
         CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
+        InputRange[] inputRange = new InputRange[8] { InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp };
         List<int> activeChannels = new List<int>();
-        int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
 
         TraceSource trace = new TraceSource("CAEN_x730");
 
         const string cAENDPPLib = "CAENDPPLib.dll";
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_InitLibrary(ref int handle);
+        private static extern int CAENDPP_InitLibrary(ref int handle);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_AddBoard(int handle, ConnParam connParam, ref int bID);
+        private static extern int CAENDPP_AddBoard(int handle, ConnParam connParam, ref int bID);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_SetBoardConfiguration(int handle, int bID, int acqMode, CAENDPP_DgtzParams_t dgtzParams);
+        private static extern int CAENDPP_SetBoardConfiguration(int handle, int bID, int acqMode, CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_GetBoardConfiguration(int handle, int bID, ref int acqMode, ref CAENDPP_DgtzParams_t dgtzParams);
+        private static extern int CAENDPP_SetInputRange(int handle, int channel, InputRange inputRange);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_StartAcquisition(int handle, int channel);
+        private static extern int CAENDPP_GetBoardConfiguration(int handle, int bID, ref int acqMode, ref CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_StopAcquisition(int handle, int channel);
+        private static extern int CAENDPP_StartAcquisition(int handle, int channel);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_GetCurrentHistogram(int handle, int channel, UInt32[] h1, ref UInt32 counts, ref UInt64 realTime, ref UInt64 deadTime, ref int acqStatus);
+        private static extern int CAENDPP_StopAcquisition(int handle, int channel);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_GetWaveform(int handle, int channel, Int16 Auto, Int16[] AT1, Int16[] AT2, byte[] DT1, byte[] DT2, ref UInt32 numSample, ref double lenSample);
+        private static extern int CAENDPP_GetCurrentHistogram(int handle, int channel, UInt32[] h1, ref UInt32 counts, ref UInt64 realTime, ref UInt64 deadTime, ref int acqStatus);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int CAENDPP_EndLibrary(int handle);
+        private static extern int CAENDPP_GetWaveform(int handle, int channel, Int16 Auto, Int16[] AT1, Int16[] AT2, byte[] DT1, byte[] DT2, ref UInt32 numSample, ref double lenSample);
+        [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int CAENDPP_EndLibrary(int handle);
 
         /// <summary>
         /// Constructor that initializes the library, adds the board and sends the default configuration. 
@@ -72,7 +74,6 @@ namespace newRBS.CAEN_x730
             //Console.WriteLine("CAENDPP_CoincParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_CoincParams_t)));
             //Console.WriteLine("CAENDPP_SpectrumControl {0}", Marshal.SizeOf(typeof(CAENDPP_SpectrumControl)));
             //Console.WriteLine("dgtzParams.ChannelExtraParameters[3].analogPath {0}", dgtzParams.ChannelExtraParameters[3].analogPath);
-
         }
 
         /// <summary>
@@ -83,20 +84,31 @@ namespace newRBS.CAEN_x730
             dgtzParams = new CAENDPP_DgtzParams_t();
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
+            for (int channel = 0; channel < 8; channel++) inputRange[channel] = InputRange.CAENDPP_InputRange_0_5Vpp;
             SendConfig();
         }
 
-        /// <summary>
-        /// Function that sends the configuration. 
-        /// </summary>
-        /// <remarks>
-        /// The variables int acqMode and <see cref="CAENDPP_DgtzParams_t"/> dgtzParams of the class <see cref="CAEN_x730"/> are used.
-        /// </remarks>
-        public void SendConfig()
+        public void SetChannelConfig(int channel, ChannelParams channelParams)
         {
-            int ret = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
+            if (channelParams.inputRange != 0) inputRange[channel] = channelParams.inputRange;
+
+            if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
+            if (channelParams.TrapezoidFlatTopTime != null) dgtzParams.DPPParams.m[channel] = (int)channelParams.TrapezoidFlatTopTime;
+            if (channelParams.TrapezoidRiseTime != null) dgtzParams.DPPParams.k[channel] = (int)channelParams.TrapezoidRiseTime;
+            if (channelParams.TrapezoidPeakingDelay != null) dgtzParams.DPPParams.ftd[channel] = (int)channelParams.TrapezoidPeakingDelay;
+            if (channelParams.TriggerFilterSmoothingFactor != null) dgtzParams.DPPParams.a[channel] = (int)channelParams.TriggerFilterSmoothingFactor;
+            if (channelParams.InputSignalRiseTime != null) dgtzParams.DPPParams.b[channel] = (int)channelParams.InputSignalRiseTime;
+            if (channelParams.TriggerThreshold != null) dgtzParams.DPPParams.thr[channel] = (int)channelParams.TriggerThreshold;
+            if (channelParams.NumSamplesBaselineMean != null) dgtzParams.DPPParams.nsbl[channel] = (int)channelParams.NumSamplesBaselineMean;
+            if (channelParams.NumSamplesPeakMean != null) dgtzParams.DPPParams.nspk[channel] = (int)channelParams.NumSamplesPeakMean;
+            if (channelParams.PeakHoldOff != null) dgtzParams.DPPParams.pkho[channel] = (int)channelParams.PeakHoldOff;
+            if (channelParams.BaseLineHoldOff != null) dgtzParams.DPPParams.blho[channel] = (int)channelParams.BaseLineHoldOff;
+            if (channelParams.TriggerHoldOff != null) dgtzParams.DPPParams.trgho[channel] = (int)channelParams.TriggerHoldOff;
+            if (channelParams.DigitalGain != null) dgtzParams.DPPParams.dgain[channel] = (int)channelParams.DigitalGain;
+            if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
+            if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
+
+            SendConfig();
         }
 
         /// <summary>
@@ -127,6 +139,23 @@ namespace newRBS.CAEN_x730
             acqMode = acquisitionMode;
 
             SendConfig();
+        }
+
+        /// <summary>
+        /// Function that sends the configuration. 
+        /// </summary>
+        /// <remarks>
+        /// The variables int acqMode and <see cref="CAENDPP_DgtzParams_t"/> dgtzParams of the class <see cref="CAEN_x730"/> are used.
+        /// </remarks>
+        public void SendConfig()
+        {
+            int ret1, ret2 = 0;
+            ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
+            for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
+
+            if (ret1 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret1, GetErrorText(ret1)); }
+            if (ret2 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret2, GetErrorText(ret2)); }
+            if (ret1 == 0 & ret2 == 0) { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
         }
 
         /// <summary>

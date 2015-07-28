@@ -1,0 +1,178 @@
+﻿<UserControl x:Class="newRBS.GUI.MeasurePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:newRBS_GUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Chamber:" Margin="0,0,0,-10"/>
+            <ComboBox x:Name="ChamberCombo" Margin="5" VerticalAlignment="Top" HorizontalAlignment="Left"  Width="80">
+                <ComboBoxItem>-10°</ComboBoxItem>
+                <ComboBoxItem IsSelected="True">-30°</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <Expander Header="Channel configuration">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Label Content="Input range:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                <ComboBox x:Name="InputRange" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0">
+                    <ComboBoxItem>2.0</ComboBoxItem>
+                    <ComboBoxItem IsSelected="True">0.5</ComboBoxItem>
+                </ComboBox>
+                <Label Content="Vpp" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="0"/>
+
+                <Label Content="DCoffset:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                <TextBox x:Name="DCoffset" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="5000" Grid.Column="1" Grid.Row="1"/>
+                <Label Content="mV" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="1"/>
+
+                <Label Content="Decimation:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                <ComboBox x:Name="Decimation" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2">
+                    <ComboBoxItem IsSelected="True">1</ComboBoxItem>
+                    <ComboBoxItem>2</ComboBoxItem>
+                    <ComboBoxItem>4</ComboBoxItem>
+                    <ComboBoxItem>8</ComboBoxItem>
+                </ComboBox>
+                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="2"/>
+
+                <Label Content="Digital probe gain:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="3"/>
+                <ComboBox x:Name="DigitalProbeGain" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="3">
+                    <ComboBoxItem IsSelected="True">1</ComboBoxItem>
+                    <ComboBoxItem>2</ComboBoxItem>
+                    <ComboBoxItem>4</ComboBoxItem>
+                    <ComboBoxItem>8</ComboBoxItem>
+                </ComboBox>
+
+                <Label Content="" Height="10" Grid.Column="0" Grid.Row="4"/>
+
+                <Label Content="Trigger threshold:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="5"/>
+                <TextBox x:Name="TriggerThreshold" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="5000" Grid.Column="1" Grid.Row="5"/>
+                <Label Content="(0...16383)" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="5"/>
+
+                <Label Content="Trigger filter smoothing:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="6"/>
+                <ComboBox x:Name="TriggerFilterSmoothing" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="6">
+                    <ComboBoxItem IsSelected="True">4</ComboBoxItem>
+                    <ComboBoxItem>8</ComboBoxItem>
+                    <ComboBoxItem>16</ComboBoxItem>
+                    <ComboBoxItem>32</ComboBoxItem>
+                </ComboBox>
+                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="6"/>
+
+                <Label Content="Trigger hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="7"/>
+                <TextBox x:Name="TriggerHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="1300" Grid.Column="1" Grid.Row="7"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="7"/>
+
+                <Label Content="Input signal rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="8"/>
+                <TextBox x:Name="InputSignalRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="200" Grid.Column="1" Grid.Row="8"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="8"/>
+
+                <Label Content="" Height="10" Grid.Column="0" Grid.Row="9"/>
+
+                <Label Content="Baseline mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="10"/>
+                <ComboBox x:Name="BaselineMean" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="10">
+                    <ComboBoxItem>0</ComboBoxItem>
+                    <ComboBoxItem>16</ComboBoxItem>
+                    <ComboBoxItem>64</ComboBoxItem>
+                    <ComboBoxItem>256</ComboBoxItem>
+                    <ComboBoxItem IsSelected="True">1024</ComboBoxItem>
+                    <ComboBoxItem>4096</ComboBoxItem>
+                    <ComboBoxItem>16384</ComboBoxItem>
+                </ComboBox>
+                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="10"/>
+
+                <Label Content="Trapezoid rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="11"/>
+                <TextBox x:Name="TrapezoidRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="3000" Grid.Column="1" Grid.Row="11"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="11"/>
+
+                <Label Content="Signal decay time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="12"/>
+                <TextBox x:Name="SignalDecayTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="3000" Grid.Column="1" Grid.Row="12"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="12"/>
+
+                <Label Content="Trapezoid flat top time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="13"/>
+                <TextBox x:Name="TrapezoidFlatTopTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="1000" Grid.Column="1" Grid.Row="13"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="13"/>
+
+                <Label Content="Flat top delay:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="14"/>
+                <TextBox x:Name="FlatTopDelay" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="500" Grid.Column="1" Grid.Row="14"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="14"/>
+
+                <Label Content="" Height="10" Grid.Column="0" Grid.Row="15"/>
+
+                <Label Content="Peak mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="16"/>
+                <ComboBox x:Name="PeakMean" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="16">
+                    <ComboBoxItem>1</ComboBoxItem>
+                    <ComboBoxItem>4</ComboBoxItem>
+                    <ComboBoxItem IsSelected="True">16</ComboBoxItem>
+                    <ComboBoxItem>64</ComboBoxItem>
+                </ComboBox>
+                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="16"/>
+
+                <Label Content="Base line hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="17"/>
+                <TextBox x:Name="BaseLineHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="2000" Grid.Column="1" Grid.Row="17"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="17"/>
+
+                <Label Content="Peak hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="18"/>
+                <TextBox x:Name="PeakHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="2000" Grid.Column="1" Grid.Row="18"/>
+                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="18"/>
+            </Grid>
+        </Expander>
+        <TabControl Grid.Row="0" Grid.Column="1">
+            <TabItem Header="Spectra">
+                <StackPanel>
+                    <Button Content="Start" x:Name="SpectraStart" Margin="5"></Button>
+                    <Button Content="Stop" x:Name="SpectraStop" Margin="5"></Button>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Detector:"></Label>
+                        <CheckBox x:Name="Detector0" Content="0" VerticalContentAlignment="Center" Margin="5" IsChecked="True"></CheckBox>
+                        <CheckBox x:Name="Detector1" Content="1" VerticalContentAlignment="Center" Margin="5"></CheckBox>
+                        <CheckBox x:Name="Detector2" Content="2" VerticalContentAlignment="Center" Margin="5"></CheckBox>
+                        <CheckBox x:Name="Detector3" Content="3" VerticalContentAlignment="Center" Margin="5"></CheckBox>
+                    </StackPanel>
+                    <GroupBox Header="Goniometer">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <Label Content="x"></Label>
+                                <Label Content="x"></Label>
+                                <Label Content="x"></Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <Label Content="phi"></Label>
+                                <Label Content="psi"></Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Dip"></TabItem>
+            <TabItem Header="Map"></TabItem>
+            <TabItem Header="Waveform"></TabItem>
+        </TabControl>
+    </StackPanel>
+</UserControl>

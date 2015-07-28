@@ -12,7 +12,7 @@ namespace newRBS.Spectra
     /// </summary>
     class MeasureSpectra
     {
-        private CAEN_x730.CAEN_x730 myCAEN_x730;
+        private Devices.CAEN_x730 myCAEN_x730;
         private DataSpectra myDataSpectra;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace newRBS.Spectra
         /// </summary>
         /// <param name="cAEN_x730">Instance of the class responsible for the CAEN N6730</param>
         /// <param name="dataSpectra">Instance of the class responsible for storing the measured spectra</param>
-        public MeasureSpectra(CAEN_x730.CAEN_x730 cAEN_x730, DataSpectra dataSpectra)
+        public MeasureSpectra(Devices.CAEN_x730 cAEN_x730, DataSpectra dataSpectra)
         {
             myCAEN_x730 = cAEN_x730;
             myDataSpectra = dataSpectra;

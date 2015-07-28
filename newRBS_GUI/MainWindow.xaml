@@ -1,12 +1,47 @@
-﻿<Window x:Class="newRBS_GUI.MainWindow"
+﻿<Window x:Class="newRBS.GUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:newRBS_GUI"
+        xmlns:local="clr-namespace:newRBS.GUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="600" Width="800">
+    <DockPanel>
+        <Border DockPanel.Dock="Left">
+            <Grid x:Name="Measure">
+                <local:MeasurePanel/>
+            </Grid>
+        </Border>
+        <Border DockPanel.Dock="Left">
+            <Grid x:Name="FolderTree">
+                <TreeView x:Name="FolderTreeView"></TreeView>
+            </Grid>
+        </Border>
+        <Border DockPanel.Dock="Left">
+            <StackPanel Orientation="Vertical">
+                <Button Content="&#8657; Measure Panel &#8657;" Width="150" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Click="ButtonMeasure_Click">
+                    <Button.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                    </Button.LayoutTransform>
+                </Button>
+                <Button Content="&#8657; Folder Panel &#8657;" Width="150" Height="22"  VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Click="ButtonFolderTree_Click">
+                    <Button.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                    </Button.LayoutTransform>
+                </Button>
+            </StackPanel>
+
+        </Border>
+        <Border>
+            <TabControl Grid.Row="0" Grid.Column="1">
+                <TabItem Header="Spectra">
+                    <local:Spectra/>
+                </TabItem>
+                
+                <TabItem Header="Dip"></TabItem>
+                <TabItem Header="Map"></TabItem>
+                <TabItem Header="Waveform"></TabItem>
+            </TabControl>
+        </Border>
+    </DockPanel>
 </Window>
