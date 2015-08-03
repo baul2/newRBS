@@ -4,8 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace newRBS
+namespace newRBS.Models
 {
+    public enum Chamber
+    {
+        Minus10,
+        Minus30,
+    }
+
+    public enum RandomAligned
+    {
+        random,
+        aligned,
+    }
+
     public enum EnumIon
     {
         H,
@@ -38,7 +50,7 @@ namespace newRBS
     /// <summary>
     /// Class responsible for storing a single spectrum.
     /// </summary>
-    class DataSpectrum
+    public class DataSpectrum
     {
         public int ID;
         public int channel;
@@ -46,11 +58,13 @@ namespace newRBS
         public ExpDetails expDetails_;
         public EnergyCalibration energyCalibration_;
         public Stop stop_;
-        public DateTime startTime, stopTime;
+        public DateTime startTime;
+        public DateTime? stopTime;
         public TimeSpan duration;
         public double progress;
         public bool runs;
-        public string chamber;
+        public Chamber chamber;
+        public RandomAligned randomAligned;
         public float x, y, z, phi, psi;
 
         public readonly int[] SpectrumX = new int[16384];

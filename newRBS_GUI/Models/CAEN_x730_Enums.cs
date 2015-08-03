@@ -1,4 +1,4 @@
-﻿namespace newRBS.Devices
+﻿namespace newRBS.Models
 {
     public enum InputRange
     {

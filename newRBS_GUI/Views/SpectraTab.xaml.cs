@@ -23,6 +23,7 @@ namespace newRBS.GUI
         public Spectra()
         {
             InitializeComponent();
+            
         }
     }
 }

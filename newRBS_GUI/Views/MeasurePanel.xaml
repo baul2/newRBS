@@ -144,16 +144,24 @@
             </Grid>
         </Expander>
         <TabControl Grid.Row="0" Grid.Column="1">
-            <TabItem Header="Spectra">
+            <TabItem Header="Spectra" DataContext="{Binding spectraViewModel, Source={StaticResource Locator}}">
                 <StackPanel>
-                    <Button Content="Start" x:Name="SpectraStart" Margin="5"></Button>
-                    <Button Content="Stop" x:Name="SpectraStop" Margin="5"></Button>
+                    <Button Content="Start" Command="{Binding StartMeasurements}" Margin="5"></Button>
+                    <Button Content="Stop" Command="{Binding StopMeasurements}" Margin="5"></Button>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Detector:"></Label>
-                        <CheckBox x:Name="Detector0" Content="0" VerticalContentAlignment="Center" Margin="5" IsChecked="True"></CheckBox>
-                        <CheckBox x:Name="Detector1" Content="1" VerticalContentAlignment="Center" Margin="5"></CheckBox>
-                        <CheckBox x:Name="Detector2" Content="2" VerticalContentAlignment="Center" Margin="5"></CheckBox>
-                        <CheckBox x:Name="Detector3" Content="3" VerticalContentAlignment="Center" Margin="5"></CheckBox>
+                        <Label Content="Detectors:"/>
+                        <ItemsControl  ItemsSource="{Binding Channels}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                     <GroupBox Header="Goniometer">
                         <StackPanel Orientation="Horizontal">

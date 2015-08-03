@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace newRBS.Devices
+namespace newRBS.Models
 {
     public struct ChannelParams
     {

@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.GUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="600" Width="800"
+        DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
+
     <DockPanel>
         <Border DockPanel.Dock="Left">
             <Grid x:Name="Measure">
@@ -35,7 +37,7 @@
         <Border>
             <TabControl Grid.Row="0" Grid.Column="1">
                 <TabItem Header="Spectra">
-                    <local:Spectra/>
+                    <local:Spectra DataContext="{Binding spectraViewModel, Source={StaticResource Locator}}"/>
                 </TabItem>
                 
                 <TabItem Header="Dip"></TabItem>
