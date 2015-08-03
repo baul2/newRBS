@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
 
-namespace newRBS.Devices
+namespace newRBS.Models
 {
     /// <summary>
     /// Class that controls the CAEN N6730 device.
     /// </summary>
-    class CAEN_x730
+    public class CAEN_x730
     {
         int handle;
         int bID;

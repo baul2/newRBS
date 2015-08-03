@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace newRBS.Spectra
+namespace newRBS.Models
 {
 
     public class SpectrumArgs : EventArgs
@@ -16,19 +16,17 @@ namespace newRBS.Spectra
     /// <summary>
     /// Class responsible for managing a spectrum dictionary (<see cref="spectra"/>) with items \<ID, <see cref="DataSpectrum"/>\>.
     /// </summary>
-    class DataSpectra
+    public class DataSpectra
     {
         private int spectrumIndex = 0;
+
         /// <summary>
         /// 
         /// </summary>
         public Dictionary<int, DataSpectrum> spectra = new Dictionary<int, DataSpectrum>();
 
-        public static event SpectrumNewHandler EventSpectrumNew;
-        public static event SpectrumRemoveHandler EventSpectrumRemove;
-        public static event SpectrumYHandler EventSpectrumY;
-        public static event SpectrumInfosHandler EventSpectrumInfos;
-        public static event SpectrumFinishedHandler EventSpectrumFinished;
+        public delegate void ChangedEventHandler(object sender, SpectrumArgs e);
+        public event ChangedEventHandler EventSpectrumNew, EventSpectrumRemove, EventSpectrumY, EventSpectrumInfos, EventSpectrumFinished;
 
         TraceSource trace = new TraceSource("DataSpectra");
 
@@ -45,7 +43,7 @@ namespace newRBS.Spectra
             spectrumIndex += 1;
 
             SpectrumArgs e1 = new SpectrumArgs(ID, channel);
-            if (EventSpectrumNew != null) EventSpectrumNew(this, e1);
+            if (EventSpectrumNew != null) { EventSpectrumNew(this, e1); } else { Console.WriteLine("EventSpectrumNew null"); }
 
             return ID;
         }
@@ -172,7 +170,7 @@ namespace newRBS.Spectra
                     spectra[ID].progress = counts / spectra[ID].stop_.value;
                     break;
                 case "Time": spectra[ID].progress = spectra[ID].duration.TotalMinutes / spectra[ID].stop_.value; break;
-                // TODO: Chopper
+                    // TODO: Chopper
             }
 
             SpectrumArgs e1 = new SpectrumArgs(ID, spectra[ID].channel);
