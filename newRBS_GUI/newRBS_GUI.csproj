@@ -99,16 +99,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="LINQtoSQL.designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>LINQtoSQL.dbml</DependentUpon>
-    </Compile>
     <Compile Include="Models\Spectrum.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
-    <Compile Include="Models\DBConnection.cs" />
     <Compile Include="Views\SpectraTab.xaml.cs">
       <DependentUpon>SpectraTab.xaml</DependentUpon>
     </Compile>
@@ -155,18 +149,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="LINQtoSQL.dbml.layout">
-      <DependentUpon>LINQtoSQL.dbml</DependentUpon>
-    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="LINQtoSQL.dbml">
-      <Generator>MSLinqToSQLGenerator</Generator>
-      <LastGenOutput>LINQtoSQL.designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

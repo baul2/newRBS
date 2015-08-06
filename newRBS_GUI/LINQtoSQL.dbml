@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="p4mist_db" Class="LINQtoSQLDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=SVRH;Initial Catalog=p4mist_db;User ID=p4mist" SettingsObjectName="newRBS_GUI.Properties.Settings" SettingsPropertyName="p4mist_dbConnectionString" Provider="System.Data.SqlClient" />
-  <Table Name="dbo.Spectra" Member="Spectras">
-    <Type Name="Spectra">
-      <Column Name="SpectrumID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="Channel" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-    </Type>
-  </Table>
-</Database>
