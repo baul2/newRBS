@@ -79,80 +79,6 @@ namespace newRBS.ViewModel
         }
     }
 
-    public class Measurement : INotifyPropertyChanged
-    {
-        private int _ID;
-        private int _channel;
-        private string _startTime, _stopTime, _duration;
-        private Models.Chamber _chamber;
-        private Models.RandomAligned _randomAligned;
-
-        public int ID
-        {
-            get { return _ID; }
-            set { _ID = value; OnPropertyChanged(); }
-        }
-
-        public Models.Chamber chamber
-        {
-            get
-            { return _chamber; }
-            set { _chamber = value; OnPropertyChanged(); }
-        }
-
-        public int channel
-        {
-            get { return _channel; }
-            set { _channel = value; OnPropertyChanged(); }
-        }
-
-        public Models.RandomAligned randomAligned
-        {
-            get
-            { return _randomAligned; }
-            set { _randomAligned = value; OnPropertyChanged(); }
-        }
-
-        public string startTime
-        {
-            get { return _startTime; }
-            set { _startTime = value; OnPropertyChanged(); }
-        }
-
-        public string stopTime
-        {
-            get { return _stopTime; }
-            set { _stopTime = value; OnPropertyChanged(); }
-        }
-
-        public string duration
-        {
-            get { return _duration; }
-            set { _duration = value; OnPropertyChanged(); }
-        }
-
-        public Measurement(Models.DataSpectrum dataSpectrum)
-        {
-            _ID = dataSpectrum.ID;
-            _chamber = dataSpectrum.chamber;
-            _channel = dataSpectrum.channel;
-            _startTime = String.Format("{0:yyyy-MM-dd hh:mm:ss}", dataSpectrum.startTime);
-            if (dataSpectrum.stopTime != null) { _stopTime = String.Format("{0:yyyy-MM-dd hh:mm:ss}", dataSpectrum.stopTime); } else _stopTime = "";
-            _duration = dataSpectrum.duration.ToString(@"hh\:mm\:ss");
-            _randomAligned = dataSpectrum.randomAligned;
-        }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = "")
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(name));
-        }
-        #endregion
-    }
-
     public class SpectraViewModel : ViewModelBase
     {
         public Models.CAEN_x730 cAEN_x730;
@@ -164,11 +90,17 @@ namespace newRBS.ViewModel
 
         public string myString { get; set; }
 
-        private AsyncObservableCollection<Measurement> _measurementList;
-        public AsyncObservableCollection<Measurement> measurementList
+
+        private AsyncObservableCollection<Models.Spectrum> _measurementList;
+        public AsyncObservableCollection<Models.Spectrum> measurementList
         {
             get { return _measurementList; }
+            set { _measurementList = value; }
         }
+
+        //private ObservableCollection<Models.Spectrum> _measurementList;
+        //public ObservableCollection<Models.Spectrum> measurementList
+        //{ get { return _measurementList; } set { _measurementList = value; } }
 
         public class CheckedListItem<T> : INotifyPropertyChanged
         {
@@ -229,8 +161,7 @@ namespace newRBS.ViewModel
             dataSpectra.EventSpectrumInfos += new Models.DataSpectra.ChangedEventHandler(SpectrumInfos);
 
             myString = "SomeString";
-
-            _measurementList = new AsyncObservableCollection<Measurement>();
+            measurementList = dataSpectra.GetObservableCollection();
 
             Channels = new ObservableCollection<CheckedListItem<int>>();
 
@@ -245,9 +176,9 @@ namespace newRBS.ViewModel
         private void SpectrumNew(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("New Spectra");
-            Models.DataSpectrum newSpectrum = dataSpectra.spectra[e.ID];
+            //Models.Spectrum newSpectrum = dataSpectra.spectra[e.ID];
 
-            _measurementList.Add(new Measurement(newSpectrum));
+            //_measurementList.Add(new Measurement(newSpectrum));
         }
 
         private void SpectrumY(object sender, Models.SpectrumArgs e)
@@ -258,23 +189,26 @@ namespace newRBS.ViewModel
         private void SpectrumInfos(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("SpectrumInfos");
-            Models.DataSpectrum spectrum = dataSpectra.spectra[e.ID];
-            var found = _measurementList.FirstOrDefault(i => i.ID == e.ID);
-            if (found != null)
+            //Models.Spectrum spectrum = dataSpectra.spectra[e.ID];
+            //var found = _measurementList.FirstOrDefault(i => i.spectrumID == e.ID);
+            //if (found != null)
             {
-                int i = _measurementList.IndexOf(found);
-                _measurementList[i] = new Measurement(spectrum);
+                //   int i = _measurementList.IndexOf(found);
+                //_measurementList[i] = new Measurement(spectrum);
             }
         }
 
         private void _StartMeasurements()
         {
+            Console.WriteLine("Measurement will be starte");
             List<int> selectedChannels = new List<int>();
             List<CheckedListItem<int>> c = Channels.Where(i => i.IsChecked == true).ToList();
             for (int i = 0; i < c.Count; i++)
                 selectedChannels.Add(c[i].Item);
 
             List<int> newIDs = measureSpectra.StartMeasurements(selectedChannels);
+
+            measurementList = dataSpectra.GetObservableCollection();
         }
 
         private void _StopMeasurements()

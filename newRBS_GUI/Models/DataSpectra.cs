@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Data.Linq;
 
 namespace newRBS.Models
 {
@@ -9,8 +12,14 @@ namespace newRBS.Models
     public class SpectrumArgs : EventArgs
     {
         public readonly int ID;
-        public readonly int Channel;
-        public SpectrumArgs(int id, int channel) { ID = id; Channel = channel; }
+        public SpectrumArgs(int id) { ID = id; }
+    }
+
+    public class SpectraDB : DataContext
+    {
+        public Table<Spectrum> Spectra;
+
+        public SpectraDB(string connection) : base(connection) { }
     }
 
     /// <summary>
@@ -18,17 +27,33 @@ namespace newRBS.Models
     /// </summary>
     public class DataSpectra
     {
-        private int spectrumIndex = 0;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<int, DataSpectrum> spectra = new Dictionary<int, DataSpectrum>();
 
         public delegate void ChangedEventHandler(object sender, SpectrumArgs e);
         public event ChangedEventHandler EventSpectrumNew, EventSpectrumRemove, EventSpectrumY, EventSpectrumInfos, EventSpectrumFinished;
 
         TraceSource trace = new TraceSource("DataSpectra");
+
+        private string ConnectionString = "Data Source = SVRH; Initial Catalog = p4mist_db; User ID = p4mist; Password = testtesttesttest";
+
+        public DataSpectra()
+        {
+
+        }
+
+        public ViewModel.AsyncObservableCollection<Spectrum> GetObservableCollection()
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra select spec;
+
+            //foreach (Spectrum spec in Spec)
+            //{ Console.WriteLine("Spectrum {0}", spec.SpectrumID); }
+
+            Console.WriteLine("Num Spectra: {0}", Spec.Count());
+
+            return new ViewModel.AsyncObservableCollection<Spectrum>(Spec.ToList());
+        }
 
         /// <summary>
         /// Function that adds a new item (\<ID, <see cref="DataSpectrum"/>\>) to the dictionary of spectra.
@@ -36,30 +61,39 @@ namespace newRBS.Models
         /// <param name="channel">Channel on which the spectrum is obtained</param>
         /// <remarks>Other parameters (expDetails, energyCalibration) is taken from the class definition.</remarks>
         /// <returns>ID of the new spectrum.</returns>
-        public int NewSpectrum(int channel, ExpDetails expDetails, EnergyCalibration energyCalibration, Stop stop)
+        public int NewSpectrum(int channel, ExpDetails expDetails, EnergyCalibration energyCalibration, string stopType, int stopValue, bool runs)
         {
-            int ID = spectrumIndex;
-            spectra.Add(ID, new DataSpectrum(ID, channel, expDetails, energyCalibration, stop));
-            spectrumIndex += 1;
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            SpectrumArgs e1 = new SpectrumArgs(ID, channel);
+            Spectrum newSpectrum = new Spectrum(channel, expDetails, energyCalibration, stopType, stopValue, runs);
+            spectraDB.Spectra.InsertOnSubmit(newSpectrum);
+            spectraDB.SubmitChanges();
+
+            SpectrumArgs e1 = new SpectrumArgs(newSpectrum.SpectrumID);
             if (EventSpectrumNew != null) { EventSpectrumNew(this, e1); } else { Console.WriteLine("EventSpectrumNew null"); }
 
-            return ID;
+            return newSpectrum.SpectrumID;
         }
 
         /// <summary>
         /// Function that removes an item (\<ID, <see cref="DataSpectrum"/>\>) from the dictionary of spectra.
         /// </summary>
-        /// <param name="ID">ID of the spectrum to remove.</param>
-        public void RemoveSpectrum(int ID)
+        /// <param name="spectrumID">ID of the spectrum to remove.</param>
+        public void RemoveSpectrum(int spectrumID)
         {
-            if (!spectra.ContainsKey(ID))
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't remove Spectrum: Spectrum with ID={0} not found", ID); return; }
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            spectra.Remove(ID);
+            var delSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
 
-            SpectrumArgs e1 = new SpectrumArgs(ID, -1);
+            if (!delSpectra.Any())
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't remove Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
+
+            foreach (var delSpectrum in delSpectra)
+                spectraDB.Spectra.DeleteOnSubmit(delSpectrum);
+
+            spectraDB.SubmitChanges();
+
+            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
             if (EventSpectrumRemove != null) EventSpectrumRemove(this, e1);
         }
 
@@ -69,9 +103,10 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="IDs">Array of IDs of the spectra to save.</param>
         /// <param name="file">Filename of the file to save the spectra to.</param>
-        public void SaveSpectra(int[] IDs, string file)
+        public void ExportSpectra(int[] spectrumIDs, string file)
         {
-            DataSpectrum spectrum = null;
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+
             TextWriter tw = new StreamWriter(file);
 
             // Header
@@ -83,28 +118,20 @@ namespace newRBS.Models
             string strECalSlope = "EnergyCalSlope";
             string strName = "Name";
 
-            foreach (int ID in IDs)
-            {
-                if (!spectra.ContainsKey(ID))
-                {
-                    trace.TraceEvent(TraceEventType.Warning, 0, "Spectrum with ID={0} not found", ID);
-                    continue;
-                }
-                spectrum = spectra[ID];
-                strChannel += String.Format("\t {0}", spectrum.channel);
-                strID += String.Format("\t {0}", spectrum.ID);
-                strStart += String.Format("\t {0}", spectrum.startTime);
-                strStop += String.Format("\t {0}", spectrum.stopTime);
-                strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", spectrum.energyCalibration_.energyCalOffset);
-                strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", spectrum.energyCalibration_.energyCalSlope);
-                strName += String.Format("\t {0}", spectrum.name);
-            }
+            var expSpectra = from spec in spectraDB.Spectra where spectrumIDs.Contains(spec.SpectrumID) select spec;
 
-            if (spectrum == null)
+            if (!expSpectra.Any())
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Spectra: No spectrum not found"); tw.Close(); return; }
+
+            foreach (var expSpectrum in expSpectra)
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "No spectra to save");
-                tw.Close();
-                return;
+                strChannel += String.Format("\t {0}", expSpectrum.Channel);
+                strID += String.Format("\t {0}", expSpectrum.SpectrumID);
+                strStart += String.Format("\t {0}", expSpectrum.StartTime);
+                strStop += String.Format("\t {0}", expSpectrum.StopTime);
+                //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
+                //strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalSlope);
+                strName += String.Format("\t {0}", expSpectrum.SampleID);
             }
 
             tw.WriteLine(strChannel);
@@ -116,39 +143,60 @@ namespace newRBS.Models
             tw.WriteLine(strName);
 
             // Data
-            for (int x = 0; x < spectrum.SpectrumX.Length; x++)
+            //for (int x = 0; x < expSpectrum.SpectrumX.Length; x++)
             {
                 // TODO: Write data
             }
             tw.Close();
-
         }
 
-        public void SetSpectrumY(int ID, int[] spectrumY)
+        public void SetSpectrumY(int spectrumID, int[] spectrumY)
         {
-            if (!spectra.ContainsKey(ID))
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Spectrum with ID={0} not found", ID); return; }
-            if (spectrumY.Length != spectra[ID].SpectrumY.Length)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't macht"); return; }
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = null;
 
-            spectra[ID].SpectrumY = spectrumY;
+            var modSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
 
-            SpectrumArgs e1 = new SpectrumArgs(ID, spectra[ID].channel);
+            if (!modSpectra.Any())
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Spectrum with SpectrumID={0} not found", spectrumID); return; }
+
+            if (spectrumY.Length != 16384)
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
+
+            foreach (var modSpectrum in modSpectra)
+                modSpectrum.SpectrumY = spectrumY;
+
+            spectraDB.SubmitChanges();
+
+            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
             if (EventSpectrumY != null) EventSpectrumY(this, e1);
 
-            UpdateSpectrumInfos(ID);
+            UpdateSpectrumInfos(spectrumID);
         }
 
         /// <summary>
         /// Function that stops the Spectrum: It sets stopTime = now and runs = false.
         /// </summary>
         /// <param name="ID">ID of the spectrum to be stopped.</param>
-        public void StopSpectrum(int ID)
+        public void StopSpectrum(int spectrumID)
         {
-            spectra[ID].stopTime = DateTime.Now;
-            spectra[ID].runs = false;
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            SpectrumArgs e1 = new SpectrumArgs(ID, spectra[ID].channel);
+            IQueryable<Spectrum> stopSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
+            Console.WriteLine("stopSpectra.Count() {0}", stopSpectra.Count());
+            if (stopSpectra.Count() == 0)
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't stop Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
+
+            foreach (Spectrum stopSpectrum in stopSpectra)
+            {
+                stopSpectrum.StopTime = DateTime.Now;
+                stopSpectrum.Runs = false;
+                Console.WriteLine("NumElements: {0}", stopSpectrum.SpectrumY.Length);
+            }
+
+            spectraDB.SubmitChanges();
+
+            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
             if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);
         }
 
@@ -156,32 +204,44 @@ namespace newRBS.Models
         /// Function that updates the metadata of the spectrum (duration, progress)
         /// </summary>
         /// <param name="ID">ID of the spectrum to be updated</param>
-        public void UpdateSpectrumInfos(int ID)
+        public void UpdateSpectrumInfos(int spectrumID)
         {
-            spectra[ID].duration = DateTime.Now - spectra[ID].startTime;
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            switch (spectra[ID].stop_.type)
+            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
+
+            var updateSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
+
+            if (!updateSpectra.Any())
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
+
+            foreach (var updateSpectrum in updateSpectra)
             {
-                case "Manual": spectra[ID].progress = 0; break;
-                case "Counts":
-                    int counts = 0;
-                    for (int i = 0; i < spectra[ID].SpectrumY.Length; i++)
-                    { counts += spectra[ID].SpectrumY[i]; }
-                    spectra[ID].progress = counts / spectra[ID].stop_.value;
-                    break;
-                case "Time": spectra[ID].progress = spectra[ID].duration.TotalMinutes / spectra[ID].stop_.value; break;
-                    // TODO: Chopper
+                updateSpectrum.Duration = DateTime.Now - updateSpectrum.StartTime;
+
+                switch (updateSpectrum.StopType)
+                {
+                    case "Manual": updateSpectrum.Progress = 0; break;
+                    case "Counts":
+                        int counts = 0;
+                        for (int i = 0; i < updateSpectrum.SpectrumY.Length; i++)
+                        { counts += updateSpectrum.SpectrumY[i]; }
+                        updateSpectrum.Progress = counts / updateSpectrum.StopValue;
+                        break;
+                    case "Time": updateSpectrum.Progress = updateSpectrum.Duration.TotalMinutes / updateSpectrum.StopValue; break;
+                        // TODO: Chopper
+                }
+
+                if (updateSpectrum.Progress >= 1)
+                {
+                    updateSpectrum.Progress = 1;
+                    if (EventSpectrumFinished != null) EventSpectrumFinished(this, e1);
+                }
+
+                if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);
             }
 
-            SpectrumArgs e1 = new SpectrumArgs(ID, spectra[ID].channel);
-
-            if (spectra[ID].progress >= 1)
-            {
-                spectra[ID].progress = 1;
-                if (EventSpectrumFinished != null) EventSpectrumFinished(this, e1);
-            }
-
-            if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);
+            spectraDB.SubmitChanges();
         }
     }
 }

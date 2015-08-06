@@ -310,4 +310,19 @@ namespace newRBS.Models
             WFParams.probeTrigger = 0;
         }
     }
+
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    public struct CAENDPP_DgtzParams_t_min
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12256)]//15256
+        public byte[] dump;
+
+        public void initializeArrays()
+        {
+            dump = new byte[15256];// 15256
+            for (int i = 0; i < 15256; i++)
+                dump[i] = 0;
+        }
+    }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using GalaSoft.MvvmLight.Ioc;
+using System.Data.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,6 +40,7 @@ namespace newRBS.Models
             myDataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
         }
 
+
         /// <summary>
         /// Starts the measurement for the selected channels (<see cref="selectedChannels"/>).
         /// </summary>
@@ -46,11 +48,11 @@ namespace newRBS.Models
         public List<int> StartMeasurements(List<int> selectedChannels)
         {
             List<int> IDs = new List<int>();
-
+            Console.WriteLine("Measurement will be starte");
             foreach (int channel in selectedChannels)
             {
                 myCAEN_x730.StartAcquisition(channel);
-                int ID = myDataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], stop);
+                int ID = myDataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], "Manual", 0, true);
                 IDs.Add(ID);
                 activeChannels.Add(channel, ID);
 
@@ -72,9 +74,9 @@ namespace newRBS.Models
 
                 myCAEN_x730.StopAcquisition(channel);
 
-                myDataSpectra.StopSpectrum(activeChannels[channel]);
-
                 spectraMeasurementTimer[channel].Stop();
+
+                myDataSpectra.StopSpectrum(activeChannels[channel]);
 
                 activeChannels.Remove(channel);
 

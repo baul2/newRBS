@@ -63,17 +63,18 @@ namespace newRBS.Models
             else { trace.TraceEvent(TraceEventType.Information, 0, "Board added"); }
 
             //Reset board to default parameters
-            SetDefaultConfig();
-
-            //Console.WriteLine("CAENDPP_DgtzParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_DgtzParams_t)));
-            //Console.WriteLine("CAENDPP_ChannelExtraParameters {0}", Marshal.SizeOf(typeof(CAENDPP_ChannelExtraParameters)));
-            //Console.WriteLine("CAENDPP_TRReset {0}", Marshal.SizeOf(typeof(CAENDPP_TRReset)));
-            //Console.WriteLine("CAENDPP_PHA_Params_t {0}", Marshal.SizeOf(typeof(CAENDPP_PHA_Params_t)));
-            //Console.WriteLine("CAENDPP_WaveformParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_WaveformParams_t)));
-            //Console.WriteLine("CAENDPP_ListParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_ListParams_t)));
-            //Console.WriteLine("CAENDPP_CoincParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_CoincParams_t)));
-            //Console.WriteLine("CAENDPP_SpectrumControl {0}", Marshal.SizeOf(typeof(CAENDPP_SpectrumControl)));
+            Console.WriteLine("CAENDPP_DgtzParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_DgtzParams_t)));
+            //Console.WriteLine("CAENDPP_DgtzParams_t_old {0}", Marshal.SizeOf(typeof(CAENDPP_DgtzParams_t_old)));
+            Console.WriteLine("CAENDPP_ChannelExtraParameters {0}", Marshal.SizeOf(typeof(CAENDPP_ChannelExtraParameters)));
+            Console.WriteLine("CAENDPP_TRReset {0}", Marshal.SizeOf(typeof(CAENDPP_TRReset)));
+            Console.WriteLine("CAENDPP_PHA_Params_t {0}", Marshal.SizeOf(typeof(CAENDPP_PHA_Params_t)));
+            Console.WriteLine("CAENDPP_WaveformParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_WaveformParams_t)));
+            Console.WriteLine("CAENDPP_ListParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_ListParams_t)));
+            Console.WriteLine("CAENDPP_CoincParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_CoincParams_t)));
+            Console.WriteLine("CAENDPP_SpectrumControl {0}", Marshal.SizeOf(typeof(CAENDPP_SpectrumControl)));
             //Console.WriteLine("dgtzParams.ChannelExtraParameters[3].analogPath {0}", dgtzParams.ChannelExtraParameters[3].analogPath);
+
+            SetDefaultConfig();
         }
 
         /// <summary>
@@ -85,6 +86,7 @@ namespace newRBS.Models
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
             for (int channel = 0; channel < 8; channel++) inputRange[channel] = InputRange.CAENDPP_InputRange_0_5Vpp;
+
             SendConfig();
         }
 
@@ -92,21 +94,21 @@ namespace newRBS.Models
         {
             if (channelParams.inputRange != 0) inputRange[channel] = channelParams.inputRange;
 
-            if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
-            if (channelParams.TrapezoidFlatTopTime != null) dgtzParams.DPPParams.m[channel] = (int)channelParams.TrapezoidFlatTopTime;
-            if (channelParams.TrapezoidRiseTime != null) dgtzParams.DPPParams.k[channel] = (int)channelParams.TrapezoidRiseTime;
-            if (channelParams.TrapezoidPeakingDelay != null) dgtzParams.DPPParams.ftd[channel] = (int)channelParams.TrapezoidPeakingDelay;
-            if (channelParams.TriggerFilterSmoothingFactor != null) dgtzParams.DPPParams.a[channel] = (int)channelParams.TriggerFilterSmoothingFactor;
-            if (channelParams.InputSignalRiseTime != null) dgtzParams.DPPParams.b[channel] = (int)channelParams.InputSignalRiseTime;
-            if (channelParams.TriggerThreshold != null) dgtzParams.DPPParams.thr[channel] = (int)channelParams.TriggerThreshold;
-            if (channelParams.NumSamplesBaselineMean != null) dgtzParams.DPPParams.nsbl[channel] = (int)channelParams.NumSamplesBaselineMean;
-            if (channelParams.NumSamplesPeakMean != null) dgtzParams.DPPParams.nspk[channel] = (int)channelParams.NumSamplesPeakMean;
-            if (channelParams.PeakHoldOff != null) dgtzParams.DPPParams.pkho[channel] = (int)channelParams.PeakHoldOff;
-            if (channelParams.BaseLineHoldOff != null) dgtzParams.DPPParams.blho[channel] = (int)channelParams.BaseLineHoldOff;
-            if (channelParams.TriggerHoldOff != null) dgtzParams.DPPParams.trgho[channel] = (int)channelParams.TriggerHoldOff;
-            if (channelParams.DigitalGain != null) dgtzParams.DPPParams.dgain[channel] = (int)channelParams.DigitalGain;
-            if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
-            if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
+            //if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
+            //if (channelParams.TrapezoidFlatTopTime != null) dgtzParams.DPPParams.m[channel] = (int)channelParams.TrapezoidFlatTopTime;
+            //if (channelParams.TrapezoidRiseTime != null) dgtzParams.DPPParams.k[channel] = (int)channelParams.TrapezoidRiseTime;
+            //if (channelParams.TrapezoidPeakingDelay != null) dgtzParams.DPPParams.ftd[channel] = (int)channelParams.TrapezoidPeakingDelay;
+            //if (channelParams.TriggerFilterSmoothingFactor != null) dgtzParams.DPPParams.a[channel] = (int)channelParams.TriggerFilterSmoothingFactor;
+            //if (channelParams.InputSignalRiseTime != null) dgtzParams.DPPParams.b[channel] = (int)channelParams.InputSignalRiseTime;
+            //if (channelParams.TriggerThreshold != null) dgtzParams.DPPParams.thr[channel] = (int)channelParams.TriggerThreshold;
+            //if (channelParams.NumSamplesBaselineMean != null) dgtzParams.DPPParams.nsbl[channel] = (int)channelParams.NumSamplesBaselineMean;
+            //if (channelParams.NumSamplesPeakMean != null) dgtzParams.DPPParams.nspk[channel] = (int)channelParams.NumSamplesPeakMean;
+            //if (channelParams.PeakHoldOff != null) dgtzParams.DPPParams.pkho[channel] = (int)channelParams.PeakHoldOff;
+            //if (channelParams.BaseLineHoldOff != null) dgtzParams.DPPParams.blho[channel] = (int)channelParams.BaseLineHoldOff;
+            //if (channelParams.TriggerHoldOff != null) dgtzParams.DPPParams.trgho[channel] = (int)channelParams.TriggerHoldOff;
+            //if (channelParams.DigitalGain != null) dgtzParams.DPPParams.dgain[channel] = (int)channelParams.DigitalGain;
+            //if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
+            //if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
 
             SendConfig();
         }
@@ -149,7 +151,7 @@ namespace newRBS.Models
         /// </remarks>
         public void SendConfig()
         {
-            int ret1, ret2 = 0;
+            int ret1 = 0, ret2 = 0;
             ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
             for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
 
@@ -166,7 +168,7 @@ namespace newRBS.Models
         {
             if (activeChannels.Contains(channel)) // Checks if measurement is already running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}, channel");
+                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}", channel);
                 return;
             }
             int ret = CAENDPP_StartAcquisition(handle, channel);
@@ -241,7 +243,7 @@ namespace newRBS.Models
         {
             if (!activeChannels.Contains(channel)) // Checks if measurement is not running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}, channel");
+                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}", channel);
                 return;
             }
             int ret = CAENDPP_StopAcquisition(handle, channel);
