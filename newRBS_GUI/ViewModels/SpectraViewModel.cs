@@ -87,9 +87,16 @@ namespace newRBS.ViewModel
 
         public ICommand StartMeasurements { get; set; }
         public ICommand StopMeasurements { get; set; }
+        public ICommand ExpandFilterList { get; set; }
 
         public string myString { get; set; }
 
+        private AsyncObservableCollection<string> _filterList;
+        public AsyncObservableCollection<string> filterList
+        {
+            get { return _filterList; }
+            set { _filterList = value; }
+        }
 
         private AsyncObservableCollection<Models.Spectrum> _measurementList;
         public AsyncObservableCollection<Models.Spectrum> measurementList
@@ -98,9 +105,19 @@ namespace newRBS.ViewModel
             set { _measurementList = value; }
         }
 
-        //private ObservableCollection<Models.Spectrum> _measurementList;
-        //public ObservableCollection<Models.Spectrum> measurementList
-        //{ get { return _measurementList; } set { _measurementList = value; } }
+        private bool _spectraFilterVis;
+        public bool spectraFilterVis
+        {
+            get { return _spectraFilterVis; }
+            set
+            {
+                if (_spectraFilterVis != value)
+                {
+                    _spectraFilterVis = value;
+                    //OnPropertyChanged("Vis");  // To notify when the property is changed
+                }
+            }
+        }
 
         public class CheckedListItem<T> : INotifyPropertyChanged
         {
@@ -154,6 +171,7 @@ namespace newRBS.ViewModel
 
             StartMeasurements = new RelayCommand(() => _StartMeasurements(), () => true);
             StopMeasurements = new RelayCommand(() => _StopMeasurements(), () => true);
+            ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
 
             // Hooking up to events from DataSpectra
             dataSpectra.EventSpectrumNew += new Models.DataSpectra.ChangedEventHandler(SpectrumNew);
@@ -171,14 +189,17 @@ namespace newRBS.ViewModel
             Channels.Add(new CheckedListItem<int>(3));
 
             Channels[0].IsChecked = true;
+
+            filterList.Add("TestFilter1");
+            filterList.Add("TestFilter2");
+            filterList.Add("TestFilter3");
         }
 
         private void SpectrumNew(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("New Spectra");
-            //Models.Spectrum newSpectrum = dataSpectra.spectra[e.ID];
 
-            //_measurementList.Add(new Measurement(newSpectrum));
+            measurementList.Add(dataSpectra.GetSpectrum(e.ID));
         }
 
         private void SpectrumY(object sender, Models.SpectrumArgs e)
@@ -189,12 +210,12 @@ namespace newRBS.ViewModel
         private void SpectrumInfos(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("SpectrumInfos");
-            //Models.Spectrum spectrum = dataSpectra.spectra[e.ID];
-            //var found = _measurementList.FirstOrDefault(i => i.spectrumID == e.ID);
-            //if (found != null)
+
+            var found = _measurementList.FirstOrDefault(i => i.SpectrumID == e.ID);
+            if (found != null)
             {
-                //   int i = _measurementList.IndexOf(found);
-                //_measurementList[i] = new Measurement(spectrum);
+                int i = _measurementList.IndexOf(found);
+                _measurementList[i] = dataSpectra.GetSpectrum(e.ID);
             }
         }
 
@@ -219,6 +240,12 @@ namespace newRBS.ViewModel
                 selectedChannels.Add(c[i].Item);
 
             measureSpectra.StopMeasurements(selectedChannels);
+        }
+
+        private void _ExpandFilterList()
+        {
+            spectraFilterVis = !spectraFilterVis;
+            Console.WriteLine(spectraFilterVis);
         }
     }
 }

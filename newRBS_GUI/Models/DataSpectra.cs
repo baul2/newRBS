@@ -55,6 +55,19 @@ namespace newRBS.Models
             return new ViewModel.AsyncObservableCollection<Spectrum>(Spec.ToList());
         }
 
+        public Spectrum GetSpectrum(int spectrumID)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
+
+            if (!Spec.Any())
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't find Spectrum with SpectrumID={0}", spectrumID); return null; }
+
+            return Spec.First();
+        }
+
         /// <summary>
         /// Function that adds a new item (\<ID, <see cref="DataSpectrum"/>\>) to the dictionary of spectra.
         /// </summary>

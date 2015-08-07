@@ -14,19 +14,10 @@
                 <local:MeasurePanel/>
             </Grid>
         </Border>
-        <Border DockPanel.Dock="Left">
-            <Grid x:Name="FolderTree">
-                <TreeView x:Name="FolderTreeView"></TreeView>
-            </Grid>
-        </Border>
+
         <Border DockPanel.Dock="Left">
             <StackPanel Orientation="Vertical">
                 <Button Content="&#8657; Measure Panel &#8657;" Width="150" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Click="ButtonMeasure_Click">
-                    <Button.LayoutTransform>
-                        <RotateTransform Angle="-90" />
-                    </Button.LayoutTransform>
-                </Button>
-                <Button Content="&#8657; Folder Panel &#8657;" Width="150" Height="22"  VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Click="ButtonFolderTree_Click">
                     <Button.LayoutTransform>
                         <RotateTransform Angle="-90" />
                     </Button.LayoutTransform>
@@ -35,15 +26,7 @@
 
         </Border>
         <Border>
-            <TabControl Grid.Row="0" Grid.Column="1">
-                <TabItem Header="Spectra">
-                    <local:Spectra DataContext="{Binding spectraViewModel, Source={StaticResource Locator}}"/>
-                </TabItem>
-                
-                <TabItem Header="Dip"></TabItem>
-                <TabItem Header="Map"></TabItem>
-                <TabItem Header="Waveform"></TabItem>
-            </TabControl>
+            <local:Spectra DataContext="{Binding spectraViewModel, Source={StaticResource Locator}}"/>
         </Border>
     </DockPanel>
 </Window>
