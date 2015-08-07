@@ -14,7 +14,6 @@
                 <local:MeasurePanel/>
             </Grid>
         </Border>
-
         <Border DockPanel.Dock="Left">
             <StackPanel Orientation="Vertical">
                 <Button Content="&#8657; Measure Panel &#8657;" Width="150" Height="22" VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Click="ButtonMeasure_Click">

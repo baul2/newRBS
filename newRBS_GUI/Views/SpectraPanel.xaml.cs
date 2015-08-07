@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GalaSoft.MvvmLight.Ioc;
 
 namespace newRBS.GUI
 {
@@ -20,10 +21,17 @@ namespace newRBS.GUI
     /// </summary>
     public partial class Spectra : UserControl
     {
+        public ViewModel.SpectraViewModel spectraViewModel;
+
         public Spectra()
         {
             InitializeComponent();
-            
+            spectraViewModel = SimpleIoc.Default.GetInstance<ViewModel.SpectraViewModel>();
+        }
+
+        public void SpectraFilterTreeChanged(object sender, RoutedPropertyChangedEventArgs<Object> e)
+        {
+            spectraViewModel.spectraFilterClass.selectedFilter = (string) e.NewValue;
         }
     }
 }

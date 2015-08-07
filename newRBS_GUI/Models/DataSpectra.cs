@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Data.Linq;
+using System.Globalization;
 
 namespace newRBS.Models
 {
@@ -40,33 +41,69 @@ namespace newRBS.Models
 
         }
 
-        public ViewModel.AsyncObservableCollection<Spectrum> GetObservableCollection()
+        public List<string> GetAllChannels()
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            var channels = from spec in spectraDB.Spectra select spec.Channel;
+
+            Console.WriteLine(channels.GetType());
+
+            List<int> noDupes = channels.Distinct().ToList();
+
+            return noDupes.ConvertAll<string>(x => x.ToString()); ;
+        }
+
+        public List<Spectrum> GetSpectra_All()
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
             IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra select spec;
 
-            //foreach (Spectrum spec in Spec)
-            //{ Console.WriteLine("Spectrum {0}", spec.SpectrumID); }
-
             Console.WriteLine("Num Spectra: {0}", Spec.Count());
 
-            return new ViewModel.AsyncObservableCollection<Spectrum>(Spec.ToList());
+            return Spec.ToList();
         }
 
-        public Spectrum GetSpectrum(int spectrumID)
+        public List<Spectrum> GetSpectra_Date(string date)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
+            IQueryable<Spectrum> Spec = null;
 
-            if (!Spec.Any())
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't find Spectrum with SpectrumID={0}", spectrumID); return null; }
+            switch (date)
+            {
+                case "Today":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date == DateTime.Today select spec; break; }
+                case "This Week":
+                    {
+                        int dayofweek = (int)DateTime.Today.DayOfWeek;
+                        Console.WriteLine(dayofweek);
+                        Spec = from spec in spectraDB.Spectra where (DateTime.Today.DayOfYear - spec.StartTime.DayOfYear) < dayofweek select spec;
+                        break;
+                    }
+                case "This Month":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Month == DateTime.Today.Month select spec; break; }
+                case "This Year":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Year == DateTime.Today.Year select spec; break; }
+            }
 
-            return Spec.First();
+            return Spec.ToList();
+
         }
+        public List<Spectrum> GetSpectra_Channel(int channel)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.Channel == channel select spec;
+
+            return Spec.ToList();
+        }
+
 
         /// <summary>
         /// Function that adds a new item (\<ID, <see cref="DataSpectrum"/>\>) to the dictionary of spectra.

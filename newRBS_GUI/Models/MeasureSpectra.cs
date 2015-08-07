@@ -48,6 +48,7 @@ namespace newRBS.Models
         public List<int> StartMeasurements(List<int> selectedChannels)
         {
             List<int> IDs = new List<int>();
+            Console.WriteLine("Measurement will be starte");
             foreach (int channel in selectedChannels)
             {
                 myCAEN_x730.StartAcquisition(channel);

@@ -37,28 +37,6 @@ namespace newRBS.GUI
             cAEN_x730.Close();
         }
 
-        void FolderExpanded(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem item = (TreeViewItem)sender;
-            if (item.Items.Count == 1 && item.Items[0] == null)
-            {
-                item.Items.Clear();
-                try
-                {
-                    foreach (string s in Directory.GetDirectories(item.Tag.ToString()))
-                    {
-                        TreeViewItem subitem = new TreeViewItem();
-                        subitem.Header = s.Substring(s.LastIndexOf("\\") + 1);
-                        subitem.Tag = s;
-                        //subitem.FontWeight = FontWeights.Normal;
-                        subitem.Items.Add(null);
-                        subitem.Expanded += new RoutedEventHandler(FolderExpanded);
-                        item.Items.Add(subitem);
-                    }
-                }
-                catch (Exception) { }
-            }
-        }
 
         private void ButtonMeasure_Click(object sender, RoutedEventArgs e)
         {

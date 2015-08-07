@@ -79,45 +79,171 @@ namespace newRBS.ViewModel
         }
     }
 
+    public class SpectraListClass
+    {
+        private Models.DataSpectra dataSpectra { get; set; }
+
+        private AsyncObservableCollection<Models.Spectrum> _spectraList;
+        public AsyncObservableCollection<Models.Spectrum> spectraList
+        {
+            get { return _spectraList; }
+            set { _spectraList = value; }
+        }
+
+        public SpectraListClass()
+        {
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+
+            spectraList = new AsyncObservableCollection<Models.Spectrum>();
+
+            List<Models.Spectrum> temp = dataSpectra.GetSpectra_All();
+            foreach (Models.Spectrum spectrum in temp)
+                spectraList.Add(spectrum);
+        }
+
+        public void ChangeFilter(string filterType, string filter)
+        {
+            spectraList.Clear();
+            Console.WriteLine("FilterType: {0}; Filter: {1}", filterType, filter);
+            if (filter == "All")
+            {
+                List<Models.Spectrum> temp = dataSpectra.GetSpectra_All();
+                foreach (Models.Spectrum spectrum in temp)
+                    spectraList.Add(spectrum);
+            }
+            else
+            {
+                switch (filterType)
+                {
+                    case "Date":
+                        {
+                            List<Models.Spectrum> temp = dataSpectra.GetSpectra_Date(filter);
+                            foreach (Models.Spectrum spectrum in temp)
+                                spectraList.Add(spectrum);
+                            break;
+                        }
+                    case "Sample":
+                        {
+
+                            break;
+                        }
+                    case "Channel":
+                        {
+                            List<Models.Spectrum> temp = dataSpectra.GetSpectra_Channel(Int32.Parse(filter));
+                            foreach (Models.Spectrum spectrum in temp)
+                                spectraList.Add(spectrum);
+                            break;
+                        }
+                }
+            }
+        }
+    }
+
+    public class SpectraFilterClass : ViewModelBase
+    {
+        private Models.DataSpectra dataSpectra { get; set; }
+        private SpectraListClass _spectraListClass;
+
+        public ICommand ExpandFilterList { get; set; }
+
+        private bool _spectraFilterPanelVis = true;
+        public bool spectraFilterPanelVis
+        {
+            get { return _spectraFilterPanelVis; }
+            set { _spectraFilterPanelVis = value; RaisePropertyChanged(); }
+        }
+
+        public AsyncObservableCollection<string> filterTypeList { get; set; }
+
+        private int _filterTypeIndex;
+        public int filterTypeIndex
+        {
+            get
+            { return _filterTypeIndex; }
+            set
+            {
+                _filterTypeIndex = value;
+                FillFilterList(filterTypeList[value]);
+                RaisePropertyChanged();
+            }
+        }
+
+        public AsyncObservableCollection<string> filterList { get; set; }
+
+        private string _selectedFilter;
+        public string selectedFilter
+        {
+            get
+            { return _selectedFilter; }
+            set
+            {
+                _selectedFilter = value;
+                _spectraListClass.ChangeFilter(filterTypeList[filterTypeIndex], value);
+                RaisePropertyChanged();
+            }
+        }
+
+        public SpectraFilterClass(SpectraListClass spectraListClass)
+        {
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            _spectraListClass = spectraListClass;
+
+            ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
+
+            filterTypeList = new AsyncObservableCollection<string>();
+            filterList = new AsyncObservableCollection<string>();
+
+            filterTypeList.Add("Date");
+            filterTypeList.Add("Sample");
+            filterTypeList.Add("Channel");
+
+            filterTypeIndex = 0;
+        }
+
+        private void _ExpandFilterList()
+        {
+            spectraFilterPanelVis = !spectraFilterPanelVis;
+        }
+
+        private void FillFilterList(string filterType)
+        {
+            filterList.Clear();
+            switch (filterType)
+            {
+                case "Date":
+                    filterList.Add("All");
+                    filterList.Add("Today");
+                    filterList.Add("This Week");
+                    filterList.Add("This Month");
+                    filterList.Add("This Year");
+                    break;
+                case "Channel":
+                    filterList.Add("All");
+                    List<string> allChannels = dataSpectra.GetAllChannels();
+                    foreach (string channel in allChannels)
+                        filterList.Add(channel);
+                    Console.WriteLine("asdf"); break;
+            }
+        }
+    }
+
     public class SpectraViewModel : ViewModelBase
     {
         public Models.CAEN_x730 cAEN_x730;
         public Models.DataSpectra dataSpectra { get; set; }
         public Models.MeasureSpectra measureSpectra;
 
+        private SpectraListClass _spectraListClass;
+        public SpectraListClass spectraListClass { get { return _spectraListClass; } set { _spectraListClass = value; } }
+
+        private SpectraFilterClass _spectraFilterClass;
+        public SpectraFilterClass spectraFilterClass { get { return _spectraFilterClass; } set { _spectraFilterClass = value; } }
+
         public ICommand StartMeasurements { get; set; }
         public ICommand StopMeasurements { get; set; }
-        public ICommand ExpandFilterList { get; set; }
+        public ICommand TestButtonClick { get; set; }
 
         public string myString { get; set; }
-
-        private AsyncObservableCollection<string> _filterList;
-        public AsyncObservableCollection<string> filterList
-        {
-            get { return _filterList; }
-            set { _filterList = value; }
-        }
-
-        private AsyncObservableCollection<Models.Spectrum> _measurementList;
-        public AsyncObservableCollection<Models.Spectrum> measurementList
-        {
-            get { return _measurementList; }
-            set { _measurementList = value; }
-        }
-
-        private bool _spectraFilterVis;
-        public bool spectraFilterVis
-        {
-            get { return _spectraFilterVis; }
-            set
-            {
-                if (_spectraFilterVis != value)
-                {
-                    _spectraFilterVis = value;
-                    //OnPropertyChanged("Vis");  // To notify when the property is changed
-                }
-            }
-        }
 
         public class CheckedListItem<T> : INotifyPropertyChanged
         {
@@ -169,9 +295,12 @@ namespace newRBS.ViewModel
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
+            spectraListClass = new SpectraListClass();
+            spectraFilterClass = new SpectraFilterClass(spectraListClass);
+
             StartMeasurements = new RelayCommand(() => _StartMeasurements(), () => true);
             StopMeasurements = new RelayCommand(() => _StopMeasurements(), () => true);
-            ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
+            TestButtonClick = new RelayCommand(() => _TestButtonClick(), () => true);
 
             // Hooking up to events from DataSpectra
             dataSpectra.EventSpectrumNew += new Models.DataSpectra.ChangedEventHandler(SpectrumNew);
@@ -179,7 +308,6 @@ namespace newRBS.ViewModel
             dataSpectra.EventSpectrumInfos += new Models.DataSpectra.ChangedEventHandler(SpectrumInfos);
 
             myString = "SomeString";
-            measurementList = dataSpectra.GetObservableCollection();
 
             Channels = new ObservableCollection<CheckedListItem<int>>();
 
@@ -189,17 +317,14 @@ namespace newRBS.ViewModel
             Channels.Add(new CheckedListItem<int>(3));
 
             Channels[0].IsChecked = true;
-
-            filterList.Add("TestFilter1");
-            filterList.Add("TestFilter2");
-            filterList.Add("TestFilter3");
         }
 
         private void SpectrumNew(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("New Spectra");
+            //Models.Spectrum newSpectrum = dataSpectra.spectra[e.ID];
 
-            measurementList.Add(dataSpectra.GetSpectrum(e.ID));
+            //_measurementList.Add(new Measurement(newSpectrum));
         }
 
         private void SpectrumY(object sender, Models.SpectrumArgs e)
@@ -210,12 +335,12 @@ namespace newRBS.ViewModel
         private void SpectrumInfos(object sender, Models.SpectrumArgs e)
         {
             Console.WriteLine("SpectrumInfos");
-
-            var found = _measurementList.FirstOrDefault(i => i.SpectrumID == e.ID);
-            if (found != null)
+            //Models.Spectrum spectrum = dataSpectra.spectra[e.ID];
+            //var found = _measurementList.FirstOrDefault(i => i.spectrumID == e.ID);
+            //if (found != null)
             {
-                int i = _measurementList.IndexOf(found);
-                _measurementList[i] = dataSpectra.GetSpectrum(e.ID);
+                //   int i = _measurementList.IndexOf(found);
+                //_measurementList[i] = new Measurement(spectrum);
             }
         }
 
@@ -229,7 +354,7 @@ namespace newRBS.ViewModel
 
             List<int> newIDs = measureSpectra.StartMeasurements(selectedChannels);
 
-            measurementList = dataSpectra.GetObservableCollection();
+            //spectrumList = dataSpectra.GetObservableCollection();
         }
 
         private void _StopMeasurements()
@@ -242,10 +367,10 @@ namespace newRBS.ViewModel
             measureSpectra.StopMeasurements(selectedChannels);
         }
 
-        private void _ExpandFilterList()
+        private void _TestButtonClick()
         {
-            spectraFilterVis = !spectraFilterVis;
-            Console.WriteLine(spectraFilterVis);
+            Console.WriteLine("TestButtionClick");
+            spectraListClass.spectraList[0].Channel = 99;
         }
     }
 }
