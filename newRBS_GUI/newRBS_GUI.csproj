@@ -103,8 +103,8 @@
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
-    <Compile Include="Views\SpectraTab.xaml.cs">
-      <DependentUpon>SpectraTab.xaml</DependentUpon>
+    <Compile Include="Views\SpectraPanel.xaml.cs">
+      <DependentUpon>SpectraPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MeasurePanel.xaml.cs">
       <DependentUpon>MeasurePanel.xaml</DependentUpon>
@@ -126,7 +126,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\SpectraTab.xaml">
+    <Page Include="Views\SpectraPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
