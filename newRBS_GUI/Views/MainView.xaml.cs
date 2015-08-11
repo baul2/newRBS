@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,26 +13,19 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using OxyPlot;
 using GalaSoft.MvvmLight.Ioc;
 
-namespace newRBS.GUI
+namespace newRBS.Views
 {
     /// <summary>
-    /// Interaction logic for Spectra.xaml
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class Spectra : UserControl
+    public partial class MainView : Window
     {
-        public ViewModel.SpectraViewModel spectraViewModel;
-
-        public Spectra()
+        public MainView()
         {
             InitializeComponent();
-            spectraViewModel = SimpleIoc.Default.GetInstance<ViewModel.SpectraViewModel>();
-        }
-
-        public void SpectraFilterTreeChanged(object sender, RoutedPropertyChangedEventArgs<Object> e)
-        {
-            spectraViewModel.spectraFilterClass.selectedFilter = (string) e.NewValue;
         }
     }
 }

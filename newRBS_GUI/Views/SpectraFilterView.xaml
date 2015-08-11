@@ -1,21 +1,29 @@
-﻿<UserControl x:Class="newRBS.GUI.Spectra"
+﻿<UserControl x:Class="newRBS.Views.SpectraFilterView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:oxy="http://oxyplot.org/wpf">
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:newRBS.ViewModels"
+             xmlns:ViewModelUtils="clr-namespace:newRBS.ViewModelUtils"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding spectraFilterViewModel, Source={StaticResource Locator}}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </UserControl.Resources>
     <DockPanel>
-        <Border DockPanel.Dock="Left" DataContext="{Binding spectraFilterClass}" Visibility="{Binding spectraFilterPanelVis, Converter={StaticResource BoolToVis}}">
+        <Border DockPanel.Dock="Left" Visibility="{Binding spectraFilterPanelVis, Converter={StaticResource BoolToVis}}" MinWidth="150">
             <Grid>
                 <StackPanel>
                     <Expander Header="Spectra filter" IsExpanded="True">
                         <StackPanel>
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
-                            <TreeView ItemsSource="{Binding filterList}" SelectedItemChanged="SpectraFilterTreeChanged">
-
+                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" ViewModelUtils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  ViewModelUtils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type local:NodeViewModel}" ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}"></TextBlock>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.Resources>
                             </TreeView>
                         </StackPanel>
                     </Expander>
@@ -40,24 +48,7 @@
                     </Button.LayoutTransform>
                 </Button>
             </StackPanel>
-
         </Border>
-        <Border>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="200"/>
-                </Grid.RowDefinitions>
-                <oxy:PlotView>
-                    <oxy:PlotView.Series>
-                        <oxy:LineSeries ItemsSource="{Binding Points}" Title="{Binding myString}"/>
-                    </oxy:PlotView.Series>
-                </oxy:PlotView>
-
-                <DataGrid x:Name="SpectraDataGrid" Grid.Row="1" ItemsSource="{Binding spectraListClass.spectraList}"/>
-
-                <GridSplitter Height="7" HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Top" ResizeDirection="Rows" ShowsPreview="False" Grid.Row="1"/>
-            </Grid>
-        </Border>
+            
     </DockPanel>
 </UserControl>

@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using Microsoft.Practices.ServiceLocation;
 
-namespace newRBS.ViewModel
+namespace newRBS.ViewModels
 {
     /// <summary>
     /// This class contains static references to all the view models in the
@@ -45,6 +45,9 @@ namespace newRBS.ViewModel
             // The ViewModels
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<SpectraViewModel>();
+            SimpleIoc.Default.Register<SpectraListViewModel>();
+            SimpleIoc.Default.Register<SpectraFilterViewModel>(); 
+            SimpleIoc.Default.Register<NewMeasurementViewModel>();
 
             // The Models
             SimpleIoc.Default.Register<Models.CAEN_x730>();
@@ -52,45 +55,35 @@ namespace newRBS.ViewModel
             SimpleIoc.Default.Register<Models.MeasureSpectra>();
         }
 
-        public Models.CAEN_x730 cAen_X730
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<Models.CAEN_x730>();
-            }
-        }
-
-        public Models.DataSpectra dataSpectra
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<Models.DataSpectra>();
-            }
-        }
-
-        public Models.MeasureSpectra measureSpectra
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>();
-            }
-        }
-
+        // The ViewModels
         public MainViewModel mainViewModel
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<MainViewModel>();
-            }
-        }
+        { get { return ServiceLocator.Current.GetInstance<MainViewModel>(); } }
 
         public SpectraViewModel spectraViewModel
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<SpectraViewModel>();
-            }
-        }
+        { get { return ServiceLocator.Current.GetInstance<SpectraViewModel>(); } }
+
+        public SpectraListViewModel spectraListViewModel
+        { get { return ServiceLocator.Current.GetInstance<SpectraListViewModel>(); } }
+
+        public SpectraFilterViewModel spectraFilterViewModel
+        { get { return ServiceLocator.Current.GetInstance<SpectraFilterViewModel>(); } }
+
+        public NewMeasurementViewModel newMeasurementViewModel
+        { get { return ServiceLocator.Current.GetInstance<NewMeasurementViewModel>(); } }
+
+        // The Models
+        public Models.CAEN_x730 cAen_X730
+        {get{return ServiceLocator.Current.GetInstance<Models.CAEN_x730>();}}
+
+        public Models.DataSpectra dataSpectra
+        {get{return ServiceLocator.Current.GetInstance<Models.DataSpectra>();}}
+
+        public Models.MeasureSpectra measureSpectra
+        {get{return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>();}}
+
+
+
+
 
         public static void Cleanup()
         {

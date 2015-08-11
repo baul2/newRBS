@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace newRBS.Views
 {
     /// <summary>
-    /// Interaction logic for MeasurePanel.xaml
+    /// Interaction logic for SpectraListView.xaml
     /// </summary>
-    public partial class MeasurePanel : UserControl
+    public partial class SpectraListView : UserControl
     {
-        public MeasurePanel()
+        public SpectraListView()
         {
             InitializeComponent();
         }
