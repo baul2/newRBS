@@ -12,8 +12,8 @@ namespace newRBS.Models
 
     public class SpectrumArgs : EventArgs
     {
-        public readonly int ID;
-        public SpectrumArgs(int id) { ID = id; }
+        public readonly Spectrum spec;
+        public SpectrumArgs(Spectrum Spec) { spec = Spec; }
     }
 
     public class SpectraDB : DataContext
@@ -41,19 +41,54 @@ namespace newRBS.Models
 
         }
 
-        public List<string> GetAllChannels()
+        public List<int> GetAllChannels()
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
             var channels = from spec in spectraDB.Spectra select spec.Channel;
 
-            Console.WriteLine(channels.GetType());
-
             List<int> noDupes = channels.Distinct().ToList();
 
-            return noDupes.ConvertAll<string>(x => x.ToString()); ;
+            return noDupes;
         }
+
+        public List<int> GetAllYears()
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            var years = from spec in spectraDB.Spectra select spec.StartTime.Year;
+
+            List<int> noDupes = years.Distinct().ToList();
+
+            return noDupes;
+        }
+
+        public List<int> GetAllMonths( int year)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            var months = from spec in spectraDB.Spectra where spec.StartTime.Year == year select spec.StartTime.Month;
+
+            List<int> noDupes = months.Distinct().ToList();
+
+            return noDupes;
+        }
+
+        public List<int> GetAllDays(int year, int month)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+            spectraDB.Log = Console.Out;
+
+            var days = from spec in spectraDB.Spectra where spec.StartTime.Year == year && spec.StartTime.Month == month select spec.StartTime.Day;
+
+            List<int> noDupes = days.Distinct().ToList();
+
+            return noDupes;
+        }
+
 
         public List<Spectrum> GetSpectra_All()
         {
@@ -67,39 +102,45 @@ namespace newRBS.Models
             return Spec.ToList();
         }
 
-        public List<Spectrum> GetSpectra_Date(string date)
+        public List<Spectrum> GetSpectra_Date(ViewModels.NodeViewModel selectedFilter)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
             IQueryable<Spectrum> Spec = null;
 
-            switch (date)
+            switch (selectedFilter.SubType)
             {
                 case "Today":
                     { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date == DateTime.Today select spec; break; }
-                case "This Week":
+                case "ThisWeek":
                     {
                         int dayofweek = (int)DateTime.Today.DayOfWeek;
                         Console.WriteLine(dayofweek);
                         Spec = from spec in spectraDB.Spectra where (DateTime.Today.DayOfYear - spec.StartTime.DayOfYear) < dayofweek select spec;
                         break;
                     }
-                case "This Month":
+                case "ThisMonth":
                     { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Month == DateTime.Today.Month select spec; break; }
-                case "This Year":
+                case "ThisYear":
                     { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Year == DateTime.Today.Year select spec; break; }
+                case "Year":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Year == selectedFilter.year select spec; break; }
+                case "Month":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month select spec; break; }
+                case "Day":
+                    { Spec = from spec in spectraDB.Spectra where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month && spec.StartTime.Date.Day == selectedFilter.day select spec; break; }
             }
 
             return Spec.ToList();
 
         }
-        public List<Spectrum> GetSpectra_Channel(int channel)
+        public List<Spectrum> GetSpectra_Channel(ViewModels.NodeViewModel selectedFilter)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.Channel == channel select spec;
+            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.Channel == selectedFilter.channel select spec;
 
             return Spec.ToList();
         }
@@ -119,7 +160,7 @@ namespace newRBS.Models
             spectraDB.Spectra.InsertOnSubmit(newSpectrum);
             spectraDB.SubmitChanges();
 
-            SpectrumArgs e1 = new SpectrumArgs(newSpectrum.SpectrumID);
+            SpectrumArgs e1 = new SpectrumArgs(newSpectrum);
             if (EventSpectrumNew != null) { EventSpectrumNew(this, e1); } else { Console.WriteLine("EventSpectrumNew null"); }
 
             return newSpectrum.SpectrumID;
@@ -138,12 +179,13 @@ namespace newRBS.Models
             if (!delSpectra.Any())
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't remove Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
 
-            foreach (var delSpectrum in delSpectra)
-                spectraDB.Spectra.DeleteOnSubmit(delSpectrum);
+            Spectrum delSpectrum = delSpectra.First();
+
+            spectraDB.Spectra.DeleteOnSubmit(delSpectra.First());
 
             spectraDB.SubmitChanges();
 
-            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
+            SpectrumArgs e1 = new SpectrumArgs(delSpectrum);
             if (EventSpectrumRemove != null) EventSpectrumRemove(this, e1);
         }
 
@@ -213,12 +255,13 @@ namespace newRBS.Models
             if (spectrumY.Length != 16384)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
-            foreach (var modSpectrum in modSpectra)
-                modSpectrum.SpectrumY = spectrumY;
+            Spectrum modSpectrum = modSpectra.First();
+
+            modSpectra.First().SpectrumY = spectrumY;
 
             spectraDB.SubmitChanges();
 
-            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
+            SpectrumArgs e1 = new SpectrumArgs(modSpectrum);
             if (EventSpectrumY != null) EventSpectrumY(this, e1);
 
             UpdateSpectrumInfos(spectrumID);
@@ -237,61 +280,57 @@ namespace newRBS.Models
             if (stopSpectra.Count() == 0)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't stop Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
 
-            foreach (Spectrum stopSpectrum in stopSpectra)
-            {
-                stopSpectrum.StopTime = DateTime.Now;
-                stopSpectrum.Runs = false;
-                Console.WriteLine("NumElements: {0}", stopSpectrum.SpectrumY.Length);
-            }
+            Spectrum stopSpectrum = stopSpectra.First();
+
+            stopSpectra.First().StopTime = DateTime.Now;
+            stopSpectra.First().Runs = false;
 
             spectraDB.SubmitChanges();
 
-            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
+            SpectrumArgs e1 = new SpectrumArgs(stopSpectrum);
             if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);
         }
 
         /// <summary>
-        /// Function that updates the metadata of the spectrum (duration, progress)
+        /// Function that updates the metadata of the spectrum (duration, progress, ...)
         /// </summary>
         /// <param name="ID">ID of the spectrum to be updated</param>
         public void UpdateSpectrumInfos(int spectrumID)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            SpectrumArgs e1 = new SpectrumArgs(spectrumID);
-
             var updateSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
 
             if (!updateSpectra.Any())
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
 
-            foreach (var updateSpectrum in updateSpectra)
+            SpectrumArgs e1 = new SpectrumArgs(updateSpectra.First());
+
+            updateSpectra.First().Duration = DateTime.Now - updateSpectra.First().StartTime;
+
+            switch (updateSpectra.First().StopType)
             {
-                updateSpectrum.Duration = DateTime.Now - updateSpectrum.StartTime;
-
-                switch (updateSpectrum.StopType)
-                {
-                    case "Manual": updateSpectrum.Progress = 0; break;
-                    case "Counts":
-                        int counts = 0;
-                        for (int i = 0; i < updateSpectrum.SpectrumY.Length; i++)
-                        { counts += updateSpectrum.SpectrumY[i]; }
-                        updateSpectrum.Progress = counts / updateSpectrum.StopValue;
-                        break;
-                    case "Time": updateSpectrum.Progress = updateSpectrum.Duration.TotalMinutes / updateSpectrum.StopValue; break;
-                        // TODO: Chopper
-                }
-
-                if (updateSpectrum.Progress >= 1)
-                {
-                    updateSpectrum.Progress = 1;
-                    if (EventSpectrumFinished != null) EventSpectrumFinished(this, e1);
-                }
-
-                if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);
+                case "Manual": updateSpectra.First().Progress = 0; break;
+                case "Counts":
+                    int counts = 0;
+                    for (int i = 0; i < updateSpectra.First().SpectrumY.Length; i++)
+                    { counts += updateSpectra.First().SpectrumY[i]; }
+                    updateSpectra.First().Progress = counts / updateSpectra.First().StopValue;
+                    break;
+                case "Time":
+                    updateSpectra.First().Progress = updateSpectra.First().Duration.TotalMinutes / updateSpectra.First().StopValue; break;
+                    // TODO: Chopper
             }
 
             spectraDB.SubmitChanges();
+
+            if (updateSpectra.First().Progress >= 1)
+            {
+                updateSpectra.First().Progress = 1;
+                if (EventSpectrumFinished != null) EventSpectrumFinished(this, e1);
+            }
+
+            if (EventSpectrumInfos != null) EventSpectrumInfos(this, e1);         
         }
     }
 }

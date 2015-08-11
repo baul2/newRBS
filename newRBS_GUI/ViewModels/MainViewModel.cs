@@ -1,6 +1,24 @@
+using System;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Threading;
+using System.Windows.Controls;
+using System.Threading;
+using System.Runtime.CompilerServices;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Ioc;
+using GalaSoft.MvvmLight.Command;
+using Microsoft.Practices.ServiceLocation;
+using newRBS.ViewModelUtils;
 
-namespace newRBS.ViewModel
+namespace newRBS.ViewModels
 {
     /// <summary>
     /// This class contains properties that the main View can data bind to.
@@ -16,19 +34,30 @@ namespace newRBS.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
+        public ICommand NewMeasurementCommand { get; set; }
+        public ICommand StopMeasurementCommand { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
         public MainViewModel()
         {
-            ////if (IsInDesignMode)
-            ////{
-            ////    // Code runs in Blend --> create design time data.
-            ////}
-            ////else
-            ////{
-            ////    // Code runs "for real"
-            ////}
+            NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
+            StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
+        }
+
+        public void _NewMeasurementCommand()
+        {
+            Console.WriteLine("_NewMeasurementCommand");
+
+            Views.NewMeasurementView newMeasurementView = new Views.NewMeasurementView();
+            
+            newMeasurementView.ShowDialog();
+        }
+
+        public void _StopMeasurementCommand()
+        {
+            Console.WriteLine("_StopMeasurementCommand");
         }
     }
 }

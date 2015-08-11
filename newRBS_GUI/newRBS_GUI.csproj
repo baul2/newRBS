@@ -103,8 +103,17 @@
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
-    <Compile Include="Views\SpectraPanel.xaml.cs">
-      <DependentUpon>SpectraPanel.xaml</DependentUpon>
+    <Compile Include="ViewModels\SpectraListViewModel.cs" />
+    <Compile Include="ViewModels\SpectraFilterViewModel.cs" />
+    <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
+    <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
+    <Compile Include="ViewModelUtils\CheckedListItem.cs" />
+    <Compile Include="ViewModelUtils\TreeViewHelper.cs" />
+    <Compile Include="Views\SpectraFilterView.xaml.cs">
+      <DependentUpon>SpectraFilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SpectraListView.xaml.cs">
+      <DependentUpon>SpectraListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MeasurePanel.xaml.cs">
       <DependentUpon>MeasurePanel.xaml</DependentUpon>
@@ -114,7 +123,13 @@
     <Compile Include="Models\MeasureSpectra.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
-    <Page Include="MainWindow.xaml">
+    <Compile Include="Views\SpectraPlotView.xaml.cs">
+      <DependentUpon>SpectraPlotView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewMeasurementView.xaml.cs">
+      <DependentUpon>NewMeasurementView.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -122,15 +137,27 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="Views\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\SpectraPanel.xaml">
+    <Page Include="Views\SpectraFilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SpectraListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MeasurePanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SpectraPlotView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\NewMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

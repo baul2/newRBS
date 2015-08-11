@@ -10,17 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace newRBS.Views
 {
     /// <summary>
-    /// Interaction logic for MeasurePanel.xaml
+    /// Interaction logic for StartMeasurementView.xaml
     /// </summary>
-    public partial class MeasurePanel : UserControl
+    public partial class NewMeasurementView : Window
     {
-        public MeasurePanel()
+        public NewMeasurementView()
         {
             InitializeComponent();
         }
