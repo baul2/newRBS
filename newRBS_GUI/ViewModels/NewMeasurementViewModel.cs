@@ -20,9 +20,8 @@ using newRBS.ViewModelUtils;
 
 namespace newRBS.ViewModels
 {
-    public class NewMeasurementViewModel
+    public class NewMeasurementViewModel : ViewModelBase
     {
-        private Models.CAEN_x730 cAEN_x730;
         private Models.DataSpectra dataSpectra;
         private Models.MeasureSpectra measureSpectra;
 
@@ -31,9 +30,12 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<CheckedListItem<int>> Channels { get; set; }
 
+        private bool? _DialogResult;
+        public bool? DialogResult
+        { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
+
         public NewMeasurementViewModel()
         {
-            cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
@@ -52,7 +54,6 @@ namespace newRBS.ViewModels
 
         private void _StartMeasurementCommand()
         {
-            Console.WriteLine("Measurement will be starte");
             List<int> selectedChannels = new List<int>();
             List<CheckedListItem<int>> c = Channels.Where(i => i.IsChecked == true).ToList();
             for (int i = 0; i < c.Count; i++)
@@ -60,12 +61,16 @@ namespace newRBS.ViewModels
 
             List<int> newIDs = measureSpectra.StartMeasurements(selectedChannels);
 
+            DialogResult = false;
+            _DialogResult = null;
+
             //spectrumList = dataSpectra.GetObservableCollection();
         }
 
         private void _CancelCommand()
         {
-
+            DialogResult = false;
+            _DialogResult = null;
         }
     }
 }

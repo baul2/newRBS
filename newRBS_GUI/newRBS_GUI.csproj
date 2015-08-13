@@ -103,12 +103,18 @@
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
+    <Compile Include="ViewModels\ImportSpectraViewModel.cs" />
     <Compile Include="ViewModels\SpectraListViewModel.cs" />
     <Compile Include="ViewModels\SpectraFilterViewModel.cs" />
     <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
+    <Compile Include="ViewModels\SpectraPlotViewModel.cs" />
     <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModelUtils\CheckedListItem.cs" />
+    <Compile Include="ViewModelUtils\DialogCloser.cs" />
     <Compile Include="ViewModelUtils\TreeViewHelper.cs" />
+    <Compile Include="Views\ImportSpectraView.xaml.cs">
+      <DependentUpon>ImportSpectraView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SpectraFilterView.xaml.cs">
       <DependentUpon>SpectraFilterView.xaml</DependentUpon>
     </Compile>
@@ -118,7 +124,6 @@
     <Compile Include="Views\MeasurePanel.xaml.cs">
       <DependentUpon>MeasurePanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\SpectraViewModel.cs" />
     <Compile Include="Models\DataSpectra.cs" />
     <Compile Include="Models\MeasureSpectra.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -129,6 +134,10 @@
     <Compile Include="Views\NewMeasurementView.xaml.cs">
       <DependentUpon>NewMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\ImportSpectraView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -192,6 +201,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

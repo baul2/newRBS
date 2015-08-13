@@ -15,7 +15,7 @@ namespace newRBS.Models
     public class MeasureSpectra
     {
         private CAEN_x730 myCAEN_x730;
-        private DataSpectra myDataSpectra;
+        private DataSpectra dataSpectra;
 
         /// <summary>
         /// Variable that holds the selected  channels.
@@ -25,9 +25,9 @@ namespace newRBS.Models
         public EnergyCalibration[] energyCalibration = new EnergyCalibration[8] { new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 } };
         public Stop stop = new Stop { type = "Manual", value = 0 };
 
-        private Timer[] spectraMeasurementTimer = new Timer[8] { new Timer(500), new Timer(500), new Timer(500), new Timer(500), new Timer(500), new Timer(500), new Timer(500), new Timer(500) };
+        private Timer[] spectraMeasurementTimer = new Timer[8];
 
-        private Dictionary<int, int> activeChannels = new Dictionary<int, int>();
+        private Dictionary<int, int> activeChannels = new Dictionary<int, int>(); // <Channel,ID>
 
         /// <summary>
         /// Initializes the class and stores the handled instances of <see cref="CAEN_x730"/> and <see cref="DataSpectra"/>
@@ -37,7 +37,7 @@ namespace newRBS.Models
         public MeasureSpectra(CAEN_x730 cAEN_x730, DataSpectra dataSpectra)
         {
             myCAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
-            myDataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            this.dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
         }
 
 
@@ -52,10 +52,11 @@ namespace newRBS.Models
             foreach (int channel in selectedChannels)
             {
                 myCAEN_x730.StartAcquisition(channel);
-                int ID = myDataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], "Manual", 0, true);
+                int ID = dataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], "Manual", 0, true);
                 IDs.Add(ID);
                 activeChannels.Add(channel, ID);
 
+                spectraMeasurementTimer[channel] = new Timer(500);
                 spectraMeasurementTimer[channel].Elapsed += delegate { SpectraMeasurementWorker(ID, channel); };
                 spectraMeasurementTimer[channel].Start();
             }
@@ -65,21 +66,19 @@ namespace newRBS.Models
         /// <summary>
         /// Stops the measurement for the selected channels (<see cref="selectedChannels"/>).
         /// </summary>
-        public void StopMeasurements(List<int> selectedChannels)
+        public void StopMeasurements()
         {
-            foreach (int channel in selectedChannels)
+            foreach (int channel in activeChannels.Keys.ToList())
             {
-                if (!activeChannels.ContainsKey(channel))
-                    continue;
-
+                int ID = activeChannels[channel];
                 myCAEN_x730.StopAcquisition(channel);
 
                 spectraMeasurementTimer[channel].Stop();
+                Console.WriteLine("ID to stop: {0}", ID);
 
-                myDataSpectra.StopSpectrum(activeChannels[channel]);
+                dataSpectra.StopSpectrum(ID);
 
                 activeChannels.Remove(channel);
-
             }
         }
 
@@ -91,7 +90,8 @@ namespace newRBS.Models
         private void SpectraMeasurementWorker(int ID, int channel)
         {
             int[] newSpectrumY = myCAEN_x730.GetHistogram(channel);
-            myDataSpectra.SetSpectrumY(ID, newSpectrumY);
+            Console.WriteLine("MeasurementWorker ID = {0}; Counts = {1} ", ID, newSpectrumY.Sum());
+            dataSpectra.UpdateSpectrum(ID, newSpectrumY);
         }
     }
 }

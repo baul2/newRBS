@@ -6,10 +6,10 @@
              xmlns:local="clr-namespace:newRBS.Views"
              xmlns:oxy="http://oxyplot.org/wpf"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <oxy:PlotView>
-        <oxy:PlotView.Series>
-            <oxy:LineSeries ItemsSource="{Binding Points}" Title="{Binding myString}"/>
-        </oxy:PlotView.Series>
-    </oxy:PlotView>
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding spectraPlotViewModel, Source={StaticResource Locator}}">
+    <Grid>
+        <oxy:Plot x:Name="Plot1" Title="A Graph" Model="{Binding plotModel}" Margin="10" Grid.Row="1">
+        </oxy:Plot>
+    </Grid>
 </UserControl>

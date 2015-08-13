@@ -36,6 +36,7 @@ namespace newRBS.ViewModels
     {
         public ICommand NewMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
+        public ICommand ImportMeasurementCommand { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -44,6 +45,7 @@ namespace newRBS.ViewModels
         {
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
+            ImportMeasurementCommand = new RelayCommand(() => _ImportMeasurementCommand(), () => true);
         }
 
         public void _NewMeasurementCommand()
@@ -58,6 +60,19 @@ namespace newRBS.ViewModels
         public void _StopMeasurementCommand()
         {
             Console.WriteLine("_StopMeasurementCommand");
+
+            Models.MeasureSpectra measureSpectra;
+            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            measureSpectra.StopMeasurements();
+        }
+
+        public void _ImportMeasurementCommand()
+        {
+            Console.WriteLine("_ImportMeasurementCommand");
+
+            Views.ImportSpectra importSpectra = new Views.ImportSpectra();
+
+            importSpectra.ShowDialog();
         }
     }
 }
