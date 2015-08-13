@@ -20,7 +20,7 @@
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
                             <TreeView ItemsSource="{Binding Path=filterTree.Items}" ViewModelUtils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  ViewModelUtils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
                                 <TreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type local:NodeViewModel}" ItemsSource="{Binding Children}">
+                                    <HierarchicalDataTemplate DataType="{x:Type local:Filter}" ItemsSource="{Binding Children}">
                                         <TextBlock Text="{Binding Name}"></TextBlock>
                                     </HierarchicalDataTemplate>
                                 </TreeView.Resources>

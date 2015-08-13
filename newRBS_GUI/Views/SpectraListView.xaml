@@ -5,7 +5,59 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300" d:DesignWidth="800"
              DataContext="{Binding spectraListViewModel, Source={StaticResource Locator}}">
-    <DataGrid x:Name="SpectraDataGrid" ItemsSource="{Binding spectraList}"/>
+    <DataGrid 
+        ItemsSource="{Binding viewSource.View}" 
+        AutoGenerateColumns="False"
+        CanUserAddRows="False"
+        AlternationCount="2"
+        HorizontalGridLinesBrush ="WhiteSmoke"
+        VerticalGridLinesBrush="LightGray">
+        <DataGrid.RowStyle>
+            <Style TargetType="{x:Type DataGridRow}">
+                <Style.Triggers>
+                    <Trigger Property="AlternationIndex" Value="0">
+                        <Setter Property="Background" Value="White" />
+                    </Trigger>
+                    <Trigger Property="AlternationIndex" Value="1">
+                        <Setter Property="Background" Value="WhiteSmoke" />
+                    </Trigger>
+                    <DataTrigger Binding="{Binding Path=Selectable}" Value="False">
+                        <DataTrigger.Setters>
+                            <Setter Property="Background" Value="WhiteSmoke" />
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.RowStyle>
+        <DataGrid.Columns>
+            <DataGridCheckBoxColumn 
+                Header="Selected"
+                Binding="{Binding selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                IsReadOnly="False"/>
+            <DataGridTextColumn 
+                Header="SpectrumID" 
+                Binding="{Binding spectrum.SpectrumID}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="Channel" 
+                Binding="{Binding spectrum.Channel}"/>
+            <DataGridCheckBoxColumn 
+                Header="Runs"
+                Binding="{Binding spectrum.Runs}"/>
+            <DataGridTextColumn 
+                Header="StartTime" 
+                Binding="{Binding spectrum.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+            <DataGridTextColumn 
+                Header="Duration" 
+                Binding="{Binding spectrum.Duration, StringFormat=hh\\:mm\\:ss}"/>
+            <DataGridTextColumn 
+                Header="Progress" 
+                Binding="{Binding spectrum.Progress, StringFormat={}{0:P0}}"/>
+            <DataGridTextColumn 
+                Header="StopTime" 
+                Binding="{Binding spectrum.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+        </DataGrid.Columns>
+    </DataGrid>
 </UserControl>

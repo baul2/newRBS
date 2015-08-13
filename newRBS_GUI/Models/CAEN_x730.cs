@@ -321,10 +321,5 @@ namespace newRBS.Models
                 default: return "Unknown";
             }
         }
-
-        ~ CAEN_x730()
-        {
-            Close();
-        }
     }
 }

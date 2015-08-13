@@ -44,10 +44,11 @@ namespace newRBS.ViewModels
 
             // The ViewModels
             SimpleIoc.Default.Register<MainViewModel>();
-            SimpleIoc.Default.Register<SpectraViewModel>();
-            SimpleIoc.Default.Register<SpectraListViewModel>();
-            SimpleIoc.Default.Register<SpectraFilterViewModel>(); 
             SimpleIoc.Default.Register<NewMeasurementViewModel>();
+            SimpleIoc.Default.Register<SpectraFilterViewModel>();
+            SimpleIoc.Default.Register<SpectraListViewModel>();
+            SimpleIoc.Default.Register<SpectraPlotViewModel>();
+            SimpleIoc.Default.Register<ImportSpectraViewModel>();
 
             // The Models
             SimpleIoc.Default.Register<Models.CAEN_x730>();
@@ -59,27 +60,31 @@ namespace newRBS.ViewModels
         public MainViewModel mainViewModel
         { get { return ServiceLocator.Current.GetInstance<MainViewModel>(); } }
 
-        public SpectraViewModel spectraViewModel
-        { get { return ServiceLocator.Current.GetInstance<SpectraViewModel>(); } }
-
-        public SpectraListViewModel spectraListViewModel
-        { get { return ServiceLocator.Current.GetInstance<SpectraListViewModel>(); } }
+        public NewMeasurementViewModel newMeasurementViewModel
+        { get { return ServiceLocator.Current.GetInstance<NewMeasurementViewModel>(); } }
 
         public SpectraFilterViewModel spectraFilterViewModel
         { get { return ServiceLocator.Current.GetInstance<SpectraFilterViewModel>(); } }
 
-        public NewMeasurementViewModel newMeasurementViewModel
-        { get { return ServiceLocator.Current.GetInstance<NewMeasurementViewModel>(); } }
+        public SpectraListViewModel spectraListViewModel
+        { get { return ServiceLocator.Current.GetInstance<SpectraListViewModel>(); } }
+
+        public SpectraPlotViewModel spectraPlotViewModel
+        { get { return ServiceLocator.Current.GetInstance<SpectraPlotViewModel>(); } }
+
+        public ImportSpectraViewModel importSpectraViewModel
+        { get { return ServiceLocator.Current.GetInstance<ImportSpectraViewModel>(); } }
+        
 
         // The Models
         public Models.CAEN_x730 cAen_X730
-        {get{return ServiceLocator.Current.GetInstance<Models.CAEN_x730>();}}
+        { get { return ServiceLocator.Current.GetInstance<Models.CAEN_x730>(); } }
 
         public Models.DataSpectra dataSpectra
-        {get{return ServiceLocator.Current.GetInstance<Models.DataSpectra>();}}
+        { get { return ServiceLocator.Current.GetInstance<Models.DataSpectra>(); } }
 
         public Models.MeasureSpectra measureSpectra
-        {get{return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>();}}
+        { get { return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>(); } }
 
 
 
