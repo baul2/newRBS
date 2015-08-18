@@ -16,8 +16,8 @@ namespace newRBS.Models
         CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
         int waveformAutoTrigger = 1;
         CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
-        InputRange[] inputRange = new InputRange[8] { InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp, InputRange.CAENDPP_InputRange_0_5Vpp };
-        List<int> activeChannels = new List<int>();
+        int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
+        public List<int> activeChannels = new List<int>();
 
         TraceSource trace = new TraceSource("CAEN_x730");
 
@@ -29,7 +29,7 @@ namespace newRBS.Models
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_SetBoardConfiguration(int handle, int bID, int acqMode, CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int CAENDPP_SetInputRange(int handle, int channel, InputRange inputRange);
+        private static extern int CAENDPP_SetInputRange(int handle, int channel, int inputRange);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_GetBoardConfiguration(int handle, int bID, ref int acqMode, ref CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
@@ -85,32 +85,57 @@ namespace newRBS.Models
             dgtzParams = new CAENDPP_DgtzParams_t();
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
-            for (int channel = 0; channel < 8; channel++) inputRange[channel] = InputRange.CAENDPP_InputRange_0_5Vpp;
+            for (int channel = 0; channel < 8; channel++) inputRange[channel] = 10; // 0.5Vpp
 
             SendConfig();
         }
 
         public void SetChannelConfig(int channel, ChannelParams channelParams)
         {
-            if (channelParams.inputRange != 0) inputRange[channel] = channelParams.inputRange;
-
-            //if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
-            //if (channelParams.TrapezoidFlatTopTime != null) dgtzParams.DPPParams.m[channel] = (int)channelParams.TrapezoidFlatTopTime;
-            //if (channelParams.TrapezoidRiseTime != null) dgtzParams.DPPParams.k[channel] = (int)channelParams.TrapezoidRiseTime;
-            //if (channelParams.TrapezoidPeakingDelay != null) dgtzParams.DPPParams.ftd[channel] = (int)channelParams.TrapezoidPeakingDelay;
-            //if (channelParams.TriggerFilterSmoothingFactor != null) dgtzParams.DPPParams.a[channel] = (int)channelParams.TriggerFilterSmoothingFactor;
-            //if (channelParams.InputSignalRiseTime != null) dgtzParams.DPPParams.b[channel] = (int)channelParams.InputSignalRiseTime;
-            //if (channelParams.TriggerThreshold != null) dgtzParams.DPPParams.thr[channel] = (int)channelParams.TriggerThreshold;
-            //if (channelParams.NumSamplesBaselineMean != null) dgtzParams.DPPParams.nsbl[channel] = (int)channelParams.NumSamplesBaselineMean;
-            //if (channelParams.NumSamplesPeakMean != null) dgtzParams.DPPParams.nspk[channel] = (int)channelParams.NumSamplesPeakMean;
-            //if (channelParams.PeakHoldOff != null) dgtzParams.DPPParams.pkho[channel] = (int)channelParams.PeakHoldOff;
-            //if (channelParams.BaseLineHoldOff != null) dgtzParams.DPPParams.blho[channel] = (int)channelParams.BaseLineHoldOff;
-            //if (channelParams.TriggerHoldOff != null) dgtzParams.DPPParams.trgho[channel] = (int)channelParams.TriggerHoldOff;
-            //if (channelParams.DigitalGain != null) dgtzParams.DPPParams.dgain[channel] = (int)channelParams.DigitalGain;
-            //if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
-            //if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
+            if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
+            if (channelParams.InputRange != 0) inputRange[channel] = (int)channelParams.InputRange;
+            if (channelParams.InputSignalDecayTime != null) dgtzParams.DPPParams.M[channel] = (int)channelParams.InputSignalDecayTime;
+            if (channelParams.TrapezoidFlatTopTime != null) dgtzParams.DPPParams.m[channel] = (int)channelParams.TrapezoidFlatTopTime;
+            if (channelParams.TrapezoidRiseTime != null) dgtzParams.DPPParams.k[channel] = (int)channelParams.TrapezoidRiseTime;
+            if (channelParams.TrapezoidPeakingDelay != null) dgtzParams.DPPParams.ftd[channel] = (int)channelParams.TrapezoidPeakingDelay;
+            if (channelParams.TriggerFilterSmoothingFactor != null) dgtzParams.DPPParams.a[channel] = (int)channelParams.TriggerFilterSmoothingFactor;
+            if (channelParams.InputSignalRiseTime != null) dgtzParams.DPPParams.b[channel] = (int)channelParams.InputSignalRiseTime;
+            if (channelParams.TriggerThreshold != null) dgtzParams.DPPParams.thr[channel] = (int)channelParams.TriggerThreshold;
+            if (channelParams.NumSamplesBaselineMean != null) dgtzParams.DPPParams.nsbl[channel] = (int)channelParams.NumSamplesBaselineMean;
+            if (channelParams.NumSamplesPeakMean != null) dgtzParams.DPPParams.nspk[channel] = (int)channelParams.NumSamplesPeakMean;
+            if (channelParams.PeakHoldOff != null) dgtzParams.DPPParams.pkho[channel] = (int)channelParams.PeakHoldOff;
+            if (channelParams.BaseLineHoldOff != null) dgtzParams.DPPParams.blho[channel] = (int)channelParams.BaseLineHoldOff;
+            if (channelParams.TriggerHoldOff != null) dgtzParams.DPPParams.trgho[channel] = (int)channelParams.TriggerHoldOff;
+            if (channelParams.DigitalGain != null) dgtzParams.DPPParams.dgain[channel] = (int)channelParams.DigitalGain;
+            if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
+            if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
 
             SendConfig();
+        }
+
+        public ChannelParams GetChannelConfig(int channel)
+        {
+            ChannelParams channelParams = new ChannelParams();
+
+            channelParams.DCoffset = dgtzParams.DCoffset[channel];
+            channelParams.InputRange = inputRange[channel];
+            channelParams.InputSignalDecayTime = dgtzParams.DPPParams.M[channel];
+            channelParams.TrapezoidFlatTopTime = dgtzParams.DPPParams.m[channel];
+            channelParams.TrapezoidRiseTime = dgtzParams.DPPParams.k[channel];
+            channelParams.TrapezoidPeakingDelay = dgtzParams.DPPParams.ftd[channel];
+            channelParams.TriggerFilterSmoothingFactor = dgtzParams.DPPParams.a[channel];
+            channelParams.InputSignalRiseTime = dgtzParams.DPPParams.b[channel];
+            channelParams.TriggerThreshold = dgtzParams.DPPParams.thr[channel];
+            channelParams.NumSamplesBaselineMean = dgtzParams.DPPParams.nsbl[channel];
+            channelParams.NumSamplesPeakMean = dgtzParams.DPPParams.nspk[channel];
+            channelParams.PeakHoldOff = dgtzParams.DPPParams.pkho[channel];
+            channelParams.BaseLineHoldOff = dgtzParams.DPPParams.blho[channel];
+            channelParams.TriggerHoldOff = dgtzParams.DPPParams.trgho[channel];
+            channelParams.DigitalGain = dgtzParams.DPPParams.dgain[channel];
+            channelParams.EnergyNormalizationFactor = dgtzParams.DPPParams.enf[channel];
+            channelParams.InputSignalDecimation = dgtzParams.DPPParams.decimation[channel];
+
+            return channelParams;
         }
 
         /// <summary>
@@ -155,8 +180,8 @@ namespace newRBS.Models
             ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
             for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
 
-            if (ret1 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret1, GetErrorText(ret1)); }
-            if (ret2 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret2, GetErrorText(ret2)); }
+            if (ret1 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error {0}: {1}", ret1, GetErrorText(ret1)); }
+            if (ret2 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error {0}: {1}", ret2, GetErrorText(ret2)); }
             if (ret1 == 0 & ret2 == 0) { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
         }
 
@@ -208,27 +233,24 @@ namespace newRBS.Models
         {
             Waveform waveform = new Waveform();
 
-            Int16[] AT1 = new Int16[dgtzParams.WFParams.recordLength];
-            Int16[] AT2 = new Int16[dgtzParams.WFParams.recordLength];
-            byte[] DT1 = new byte[dgtzParams.WFParams.recordLength];
-            byte[] DT2 = new byte[dgtzParams.WFParams.recordLength];
-            UInt32 numSample = 0;
-            double lenSample = 0;
+            waveform.AT1 = new Int16[dgtzParams.WFParams.recordLength];
+            waveform.AT2 = new Int16[dgtzParams.WFParams.recordLength];
+            waveform.DT1 = new byte[dgtzParams.WFParams.recordLength];
+            waveform.DT2 = new byte[dgtzParams.WFParams.recordLength];
+            waveform.NumSamples = 0;
+            waveform.LenSample = 0;
 
             for (int i = 0; i < 100; i++)
             {
-                int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, AT1, AT2, DT1, DT2, ref numSample, ref lenSample);
+                int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
                 if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return waveform; }
                 else
                 {
-                    if (numSample == 0) { continue; }
-                    trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
-                    waveform.AT1 = AT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    waveform.AT2 = AT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    waveform.DT1 = DT1.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    waveform.DT2 = DT2.ToString().Select(o => Convert.ToInt32(o)).ToArray();
-                    waveform.numSamples = (int)numSample;
-                    return waveform;
+                    if (waveform.NumSamples > 0)
+                    {
+                        trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
+                        return waveform;
+                    }
                 }
             }
             trace.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel {0}", channel);

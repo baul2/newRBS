@@ -17,6 +17,9 @@
                 <Button Command="{Binding ImportMeasurementCommand}" Content="Import Measurement" />
                 <Button Command="{Binding ExportMeasurementCommand}" Content="Export Measurement" />
             </ToolBar>
+            <ToolBar>
+                <Button Command="{Binding ChannelConfigurationCommand}" Content="Configure Channels" />
+            </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">
             <local:SpectraFilterView/>

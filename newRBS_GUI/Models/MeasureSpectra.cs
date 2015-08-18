@@ -14,7 +14,7 @@ namespace newRBS.Models
     /// </summary>
     public class MeasureSpectra
     {
-        private CAEN_x730 myCAEN_x730;
+        private CAEN_x730 cAEN_x730;
         private DataSpectra dataSpectra;
 
         /// <summary>
@@ -34,12 +34,19 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="cAEN_x730">Instance of the class responsible for the CAEN N6730</param>
         /// <param name="dataSpectra">Instance of the class responsible for storing the measured spectra</param>
-        public MeasureSpectra(CAEN_x730 cAEN_x730, DataSpectra dataSpectra)
+        public MeasureSpectra()
         {
-            myCAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
-            this.dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
         }
 
+        public bool IsAcquiring()
+        {
+            if (cAEN_x730.activeChannels.Count > 0)
+                return true;
+            else
+                return false;
+        }
 
         /// <summary>
         /// Starts the measurement for the selected channels (<see cref="selectedChannels"/>).
@@ -48,10 +55,13 @@ namespace newRBS.Models
         public List<int> StartMeasurements(List<int> selectedChannels)
         {
             List<int> IDs = new List<int>();
-            Console.WriteLine("Measurement will be starte");
+            Console.WriteLine("Measurement will start");
+
+            cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Waveform);
+
             foreach (int channel in selectedChannels)
             {
-                myCAEN_x730.StartAcquisition(channel);
+                cAEN_x730.StartAcquisition(channel);
                 int ID = dataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], "Manual", 0, true);
                 IDs.Add(ID);
                 activeChannels.Add(channel, ID);
@@ -71,7 +81,7 @@ namespace newRBS.Models
             foreach (int channel in activeChannels.Keys.ToList())
             {
                 int ID = activeChannels[channel];
-                myCAEN_x730.StopAcquisition(channel);
+                cAEN_x730.StopAcquisition(channel);
 
                 spectraMeasurementTimer[channel].Stop();
                 Console.WriteLine("ID to stop: {0}", ID);
@@ -89,7 +99,7 @@ namespace newRBS.Models
         /// <param name="channel">Channel to read the spectrum from.</param>
         private void SpectraMeasurementWorker(int ID, int channel)
         {
-            int[] newSpectrumY = myCAEN_x730.GetHistogram(channel);
+            int[] newSpectrumY = cAEN_x730.GetHistogram(channel);
             Console.WriteLine("MeasurementWorker ID = {0}; Counts = {1} ", ID, newSpectrumY.Sum());
             dataSpectra.UpdateSpectrum(ID, newSpectrumY);
         }

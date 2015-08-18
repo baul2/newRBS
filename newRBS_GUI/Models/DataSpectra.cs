@@ -29,11 +29,6 @@ namespace newRBS.Models
 
         private string ConnectionString = "Data Source = SVRH; Initial Catalog = p4mist_db; User ID = p4mist; Password = testtesttesttest";
 
-        public DataSpectra()
-        {
-
-        }
-
         public List<int> GetAllChannels()
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
