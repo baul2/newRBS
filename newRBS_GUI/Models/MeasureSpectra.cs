@@ -17,12 +17,17 @@ namespace newRBS.Models
         private CAEN_x730 cAEN_x730;
         private DataSpectra dataSpectra;
 
-        /// <summary>
-        /// Variable that holds the selected  channels.
-        /// </summary>
+        public int NumOfChannels = 16384;
+        public int IncomingIonNumber = 2;
+        public int IncomingIonMass = 4;
+        public double IncomingIonEnergy = 1400;
+        public double IncomingIonAngle = 180;
+        public double OutcomingIonAngle = 170;
+        public double SolidAngle = 2.45;
 
-        public ExpDetails expDetails = new ExpDetails { ion = EnumIon.He, ionEnergy = 1400, theta = 170 };
-        public EnergyCalibration[] energyCalibration = new EnergyCalibration[8] { new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 }, new EnergyCalibration { energyCalOffset = 0, energyCalSlope = 1 } };
+        public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
+        
         public Stop stop = new Stop { type = "Manual", value = 0 };
 
         private Timer[] spectraMeasurementTimer = new Timer[8];
@@ -62,7 +67,7 @@ namespace newRBS.Models
             foreach (int channel in selectedChannels)
             {
                 cAEN_x730.StartAcquisition(channel);
-                int ID = dataSpectra.NewSpectrum(channel, expDetails, energyCalibration[channel], "Manual", 0, true);
+                int ID = dataSpectra.NewSpectrum(channel, IncomingIonNumber, IncomingIonMass, IncomingIonEnergy, IncomingIonAngle, OutcomingIonAngle, SolidAngle, EnergyCalOffset[channel], EnergyCalSlope[channel], "Manual", 0, true, NumOfChannels);
                 IDs.Add(ID);
                 activeChannels.Add(channel, ID);
 

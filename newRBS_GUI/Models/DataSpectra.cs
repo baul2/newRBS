@@ -5,13 +5,15 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Data.Linq;
+using System.Data.Linq.Mapping;
 using System.Globalization;
 
 namespace newRBS.Models
 {
+    [Database(Name = "p4mist_db")]
     public class SpectraDB : DataContext
     {
-        public Table<Spectrum> Spectra;
+        public Table<Measurement> Spectra;
 
         public SpectraDB(string connection) : base(connection) { }
     }
@@ -22,7 +24,7 @@ namespace newRBS.Models
     public class DataSpectra
     {
 
-        public delegate void EventHandlerSpectrum(Spectrum spectrum);
+        public delegate void EventHandlerSpectrum(Measurement spectrum);
         public event EventHandlerSpectrum EventSpectrumNew, EventSpectrumUpdate, EventSpectrumFinished;
 
         public delegate void EventHandlerSpectrumID(int spectrumID);
@@ -30,7 +32,8 @@ namespace newRBS.Models
 
         TraceSource trace = new TraceSource("DataSpectra");
 
-        private string ConnectionString = "Data Source = SVRH; Initial Catalog = p4mist_db; User ID = p4mist; Password = testtesttesttest";
+        //private string ConnectionString = "Data Source = SVRH; Initial Catalog = p4mist_db; User ID = p4mist; Password = testtesttesttest";
+        private string ConnectionString = "Data Source = SVRH; User ID = p4mist; Password = testtesttesttest";
 
         public List<int> GetAllChannels()
         {
@@ -81,24 +84,24 @@ namespace newRBS.Models
         }
 
 
-        public List<Spectrum> GetSpectra_All()
+        public List<Measurement> GetSpectra_All()
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra select spec;
+            IQueryable<Measurement> Spec = from spec in spectraDB.Spectra select spec;
 
             Console.WriteLine("Num Spectra: {0}", Spec.Count());
 
             return Spec.ToList();
         }
 
-        public List<Spectrum> GetSpectra_Date(ViewModels.Filter selectedFilter)
+        public List<Measurement> GetSpectra_Date(ViewModels.Filter selectedFilter)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            IQueryable<Spectrum> Spec = null;
+            IQueryable<Measurement> Spec = null;
 
             switch (selectedFilter.SubType)
             {
@@ -126,25 +129,25 @@ namespace newRBS.Models
             return Spec.ToList();
 
         }
-        public List<Spectrum> GetSpectra_Channel(ViewModels.Filter selectedFilter)
+        public List<Measurement> GetSpectra_Channel(ViewModels.Filter selectedFilter)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            IQueryable<Spectrum> Spec = from spec in spectraDB.Spectra where spec.Channel == selectedFilter.channel select spec;
+            IQueryable<Measurement> Spec = from spec in spectraDB.Spectra where spec.Channel == selectedFilter.channel select spec;
 
             return Spec.ToList();
         }
 
-        public Spectrum GetSpectrum_SpectrumID(int spectrumID)
+        public Measurement GetSpectrum_SpectrumID(int spectrumID)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
 
-            return (from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec).First();
+            return (from spec in spectraDB.Spectra where spec.MeasurementID == spectrumID select spec).First();
         }
 
-        public void AddSpectrum(Spectrum spectrum)
+        public void AddSpectrum(Measurement spectrum)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
@@ -159,7 +162,7 @@ namespace newRBS.Models
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            var deleteSpectra = from spec in spectraDB.Spectra where spectraIDs.Contains(spec.SpectrumID) select spec;
+            var deleteSpectra = from spec in spectraDB.Spectra where spectraIDs.Contains(spec.MeasurementID) select spec;
 
             spectraDB.Spectra.DeleteAllOnSubmit(deleteSpectra);
 
@@ -175,17 +178,17 @@ namespace newRBS.Models
         /// <param name="channel">Channel on which the spectrum is obtained</param>
         /// <remarks>Other parameters (expDetails, energyCalibration) is taken from the class definition.</remarks>
         /// <returns>ID of the new spectrum.</returns>
-        public int NewSpectrum(int channel, ExpDetails expDetails, EnergyCalibration energyCalibration, string stopType, int stopValue, bool runs)
+        public int NewSpectrum(int channel, int incomingIonNumber, int incomingIonMass, double incomingIonEnergy, double incomingIonAngle, double outcomingIonAngle, double solidAngle, double energyCalOffset, double energyCalSlope, string stopType, int stopValue, bool runs, int numOfChannels)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            Spectrum newSpectrum = new Spectrum(channel, expDetails, energyCalibration, stopType, stopValue, runs);
+            Measurement newSpectrum = new Measurement(channel, incomingIonNumber, incomingIonMass, incomingIonEnergy, incomingIonAngle, outcomingIonAngle, solidAngle, energyCalOffset, energyCalSlope, stopType, stopValue, runs, numOfChannels);
             spectraDB.Spectra.InsertOnSubmit(newSpectrum);
             spectraDB.SubmitChanges();
 
             if (EventSpectrumNew != null) { EventSpectrumNew(newSpectrum); } else { Console.WriteLine("EventSpectrumNew null"); }
 
-            return newSpectrum.SpectrumID;
+            return newSpectrum.MeasurementID;
         }
 
         /// <summary>
@@ -208,7 +211,7 @@ namespace newRBS.Models
             string strECalSlope = "EnergyCalSlope";
             string strName = "Name";
 
-            var expSpectra = from spec in spectraDB.Spectra where spectrumIDs.Contains(spec.SpectrumID) select spec;
+            var expSpectra = from spec in spectraDB.Spectra where spectrumIDs.Contains(spec.MeasurementID) select spec;
 
             if (!expSpectra.Any())
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Spectra: No spectrum not found"); tw.Close(); return; }
@@ -216,7 +219,7 @@ namespace newRBS.Models
             foreach (var expSpectrum in expSpectra)
             {
                 strChannel += String.Format("\t {0}", expSpectrum.Channel);
-                strID += String.Format("\t {0}", expSpectrum.SpectrumID);
+                strID += String.Format("\t {0}", expSpectrum.MeasurementID);
                 strStart += String.Format("\t {0}", expSpectrum.StartTime);
                 strStop += String.Format("\t {0}", expSpectrum.StopTime);
                 //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
@@ -245,7 +248,7 @@ namespace newRBS.Models
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = null;
 
-            var updateSpectrum = (from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec).First();
+            var updateSpectrum = (from spec in spectraDB.Spectra where spec.MeasurementID == spectrumID select spec).First();
 
             if (updateSpectrum == null)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Spectrum with SpectrumID={0} not found", spectrumID); return; }
@@ -290,7 +293,7 @@ namespace newRBS.Models
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
 
-            Spectrum stopSpectrum = (from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec).First();
+            Measurement stopSpectrum = (from spec in spectraDB.Spectra where spec.MeasurementID == spectrumID select spec).First();
 
             if (stopSpectrum == null)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't stop Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
@@ -312,9 +315,9 @@ namespace newRBS.Models
 
         }
 
-        public List<Spectrum> ImportSpectra(string fileName)
+        public List<Measurement> ImportSpectra(string fileName)
         {
-            List<Spectrum> newSpectra = new List<Spectrum>();
+            List<Measurement> newSpectra = new List<Measurement>();
             List<List<int>> spectraY = new List<List<int>>();
 
             using (TextReader textReader = new StreamReader(fileName))
@@ -328,7 +331,7 @@ namespace newRBS.Models
 
                 for (int i = 0; i < numSpectra; i++)
                 {
-                    newSpectra.Add(new Models.Spectrum());
+                    newSpectra.Add(new Models.Measurement());
                     spectraY.Add(new List<int>());
                     newSpectra[i].Name = lineParts[i + 1];
                 }

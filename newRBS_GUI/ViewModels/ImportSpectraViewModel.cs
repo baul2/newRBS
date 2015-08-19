@@ -44,10 +44,10 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<Models.Spectrum> newSpectra { get; set; }
+        public ObservableCollection<Models.Measurement> newSpectra { get; set; }
 
-        private Models.Spectrum _selectedSpectrum;
-        public Models.Spectrum selectedSpectrum
+        private Models.Measurement _selectedSpectrum;
+        public Models.Measurement selectedSpectrum
         {
             get { return _selectedSpectrum; }
             set
@@ -80,8 +80,8 @@ namespace newRBS.ViewModels
             AddCurrentSpectrumCommand = new RelayCommand(() => _AddCurrentSpectrumCommand(), () => true);
 
             areaData = new ObservableCollection<AreaData>() { new AreaData { x1 = 1, y1 = 10, x2 = 1, y2 = 0 }, new AreaData { x1 = 2, y1 = 20, x2 = 2, y2 = 0 } };
-            newSpectra = new ObservableCollection<Models.Spectrum>();
-            selectedSpectrum = new Models.Spectrum();
+            newSpectra = new ObservableCollection<Models.Measurement>();
+            selectedSpectrum = new Models.Measurement();
         }
 
         public void _OpenFileCommand()
@@ -91,11 +91,11 @@ namespace newRBS.ViewModels
 
             SelectedPath = dialog.FileName;
 
-            List<Models.Spectrum> loadedSpectra = dataSpectra.ImportSpectra(SelectedPath);
+            List<Models.Measurement> loadedSpectra = dataSpectra.ImportSpectra(SelectedPath);
 
             newSpectra.Clear();
 
-            foreach (Models.Spectrum spectrum in loadedSpectra)
+            foreach (Models.Measurement spectrum in loadedSpectra)
                 newSpectra.Add(spectrum);
 
             selectedSpectrum = newSpectra.First();
