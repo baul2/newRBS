@@ -37,7 +37,11 @@ namespace newRBS.ViewModels
     {
         public ICommand NewMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
-        public ICommand ImportMeasurementCommand { get; set; }
+
+        public ICommand ImportMeasurementsCommand { get; set; }
+        public ICommand ExportMeasurementsCommand { get; set; }
+        public ICommand DeleteMeasurementsCommand { get; set; }
+        
         public ICommand ChannelConfigurationCommand { get; set; }
 
         TraceSource trace = new TraceSource("MainViewModel");
@@ -49,7 +53,11 @@ namespace newRBS.ViewModels
         {
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
-            ImportMeasurementCommand = new RelayCommand(() => _ImportMeasurementCommand(), () => true);
+
+            ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementCommand(), () => true);
+            ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
+            DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
+
             ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
         }
 
@@ -78,6 +86,18 @@ namespace newRBS.ViewModels
             Views.ImportSpectra importSpectra = new Views.ImportSpectra();
 
             importSpectra.ShowDialog();
+        }
+
+        public void _ExportMeasurementsCommand()
+        {
+            Console.WriteLine("_ExportMeasurementsCommand");
+        }
+
+        public void _DeleteMeasurementsCommand()
+        {
+            Console.WriteLine("_DeleteMeasurementsCommand");
+
+            SimpleIoc.Default.GetInstance<SpectraListViewModel>().DeleteSelectedSpectra();
         }
 
         public void _ChannelConfigurationCommand()

@@ -23,7 +23,10 @@ namespace newRBS.Models
     {
 
         public delegate void EventHandlerSpectrum(Spectrum spectrum);
-        public event EventHandlerSpectrum EventSpectrumNew, EventSpectrumRemove, EventSpectrumUpdate, EventSpectrumFinished;
+        public event EventHandlerSpectrum EventSpectrumNew, EventSpectrumUpdate, EventSpectrumFinished;
+
+        public delegate void EventHandlerSpectrumID(int spectrumID);
+        public event EventHandlerSpectrumID EventSpectrumRemove;
 
         TraceSource trace = new TraceSource("DataSpectra");
 
@@ -53,7 +56,7 @@ namespace newRBS.Models
             return noDupes;
         }
 
-        public List<int> GetAllMonths( int year)
+        public List<int> GetAllMonths(int year)
         {
             SpectraDB spectraDB = new SpectraDB(ConnectionString);
             spectraDB.Log = Console.Out;
@@ -141,6 +144,31 @@ namespace newRBS.Models
             return (from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec).First();
         }
 
+        public void AddSpectrum(Spectrum spectrum)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+
+            spectraDB.Spectra.InsertOnSubmit(spectrum);
+
+            spectraDB.SubmitChanges();
+
+            if (EventSpectrumNew != null) { EventSpectrumNew(spectrum); } else { Console.WriteLine("EventSpectrumNew null"); }
+        }
+
+        public void DeleteSpectra(List<int> spectraIDs)
+        {
+            SpectraDB spectraDB = new SpectraDB(ConnectionString);
+
+            var deleteSpectra = from spec in spectraDB.Spectra where spectraIDs.Contains(spec.SpectrumID) select spec;
+
+            spectraDB.Spectra.DeleteAllOnSubmit(deleteSpectra);
+
+            spectraDB.SubmitChanges();
+
+            foreach (int spectrumID in spectraIDs)
+                if (EventSpectrumRemove != null) { EventSpectrumRemove(spectrumID); } else { Console.WriteLine("EventSpectrumRemove null"); }
+        }
+
         /// <summary>
         /// Function that adds a new item (\<ID, <see cref="DataSpectrum"/>\>) to the dictionary of spectra.
         /// </summary>
@@ -159,29 +187,6 @@ namespace newRBS.Models
 
             return newSpectrum.SpectrumID;
         }
-
-        /// <summary>
-        /// Function that removes an item (\<ID, <see cref="DataSpectrum"/>\>) from the dictionary of spectra.
-        /// </summary>
-        /// <param name="spectrumID">ID of the spectrum to remove.</param>
-        public void RemoveSpectrum(int spectrumID)
-        {
-            SpectraDB spectraDB = new SpectraDB(ConnectionString);
-
-            var delSpectra = from spec in spectraDB.Spectra where spec.SpectrumID == spectrumID select spec;
-
-            if (!delSpectra.Any())
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't remove Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
-
-            Spectrum delSpectrum = delSpectra.First();
-
-            spectraDB.Spectra.DeleteOnSubmit(delSpectra.First());
-
-            spectraDB.SubmitChanges();
-
-            if (EventSpectrumRemove != null) EventSpectrumRemove(delSpectrum);
-        }
-
 
         /// <summary>
         /// Function that saves spectra to a file
@@ -304,7 +309,80 @@ namespace newRBS.Models
         /// <param name="ID">ID of the spectrum to be updated</param>
         public void UpdateSpectrumInfos(int spectrumID)
         {
-   
+
+        }
+
+        public List<Spectrum> ImportSpectra(string fileName)
+        {
+            List<Spectrum> newSpectra = new List<Spectrum>();
+            List<List<int>> spectraY = new List<List<int>>();
+
+            using (TextReader textReader = new StreamReader(fileName))
+            {
+                string line;
+
+                string[] lineParts = textReader.ReadLine().Split('\t');
+
+                int numSpectra = lineParts.Count() - 1;
+                Console.WriteLine("Number of spectra: {0}", numSpectra);
+
+                for (int i = 0; i < numSpectra; i++)
+                {
+                    newSpectra.Add(new Models.Spectrum());
+                    spectraY.Add(new List<int>());
+                    newSpectra[i].Name = lineParts[i + 1];
+                }
+
+                while ((line = textReader.ReadLine()) != null)
+                {
+                    lineParts = line.Split('\t');
+
+                    for (int i = 0; i < numSpectra; i++)
+                    {
+                        switch (lineParts[0])
+                        {
+                            case "Date":
+                                { newSpectra[i].StartTime = DateTime.ParseExact(lineParts[i + 1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture); break; }
+                            case "Remark":
+                                { break; }
+                            case "Projectile":
+                                { break; }
+                            case "Energy":
+                                { break; }
+                            case "Scattering angle":
+                                { break; }
+                            case "Incident angle":
+                                { break; }
+                            case "Exit angle":
+                                { break; }
+                            case "Energy / Channel":
+                                { break; }
+                            case "Offset":
+                                { break; }
+                            case "Solid angle":
+                                { break; }
+                            case "Charge":
+                                { break; }
+                            case "Real time":
+                                { newSpectra[i].Duration = TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); break; }
+                            case "Live time":
+                                { break; }
+                            case "FWHM":
+                                { break; }
+                            case "Channel":
+                                { break; }
+                            case "":
+                                { break; }
+                            default:
+                                { spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
+                        }
+                    }
+                }
+                for (int i = 0; i < numSpectra; i++)
+                    newSpectra[i].SpectrumY = spectraY[i].ToArray();
+
+                return newSpectra;
+            }
         }
     }
 }

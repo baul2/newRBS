@@ -59,6 +59,7 @@ namespace newRBS.Models
     public class Spectrum : INotifyPropertyChanged
     {
         private int _SpectrumID = 0;
+        private string _Name;
         private int _Channel;
         private int _SampleID;
         private DateTime _StartTime;
@@ -74,6 +75,10 @@ namespace newRBS.Models
         [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_SpectrumID", DbType = "Int IDENTITY(1,1)")]
         public int SpectrumID
         { get { return _SpectrumID; } }
+
+        [Column(CanBeNull = true, Storage = "_Name")]
+        public string Name
+        { get { return _Name; } set { _Name = value; OnPropertyChanged(); } }
 
         [Column(CanBeNull = true, Storage = "_Channel")]
         public int Channel
@@ -108,7 +113,7 @@ namespace newRBS.Models
             get
             {
                 int[] temp = new int[_SpectrumY.Length / sizeof(int)];
-                Buffer.BlockCopy(_SpectrumY, 0, temp, 0, temp.Length);
+                Buffer.BlockCopy(_SpectrumY, 0, temp, 0, temp.Length * sizeof(int));
                 return temp;
             }
             set
