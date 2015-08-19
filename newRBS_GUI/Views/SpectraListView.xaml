@@ -31,11 +31,19 @@
                 </Style.Triggers>
             </Style>
         </DataGrid.RowStyle>
+        
         <DataGrid.Columns>
-            <DataGridCheckBoxColumn 
+            <DataGridTemplateColumn Header="Selected">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <!--DataGridCheckBoxColumn 
                 Header="Selected"
                 Binding="{Binding selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                IsReadOnly="False"/>
+                IsReadOnly="False"/-->
             <DataGridTextColumn 
                 Header="SpectrumID" 
                 Binding="{Binding spectrum.SpectrumID}"

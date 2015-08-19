@@ -5,17 +5,60 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
         xmlns:xc="clr-namespace:newRBS.ViewModelUtils"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="ImportSpectra" Height="300" Width="300"
+        Title="ImportSpectra" SizeToContent="WidthAndHeight"
         DataContext="{Binding importSpectraViewModel, Source={StaticResource Locator}}"
         xc:DialogCloser.DialogResult="{Binding DialogResult}">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal">
-                <TextBox Text="{Binding SelectedPath}" Margin="5" Width="200"/>
-                <Button Command="{Binding OpenFileCommand}" Margin="5" Content="Open File"/>
+    <DockPanel>
+        <Border DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding SelectedPath}" Margin="5" Width="200"/>
+                    <Button Command="{Binding OpenFileCommand}" Margin="5" Padding="3" Content="Open File"/>
+                </StackPanel>
+                <ComboBox ItemsSource="{Binding newSpectra}" DisplayMemberPath="Name" SelectedItem="{Binding selectedSpectrum}" />
             </StackPanel>
-            <TextBox Text="{Binding FileContent}" Height="100"/>
-        </StackPanel>
-    </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Name:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                    <TextBox Text="{Binding selectedSpectrum.Name, Mode=TwoWay}" VerticalContentAlignment="Center" Grid.Column="1" Grid.Row="0" />
+                    <Label Content="Start time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                    <!--DatePicker SelectedDate="{Binding selectedSpectrum.StartTime}" Grid.Column="1" Grid.Row="1" /-->
+                    <xctk:DateTimePicker Value="{Binding selectedSpectrum.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yy-MM-dd hh:mm" Grid.Column="1" Grid.Row="1" />
+                </Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding AddCurrentSpectrumCommand}" Content="Add current spectrum" Margin="5" Padding="3"/>
+                    <Button Content="Add all spectra" Margin="5" Padding="3"/>
+                    <Button Content="Cancel" Margin="5" Padding="3"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border>
+            <oxy:Plot MinHeight="200" InvalidateFlag="{Binding areaData.Count, Delay=100}">
+                <oxy:Plot.Axes>
+                    <oxy:LinearAxis Title="Energy (keV)" Position="Bottom"/>
+                    <oxy:LinearAxis Title="Counts" Position="Left"/>
+                </oxy:Plot.Axes>
+                <oxy:Plot.Series>
+                    <oxy:AreaSeries  ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
+                </oxy:Plot.Series>
+            </oxy:Plot>
+        </Border>
+    </DockPanel>
 </Window>

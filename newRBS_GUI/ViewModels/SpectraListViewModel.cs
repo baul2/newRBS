@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModelUtils;
+using Microsoft.Win32;
 
 namespace newRBS.ViewModels
 {
@@ -80,7 +81,7 @@ namespace newRBS.ViewModels
 
             // Hooking up to events from DataSpectra
             dataSpectra.EventSpectrumNew += new Models.DataSpectra.EventHandlerSpectrum(SpectrumNew);
-            dataSpectra.EventSpectrumRemove += new Models.DataSpectra.EventHandlerSpectrum(SpectrumRemove);
+            dataSpectra.EventSpectrumRemove += new Models.DataSpectra.EventHandlerSpectrumID(SpectrumRemove);
             dataSpectra.EventSpectrumUpdate += new Models.DataSpectra.EventHandlerSpectrum(SpectrumUpdate);
 
             // Hooking up to events from SpectraFilter
@@ -192,9 +193,13 @@ namespace newRBS.ViewModels
             ChangeFilter(lastFilter);
         }
 
-        private void SpectrumRemove(Models.Spectrum spectrum)
+        private void SpectrumRemove(int spectrumID)
         {
             Console.WriteLine("SpectrumRemove");
+            MySpectrum delSpectra = spectraList.Where(x => x.spectrum.SpectrumID == spectrumID).First();
+
+            if (delSpectra != null)
+                spectraList.Remove(delSpectra);
         }
 
         private void SpectrumUpdate(Models.Spectrum spectrum)
@@ -206,6 +211,17 @@ namespace newRBS.ViewModels
                 int index = spectraList.IndexOf(item);
                 spectraList[index].spectrum = spectrum;
             }
+        }
+
+        public void DeleteSelectedSpectra()
+        {
+            List<int> selectedSpectra = spectraList.Where(x => x.selected == true).Select(y => y.spectrum.SpectrumID).ToList();
+
+            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected spectra?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+            if (rsltMessageBox == MessageBoxResult.Yes)
+                foreach (int ID in selectedSpectra)
+                    dataSpectra.DeleteSpectra(selectedSpectra);
         }
     }
 }

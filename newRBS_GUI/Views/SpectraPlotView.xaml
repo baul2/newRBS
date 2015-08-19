@@ -9,7 +9,6 @@
              d:DesignHeight="300" d:DesignWidth="300"
              DataContext="{Binding spectraPlotViewModel, Source={StaticResource Locator}}">
     <Grid>
-        <oxy:Plot x:Name="Plot1" Title="A Graph" Model="{Binding plotModel}" Margin="10" Grid.Row="1">
-        </oxy:Plot>
+        <oxy:Plot x:Name="Plot1" Title="A Graph" Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
     </Grid>
 </UserControl>

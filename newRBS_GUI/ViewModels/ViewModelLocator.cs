@@ -49,11 +49,13 @@ namespace newRBS.ViewModels
             SimpleIoc.Default.Register<SpectraListViewModel>();
             SimpleIoc.Default.Register<SpectraPlotViewModel>();
             SimpleIoc.Default.Register<ImportSpectraViewModel>();
+            SimpleIoc.Default.Register<ChannelConfigurationViewModel>();
 
             // The Models
             SimpleIoc.Default.Register<Models.CAEN_x730>();
             SimpleIoc.Default.Register<Models.DataSpectra>();
             SimpleIoc.Default.Register<Models.MeasureSpectra>();
+            SimpleIoc.Default.Register<Models.MeasureWaveform>();
         }
 
         // The ViewModels
@@ -74,7 +76,10 @@ namespace newRBS.ViewModels
 
         public ImportSpectraViewModel importSpectraViewModel
         { get { return ServiceLocator.Current.GetInstance<ImportSpectraViewModel>(); } }
-        
+
+        public ChannelConfigurationViewModel channelConfigurationViewModel
+        { get { return ServiceLocator.Current.GetInstance<ChannelConfigurationViewModel>(); } }
+
 
         // The Models
         public Models.CAEN_x730 cAen_X730
@@ -86,9 +91,9 @@ namespace newRBS.ViewModels
         public Models.MeasureSpectra measureSpectra
         { get { return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>(); } }
 
-
-
-
+        public Models.MeasureWaveform measureWaveform
+        { get { return ServiceLocator.Current.GetInstance<Models.MeasureWaveform>(); } }
+        
 
         public static void Cleanup()
         {

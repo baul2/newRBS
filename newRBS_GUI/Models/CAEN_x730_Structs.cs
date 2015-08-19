@@ -1,28 +1,75 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 
 namespace newRBS.Models
 {
-    public struct ChannelParams
+    [Serializable()]
+    public class ChannelParams : INotifyPropertyChanged
     {
-        public int? DCoffset;
-        public InputRange inputRange;
-        public int? InputSignalDecayTime;
-        public int? TrapezoidFlatTopTime;
-        public int? TrapezoidRiseTime;
-        public int? TrapezoidPeakingDelay;
-        public int? TriggerFilterSmoothingFactor;
-        public int? InputSignalRiseTime;
-        public int? TriggerThreshold;
-        public int? NumSamplesBaselineMean;
-        public int? NumSamplesPeakMean;
-        public int? PeakHoldOff;
-        public int? BaseLineHoldOff;
-        public int? TriggerHoldOff;
-        public int? DigitalGain;
-        public float? EnergyNormalizationFactor;
-        public int? InputSignalDecimation;
+        private int? _DCoffset;
+        public  int? DCoffset { get { return _DCoffset; } set { _DCoffset = value; OnPropertyChanged(); } }
+
+        private int? _InputRange; // 2_0Vpp = 9, 0_5Vpp = 10
+        public  int? InputRange { get { return _InputRange; } set { _InputRange = value; OnPropertyChanged(); } }
+
+        private int? _InputSignalDecayTime;
+        public  int? InputSignalDecayTime { get { return _InputSignalDecayTime; } set { _InputSignalDecayTime = value; OnPropertyChanged(); } }
+
+        private int? _TrapezoidFlatTopTime;
+        public  int? TrapezoidFlatTopTime { get { return _TrapezoidFlatTopTime; } set { _TrapezoidFlatTopTime = value; OnPropertyChanged(); } }
+
+        private int? _TrapezoidRiseTime;
+        public  int? TrapezoidRiseTime { get { return _TrapezoidRiseTime; } set { _TrapezoidRiseTime = value; OnPropertyChanged(); } }
+
+        private int? _TrapezoidPeakingDelay;
+        public  int? TrapezoidPeakingDelay { get { return _TrapezoidPeakingDelay; } set { _TrapezoidPeakingDelay = value; OnPropertyChanged(); } }
+
+        private int? _TriggerFilterSmoothingFactor;
+        public  int? TriggerFilterSmoothingFactor { get { return _TriggerFilterSmoothingFactor; } set { _TriggerFilterSmoothingFactor = value; OnPropertyChanged(); } }
+
+        private int? _InputSignalRiseTime;
+        public  int? InputSignalRiseTime { get { return _InputSignalRiseTime; } set { _InputSignalRiseTime = value; OnPropertyChanged(); } }
+
+        private int? _TriggerThreshold;
+        public  int? TriggerThreshold { get { return _TriggerThreshold; } set { _TriggerThreshold = value; OnPropertyChanged(); } }
+
+        private int? _NumSamplesBaselineMean;
+        public  int? NumSamplesBaselineMean { get { return _NumSamplesBaselineMean; } set { _NumSamplesBaselineMean = value; OnPropertyChanged(); } }
+
+        private int? _NumSamplesPeakMean;
+        public  int? NumSamplesPeakMean { get { return _NumSamplesPeakMean; } set { _NumSamplesPeakMean = value; OnPropertyChanged(); } }
+
+        private int? _PeakHoldOff;
+        public  int? PeakHoldOff { get { return _PeakHoldOff; } set { _PeakHoldOff = value; OnPropertyChanged(); } }
+
+        private int? _BaseLineHoldOff;
+        public  int? BaseLineHoldOff { get { return _BaseLineHoldOff; } set { _BaseLineHoldOff = value; OnPropertyChanged(); } }
+
+        private int? _TriggerHoldOff;
+        public  int? TriggerHoldOff { get { return _TriggerHoldOff; } set { _TriggerHoldOff = value; OnPropertyChanged(); } }
+
+        private int? _DigitalGain;
+        public  int? DigitalGain { get { return _DigitalGain; } set { _DigitalGain = value; OnPropertyChanged(); } }
+
+        private float? _EnergyNormalizationFactor;
+        public  float? EnergyNormalizationFactor { get { return _EnergyNormalizationFactor; } set { _EnergyNormalizationFactor = value; OnPropertyChanged(); } }
+
+        private int? _InputSignalDecimation;
+        public  int? InputSignalDecimation { get { return _InputSignalDecimation; } set { _InputSignalDecimation = value; OnPropertyChanged(); } }
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
     }
 
     /// <summary>
@@ -30,11 +77,12 @@ namespace newRBS.Models
     /// </summary>
     public struct Waveform
     {
-        public int[] AT1;
-        public int[] AT2;
-        public int[] DT1;
-        public int[] DT2;
-        public int numSamples;
+        public Int16[] AT1;
+        public Int16[] AT2;
+        public byte[] DT1;
+        public byte[] DT2;
+        public UInt32 NumSamples;
+        public double LenSample;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -300,11 +348,11 @@ namespace newRBS.Models
 
             // Waveform parameters default settings
             WFParams.dualTraceMode = 1;
-            WFParams.ap1 = CAENDPP_PHA_AnalogProbe1_t.CAENDPP_PHA_VIRTUALPROBE1_Delta2;
-            WFParams.ap2 = CAENDPP_PHA_AnalogProbe2_t.CAENDPP_PHA_VIRTUALPROBE2_Input;
-            WFParams.dp1 = CAENDPP_PHA_DigitalProbe1_t.CAENDPP_PHA_DigitalProbe1_Peaking;
-            WFParams.dp2 = CAENDPP_PHA_DigitalProbe2_t.CAENDPP_PHA_DigitalProbe2_Trigger;
-            WFParams.recordLength = 16384; //8192
+            WFParams.ap1 = CAENDPP_PHA_AnalogProbe1_t.Delta2;
+            WFParams.ap2 = CAENDPP_PHA_AnalogProbe2_t.Input;
+            WFParams.dp1 = CAENDPP_PHA_DigitalProbe1_t.Peaking;
+            WFParams.dp2 = CAENDPP_PHA_DigitalProbe2_t.Trigger;
+            WFParams.recordLength = 8192; //8192
             WFParams.preTrigger = 1000; //1000
             WFParams.probeSelfTriggerVal = 1482; //150
             WFParams.probeTrigger = 0;
