@@ -21,31 +21,29 @@ using Microsoft.Win32;
 
 namespace newRBS.ViewModels
 {
-    public class MySpectrum : INotifyPropertyChanged
+    public class MyMeasurement : INotifyPropertyChanged
     {
-
-
-        private bool _selected;
-        public bool selected
+        private bool _Selected;
+        public bool Selected
         {
-            get { return _selected; }
+            get { return _Selected; }
             set
             {
-                if (_selected != value)
+                if (_Selected != value)
                 {
-                    _selected = value;
+                    _Selected = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        private Models.Spectrum _spectrum;
-        public Models.Spectrum spectrum
+        private Models.Measurement _Measurement;
+        public Models.Measurement Measurement
         {
-            get { return _spectrum; }
+            get { return _Measurement; }
             set
             {
-                _spectrum = value;
+                _Measurement = value;
                 OnPropertyChanged();
             }
         }
@@ -68,8 +66,8 @@ namespace newRBS.ViewModels
         public delegate void EventHandlerSpectrumID(int SpectrumID);
         public event EventHandlerSpectrumID EventSpectrumToPlot, EventSpectrumNotToPlot;
 
-        public List<MySpectrum> ModifiedItems { get; set; }
-        public AsyncObservableCollection<MySpectrum> spectraList { get; set; }
+        public List<MyMeasurement> ModifiedItems { get; set; }
+        public AsyncObservableCollection<MyMeasurement> MeasurementList { get; set; }
 
         public CollectionViewSource viewSource { get; set; }
 
@@ -87,13 +85,13 @@ namespace newRBS.ViewModels
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<SpectraFilterViewModel>().EventNewFilter += new SpectraFilterViewModel.EventHandlerFilter(ChangeFilter);
 
-            ModifiedItems = new List<MySpectrum>();
-            spectraList = new AsyncObservableCollection<MySpectrum>();
-            spectraList.CollectionChanged += OnCollectionChanged;
+            ModifiedItems = new List<MyMeasurement>();
+            MeasurementList = new AsyncObservableCollection<MyMeasurement>();
+            MeasurementList.CollectionChanged += OnCollectionChanged;
 
             viewSource = new CollectionViewSource();
-            viewSource.Source = spectraList;
-            viewSource.SortDescriptions.Add(new SortDescription("spectrum.StartTime", ListSortDirection.Descending));
+            viewSource.Source = MeasurementList;
+            viewSource.SortDescriptions.Add(new SortDescription("Measurement.StartTime", ListSortDirection.Descending));
 
             ChangeFilter(new Filter() { Name = "Today", Type = "Date", SubType = "Today" });
         }
@@ -103,7 +101,7 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Add)
                 if (e.NewItems != null)
                 {
-                    foreach (MySpectrum newItem in e.NewItems)
+                    foreach (MyMeasurement newItem in e.NewItems)
                     {
                         ModifiedItems.Add(newItem);
                         newItem.PropertyChanged += this.OnItemPropertyChanged;
@@ -113,7 +111,7 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Remove)
                 if (e.OldItems != null)
                 {
-                    foreach (MySpectrum oldItem in e.OldItems)
+                    foreach (MyMeasurement oldItem in e.OldItems)
                     {
                         oldItem.PropertyChanged -= this.OnItemPropertyChanged;
                         ModifiedItems.Remove(oldItem);
@@ -123,12 +121,12 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Replace)
                 if (e.NewItems != null && e.OldItems != null)
                 {
-                    foreach (MySpectrum newItem in e.NewItems)
+                    foreach (MyMeasurement newItem in e.NewItems)
                     {
                         ModifiedItems.Add(newItem);
                         newItem.PropertyChanged += this.OnItemPropertyChanged;
                     }
-                    foreach (MySpectrum oldItem in e.OldItems)
+                    foreach (MyMeasurement oldItem in e.OldItems)
                     {
                         oldItem.PropertyChanged -= this.OnItemPropertyChanged;
                         ModifiedItems.Remove(oldItem);
@@ -138,35 +136,35 @@ namespace newRBS.ViewModels
 
         void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MySpectrum mySpectrum = sender as MySpectrum;
+            MyMeasurement myMeasurement = sender as MyMeasurement;
 
-            if (e.PropertyName == "spectrum") return;
+            if (e.PropertyName == "Measurement") return;
 
-            if (mySpectrum.selected == true)
-            { if (EventSpectrumToPlot != null) EventSpectrumToPlot(mySpectrum.spectrum.SpectrumID); }
+            if (myMeasurement.Selected == true)
+            { if (EventSpectrumToPlot != null) EventSpectrumToPlot(myMeasurement.Measurement.MeasurementID); }
             else
-            { if (EventSpectrumNotToPlot != null) EventSpectrumNotToPlot(mySpectrum.spectrum.SpectrumID); }
+            { if (EventSpectrumNotToPlot != null) EventSpectrumNotToPlot(myMeasurement.Measurement.MeasurementID); }
         }
 
         public void ChangeFilter(Filter selectedFilter)
         {
-            spectraList.Clear();
+            MeasurementList.Clear();
             Console.WriteLine("FilterType: {0}", selectedFilter.Type);
 
             switch (selectedFilter.Type)
             {
                 case "All":
                     {
-                        List<Models.Spectrum> temp = dataSpectra.GetSpectra_All();
-                        foreach (Models.Spectrum spec in temp)
-                            spectraList.Add(new MySpectrum() { selected = false, spectrum = spec });
+                        List<Models.Measurement> temp = dataSpectra.GetSpectra_All();
+                        foreach (Models.Measurement spec in temp)
+                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
                         break;
                     }
                 case "Date":
                     {
-                        List<Models.Spectrum> temp = dataSpectra.GetSpectra_Date(selectedFilter);
-                        foreach (Models.Spectrum spec in temp)
-                            spectraList.Add(new MySpectrum() { selected = false, spectrum = spec });
+                        List<Models.Measurement> temp = dataSpectra.GetSpectra_Date(selectedFilter);
+                        foreach (Models.Measurement spec in temp)
+                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
                         break;
                     }
                 case "Sample":
@@ -176,46 +174,47 @@ namespace newRBS.ViewModels
                     }
                 case "Channel":
                     {
-                        List<Models.Spectrum> temp = dataSpectra.GetSpectra_Channel(selectedFilter);
-                        foreach (Models.Spectrum spec in temp)
-                            spectraList.Add(new MySpectrum() { selected = false, spectrum = spec });
+                        List<Models.Measurement> temp = dataSpectra.GetSpectra_Channel(selectedFilter);
+                        foreach (Models.Measurement spec in temp)
+                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
                         break;
                     }
             }
             viewSource.View.Refresh();
-            Console.WriteLine("Length of spectraList: {0}", spectraList.Count());
+            Console.WriteLine("Length of spectraList: {0}", MeasurementList.Count());
             lastFilter = selectedFilter;
         }
 
-        private void SpectrumNew(Models.Spectrum spectrum)
+        private void SpectrumNew(Models.Measurement measurement)
         {
             Console.WriteLine("SpectrumNew");
-            ChangeFilter(lastFilter);
+            MeasurementList.Add(new MyMeasurement() { Selected = true, Measurement = measurement });
+            if (EventSpectrumToPlot != null) EventSpectrumToPlot(measurement.MeasurementID);
         }
 
         private void SpectrumRemove(int spectrumID)
         {
             Console.WriteLine("SpectrumRemove");
-            MySpectrum delSpectra = spectraList.Where(x => x.spectrum.SpectrumID == spectrumID).First();
+            MyMeasurement delSpectra = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrumID).First();
 
             if (delSpectra != null)
-                spectraList.Remove(delSpectra);
+                MeasurementList.Remove(delSpectra);
         }
 
-        private void SpectrumUpdate(Models.Spectrum spectrum)
+        private void SpectrumUpdate(Models.Measurement spectrum)
         {
-            var item = spectraList.Where(x => x.spectrum.SpectrumID == spectrum.SpectrumID).First();
+            var item = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrum.MeasurementID).First();
 
             if (item != null)
             {
-                int index = spectraList.IndexOf(item);
-                spectraList[index].spectrum = spectrum;
+                int index = MeasurementList.IndexOf(item);
+                MeasurementList[index].Measurement = spectrum;
             }
         }
 
         public void DeleteSelectedSpectra()
         {
-            List<int> selectedSpectra = spectraList.Where(x => x.selected == true).Select(y => y.spectrum.SpectrumID).ToList();
+            List<int> selectedSpectra = MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
 
             MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected spectra?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
 

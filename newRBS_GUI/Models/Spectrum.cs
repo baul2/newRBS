@@ -16,36 +16,6 @@ namespace newRBS.Models
         Minus30,
     }
 
-    public enum RandomAligned
-    {
-        random,
-        aligned,
-        unknown,
-    }
-
-    public enum EnumIon
-    {
-        H,
-        He,
-        Li,
-    };
-
-    /// <summary>
-    /// Experimental details
-    /// </summary>
-    public struct ExpDetails
-    {
-        public EnumIon ion;
-        public int ionEnergy;
-        public int theta;
-    }
-
-    public struct EnergyCalibration
-    {
-        public float energyCalOffset;
-        public float energyCalSlope;
-    }
-
     public struct Stop
     {
         public string type;
@@ -55,32 +25,49 @@ namespace newRBS.Models
     /// <summary>
     /// Class responsible for storing a single spectrum.
     /// </summary>
-    [global::System.Data.Linq.Mapping.TableAttribute(Name = "dbo.Spectra")]
-    public class Spectrum : INotifyPropertyChanged
+    [Table(Name = "dbo.Spectra")]
+    public class Measurement : INotifyPropertyChanged
     {
-        private int _SpectrumID = 0;
+        private int _MeasurementID = 0;
         private string _Name;
         private int _Channel;
         private int _SampleID;
+        private bool? _RandomAligned;
         private DateTime _StartTime;
         private DateTime? _StopTime;
         private TimeSpan _Duration = TimeSpan.Zero;
-        private double _Progress;
         private bool _Runs;
+        private double? _Charge;
+        private double _Progress;
+        private int _NumOfChannels;
         [Column(Name = "SpectrumY")]
-        private byte[] _SpectrumY = new byte[] { 0};
+        private byte[] _SpectrumY = new byte[] { 0 };
+        [Column(Name = "SpectrumYCalculated")]
+        private byte[] _SpectrumYCalculated = new byte[] { 0 };
         private string _StopType;
         private int _StopValue;
+        private double _EnergyCalOffset;
+        private double _EnergyCalSlope;
+        private int _IncomingIonNumber;
+        private int _IncomingIonMass;
+        private double _IncomingIonEnergy;
+        private double _IncomingIonAngle;
+        private double _OutcomingIonAngle;
+        private double _SolidAngle;
+        private double? _X;
+        private double? _Y;
+        private double? _Phi;
+        private double? _Theta;
 
-        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_SpectrumID", DbType = "Int IDENTITY(1,1)")]
-        public int SpectrumID
-        { get { return _SpectrumID; } }
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_MeasurementID", DbType = "Int IDENTITY(1,1)")]
+        public int MeasurementID
+        { get { return _MeasurementID; } }
 
         [Column(CanBeNull = true, Storage = "_Name")]
         public string Name
         { get { return _Name; } set { _Name = value; OnPropertyChanged(); } }
 
-        [Column(CanBeNull = true, Storage = "_Channel")]
+        [Column(Storage = "_Channel")]
         public int Channel
         { get { return _Channel; } set { _Channel = value; OnPropertyChanged(); } }
 
@@ -88,7 +75,11 @@ namespace newRBS.Models
         public int SampleID
         { get { return _SampleID; } set { _SampleID = value; OnPropertyChanged(); } }
 
-        [Column(CanBeNull = true, Storage = "_StartTime")]
+        [Column(CanBeNull = true, Storage = "_RandomAligned")]
+        public bool? RandomAligned
+        { get { return _RandomAligned; } set { _RandomAligned = value; OnPropertyChanged(); } }
+
+        [Column( Storage = "_StartTime")]
         public DateTime StartTime
         { get { return _StartTime; } set { _StartTime = value; OnPropertyChanged(); } }
 
@@ -96,18 +87,26 @@ namespace newRBS.Models
         public DateTime? StopTime
         { get { return _StopTime; } set { _StopTime = value; OnPropertyChanged(); } }
 
-        [Column(CanBeNull = true, Storage = "_Duration", DbType = "time")]
+        [Column( Storage = "_Duration", DbType = "time")]
         public TimeSpan Duration
         { get { return _Duration; } set { _Duration = value; OnPropertyChanged(); } }
 
-        [Column(CanBeNull = true, Storage = "_Progress")]
-        public double Progress
-        { get { return _Progress; } set { _Progress = value; OnPropertyChanged(); } }
-
-        [Column(CanBeNull = true, Storage = "_Runs", DbType = "bit")]
+        [Column( Storage = "_Runs", DbType = "bit")]
         public bool Runs
         { get { return _Runs; } set { _Runs = value; OnPropertyChanged(); } }
 
+        [Column(CanBeNull = true, Storage = "_Charge")]
+        public double? Charge
+        { get { return _Charge; } set { _Charge = value; OnPropertyChanged(); } }
+
+        [Column( Storage = "_Progress")]
+        public double Progress
+        { get { return _Progress; } set { _Progress = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_NumOfChannels")]
+        public int NumOfChannels
+        { get { return _NumOfChannels; } set { _NumOfChannels = value; OnPropertyChanged(); } }
+        
         public int[] SpectrumY
         {
             get
@@ -124,6 +123,22 @@ namespace newRBS.Models
             }
         }
 
+        public int[] SpectrumYCalculated
+        {
+            get
+            {
+                int[] temp = new int[_SpectrumY.Length / sizeof(int)];
+                Buffer.BlockCopy(_SpectrumYCalculated, 0, temp, 0, temp.Length * sizeof(int));
+                return temp;
+            }
+            set
+            {
+                byte[] temp = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, temp, 0, temp.Length);
+                _SpectrumYCalculated = temp; OnPropertyChanged();
+            }
+        }
+
         [Column(CanBeNull = true, Storage = "_StopType")]
         public string StopType
         { get { return _StopType; } set { _StopType = value; OnPropertyChanged(); } }
@@ -132,21 +147,64 @@ namespace newRBS.Models
         public int StopValue
         { get { return _StopValue; } set { _StopValue = value; OnPropertyChanged(); } }
 
-        public ExpDetails expDetails_;
-        public EnergyCalibration energyCalibration_;
+        [Column(Storage = "_EnergyCalOffset")]
+        public double EnergyCalOffset
+        { get { return _EnergyCalOffset; } set { _EnergyCalOffset = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_EnergyCalSlope")]
+        public double EnergyCalSlope
+        { get { return _EnergyCalSlope; } set { _EnergyCalSlope = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_IncomingIonNumber")]
+        public int IncomingIonNumber
+        { get { return _IncomingIonNumber; } set { _IncomingIonNumber = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_IncomingIonMass")]
+        public int IncomingIonMass
+        { get { return _IncomingIonMass; } set { _IncomingIonMass = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_IncomingIonEnergy")]
+        public double IncomingIonEnergy
+        { get { return _IncomingIonEnergy; } set { _IncomingIonEnergy = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_IncomingIonAngle")]
+        public double IncomingIonAngle
+        { get { return _IncomingIonAngle; } set { _IncomingIonAngle = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_OutcomingIonAngle")]
+        public double OutcomingIonAngle
+        { get { return _OutcomingIonAngle; } set { _OutcomingIonAngle = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_SolidAngle")]
+        public double SolidAngle
+        { get { return _SolidAngle; } set { _SolidAngle = value; OnPropertyChanged(); } }
+
+        [Column(CanBeNull = true, Storage = "_X")]
+        public double? X
+        { get { return _X; } set { _X = value; OnPropertyChanged(); } }
+
+        [Column(CanBeNull = true, Storage = "_Y")]
+        public double? Y
+        { get { return _Y; } set { _Y = value; OnPropertyChanged(); } }
+
+        [Column(CanBeNull = true, Storage = "_Phi")]
+        public double? Phi
+        { get { return _Phi; } set { _Phi = value; OnPropertyChanged(); } }
+
+        [Column(CanBeNull = true, Storage = "_Theta")]
+        public double? Theta
+        { get { return _Theta; } set { _Theta = value; OnPropertyChanged(); } }
 
         public Chamber chamber;
-        public RandomAligned randomAligned;
-        public float x, y, z, phi, psi;
 
-        public readonly int[] SpectrumX = new int[16384];
-        public float[] SpectrumCalX
+        public readonly int[] SpectrumX ;
+        public double[] SpectrumCalX
         {
             get
             {
-                float[] temp = new float[SpectrumX.Length];
+                double[] temp = new double[SpectrumX.Length];
                 for (int i = 0; i < SpectrumX.Length; i++)
-                    temp[i] = energyCalibration_.energyCalSlope * SpectrumX[i] + energyCalibration_.energyCalOffset;
+                    temp[i] = EnergyCalSlope * SpectrumX[i] + EnergyCalOffset;
                 return temp;
             }
         }
@@ -159,21 +217,27 @@ namespace newRBS.Models
         /// <param name="expDetails">Experimental details</param>
         /// <param name="energyCalibration">Energy calibration</param>
         /// <param name="stop">Stop condition</param>
-        public Spectrum(int channel, ExpDetails expDetails, EnergyCalibration energyCalibration, string stopType, int stopValue, bool runs)
+        public Measurement(int channel, int incomingIonNumber, int incomingIonMass, double incomingIonEnergy, double incomingIonAngle, double outcomingIonAngle, double solidAngle, double energyCalOffset, double energyCalSlope, string stopType, int stopValue, bool runs, int numOfChannels)
         {
-            //Console.WriteLine("");
-            //SpectrumID = id;
             Channel = channel;
-            expDetails_ = expDetails;
-            energyCalibration_ = energyCalibration;
+            StartTime = DateTime.Now;
+            IncomingIonNumber = incomingIonNumber;
+            IncomingIonMass = incomingIonMass;
+            IncomingIonEnergy = incomingIonEnergy;
+            IncomingIonAngle = incomingIonAngle;
+            OutcomingIonAngle = outcomingIonAngle;
+            SolidAngle = solidAngle;
+            EnergyCalOffset = energyCalOffset;
+            EnergyCalSlope = energyCalSlope;
             StopType = stopType;
             StopValue = stopValue;
             Runs = runs;
-            StartTime = DateTime.Now;
-            for (int i = 0; i < 16384; i++) { SpectrumX[i] = i; }
+            NumOfChannels = numOfChannels;
+            SpectrumX = new int[numOfChannels];
+            for (int i = 0; i < numOfChannels; i++) { SpectrumX[i] = i; }
         }
 
-        public Spectrum()
+        public Measurement()
         {
 
         }

@@ -36,7 +36,7 @@
             <DataGridTemplateColumn Header="Selected">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
@@ -46,26 +46,26 @@
                 IsReadOnly="False"/-->
             <DataGridTextColumn 
                 Header="SpectrumID" 
-                Binding="{Binding spectrum.SpectrumID}"
+                Binding="{Binding Measurement.MeasurementID}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Channel" 
-                Binding="{Binding spectrum.Channel}"/>
+                Binding="{Binding Measurement.Channel}"/>
             <DataGridCheckBoxColumn 
                 Header="Runs"
-                Binding="{Binding spectrum.Runs}"/>
+                Binding="{Binding Measurement.Runs}"/>
             <DataGridTextColumn 
                 Header="StartTime" 
-                Binding="{Binding spectrum.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                Binding="{Binding Measurement.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
             <DataGridTextColumn 
                 Header="Duration" 
-                Binding="{Binding spectrum.Duration, StringFormat=hh\\:mm\\:ss}"/>
+                Binding="{Binding Measurement.Duration, StringFormat=hh\\:mm\\:ss}"/>
             <DataGridTextColumn 
                 Header="Progress" 
-                Binding="{Binding spectrum.Progress, StringFormat={}{0:P0}}"/>
+                Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"/>
             <DataGridTextColumn 
                 Header="StopTime" 
-                Binding="{Binding spectrum.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                Binding="{Binding Measurement.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
         </DataGrid.Columns>
     </DataGrid>
 </UserControl>
