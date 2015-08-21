@@ -124,7 +124,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\MeasureWaveform.cs" />
-    <Compile Include="Models\Spectrum.cs" />
+    <Compile Include="Models\RBS_Database.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
@@ -160,6 +160,9 @@
     <Compile Include="Views\NewMeasurementView.xaml.cs">
       <DependentUpon>NewMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewUtils\InputDialog.xaml.cs">
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\ChannelConfigurationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -193,6 +196,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NewMeasurementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ViewUtils\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
