@@ -183,7 +183,7 @@ namespace newRBS.ViewModels
 
             SelectedPath = dialog.FileName;
 
-            List<Models.Measurement> importedMeasurements = dataSpectra.ImportSpectra(SelectedPath);
+            List<Models.Measurement> importedMeasurements = dataSpectra.LoadMeasurementsFromFile(SelectedPath);
 
             newMeausurements.Clear();
 

@@ -16,162 +16,39 @@ namespace newRBS.Models
     public class DataSpectra
     {
 
-        public delegate void EventHandlerSpectrum(Measurement spectrum);
-        public event EventHandlerSpectrum EventSpectrumNew, EventSpectrumUpdate, EventSpectrumFinished;
+        public delegate void EventHandlerMeasurement(Measurement spectrum);
+        public event EventHandlerMeasurement EventMeasurementNew, EventMeasurementUpdate, EventMeasurementFinished;
 
-        public delegate void EventHandlerSpectrumID(int spectrumID);
-        public event EventHandlerSpectrumID EventSpectrumRemove;
+        public delegate void EventHandlerMeasurementID(int measurementID);
+        public event EventHandlerMeasurementID EventMeasurementRemove;
 
         TraceSource trace = new TraceSource("DataSpectra");
 
-        //private string ConnectionString = "Data Source = SVRH; Initial Catalog = p4mist_db; User ID = p4mist; Password = testtesttesttest";
-        private string ConnectionString = "Data Source = SVRH; User ID = p4mist; Password = testtesttesttest";
-
-        public List<int> GetAllChannels()
+        public void AddSpectrum(Measurement measurement)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            var channels = from spec in rbs_Database.Measurements select spec.Channel;
-
-            List<int> noDupes = channels.Distinct().ToList();
-
-            return noDupes;
-        }
-
-        public List<Sample> GetAllSamples()
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            List<Sample> SampleList = (from sample in rbs_Database.Samples select sample).ToList();
-
-            return SampleList;
-        }
-
-        public List<int> GetAllYears()
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            var years = from spec in rbs_Database.Measurements select spec.StartTime.Year;
-
-            List<int> noDupes = years.Distinct().ToList();
-
-            return noDupes;
-        }
-
-        public List<int> GetAllMonths(int year)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            var months = from spec in rbs_Database.Measurements where spec.StartTime.Year == year select spec.StartTime.Month;
-
-            List<int> noDupes = months.Distinct().ToList();
-
-            return noDupes;
-        }
-
-        public List<int> GetAllDays(int year, int month)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            var days = from spec in rbs_Database.Measurements where spec.StartTime.Year == year && spec.StartTime.Month == month select spec.StartTime.Day;
-
-            List<int> noDupes = days.Distinct().ToList();
-
-            return noDupes;
-        }
-
-
-        public List<Measurement> GetSpectra_All()
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            IQueryable<Measurement> Spec = from spec in rbs_Database.Measurements select spec;
-
-            Console.WriteLine("Num Spectra: {0}", Spec.Count());
-
-            return Spec.ToList();
-        }
-
-        public List<Measurement> GetSpectra_Date(ViewModels.Filter selectedFilter)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            IQueryable<Measurement> Spec = null;
-
-            switch (selectedFilter.SubType)
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
             {
-                case "Today":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date == DateTime.Today select spec; break; }
-                case "ThisWeek":
-                    {
-                        int dayofweek = (int)DateTime.Today.DayOfWeek;
-                        Console.WriteLine(dayofweek);
-                        Spec = from spec in rbs_Database.Measurements where (DateTime.Today.DayOfYear - spec.StartTime.DayOfYear) < dayofweek select spec;
-                        break;
-                    }
-                case "ThisMonth":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Month == DateTime.Today.Month select spec; break; }
-                case "ThisYear":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == DateTime.Today.Year select spec; break; }
-                case "Year":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year select spec; break; }
-                case "Month":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month select spec; break; }
-                case "Day":
-                    { Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month && spec.StartTime.Date.Day == selectedFilter.day select spec; break; }
+                db.Measurements.InsertOnSubmit(measurement);
+
+                db.SubmitChanges();
+
+                if (EventMeasurementNew != null) { EventMeasurementNew(measurement); } else { Console.WriteLine("EventSpectrumNew null"); }
             }
-            Console.WriteLine("asdf");
-            return Spec.ToList();
-
-        }
-        public List<Measurement> GetSpectra_Channel(ViewModels.Filter selectedFilter)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-
-            IQueryable<Measurement> Spec = from spec in rbs_Database.Measurements where spec.Channel == selectedFilter.channel select spec;
-
-            return Spec.ToList();
         }
 
-        public Measurement GetSpectrum_SpectrumID(int spectrumID)
+        public void DeleteSpectra(List<int> measurementIDs)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = Console.Out;
-            Console.WriteLine(spectrumID);
-            return (from spec in rbs_Database.Measurements where spec.MeasurementID == spectrumID select spec).First();
-        }
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            {
+                List<Measurement> MeasurementsToDelete = db.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
+                //from spec in rbs_Database.Measurements where measurementIDs.Contains(spec.MeasurementID) select spec;
 
-        public void AddSpectrum(Measurement spectrum)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
+                db.Measurements.DeleteAllOnSubmit(MeasurementsToDelete);
+                db.SubmitChanges();
 
-            rbs_Database.Measurements.InsertOnSubmit(spectrum);
-
-            rbs_Database.SubmitChanges();
-
-            if (EventSpectrumNew != null) { EventSpectrumNew(spectrum); } else { Console.WriteLine("EventSpectrumNew null"); }
-        }
-
-        public void DeleteSpectra(List<int> spectraIDs)
-        {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-
-            var deleteSpectra = from spec in rbs_Database.Measurements where spectraIDs.Contains(spec.MeasurementID) select spec;
-
-            rbs_Database.Measurements.DeleteAllOnSubmit(deleteSpectra);
-
-            rbs_Database.SubmitChanges();
-
-            foreach (int spectrumID in spectraIDs)
-                if (EventSpectrumRemove != null) { EventSpectrumRemove(spectrumID); } else { Console.WriteLine("EventSpectrumRemove null"); }
+                foreach (int measurementID in measurementIDs)
+                    if (EventMeasurementRemove != null) { EventMeasurementRemove(measurementID); } else { Console.WriteLine("EventSpectrumRemove null"); }
+            }
         }
 
         /// <summary>
@@ -182,15 +59,17 @@ namespace newRBS.Models
         /// <returns>ID of the new spectrum.</returns>
         public int NewSpectrum(int channel, int incomingIonNumber, int incomingIonMass, double incomingIonEnergy, double incomingIonAngle, double outcomingIonAngle, double solidAngle, double energyCalOffset, double energyCalSlope, string stopType, int stopValue, bool runs, int numOfChannels)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            {
+                Measurement newSpectrum = new Measurement(channel, incomingIonNumber, incomingIonMass, incomingIonEnergy, incomingIonAngle, outcomingIonAngle, solidAngle, energyCalOffset, energyCalSlope, stopType, stopValue, runs, numOfChannels);
 
-            Measurement newSpectrum = new Measurement(channel, incomingIonNumber, incomingIonMass, incomingIonEnergy, incomingIonAngle, outcomingIonAngle, solidAngle, energyCalOffset, energyCalSlope, stopType, stopValue, runs, numOfChannels);
-            rbs_Database.Measurements.InsertOnSubmit(newSpectrum);
-            rbs_Database.SubmitChanges();
+                db.Measurements.InsertOnSubmit(newSpectrum);
+                db.SubmitChanges();
 
-            if (EventSpectrumNew != null) { EventSpectrumNew(newSpectrum); } else { Console.WriteLine("EventSpectrumNew null"); }
+                if (EventMeasurementNew != null) { EventMeasurementNew(newSpectrum); } else { Console.WriteLine("EventSpectrumNew null"); }
 
-            return newSpectrum.MeasurementID;
+                return newSpectrum.MeasurementID;
+            }
         }
 
         /// <summary>
@@ -198,129 +77,117 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="IDs">Array of IDs of the spectra to save.</param>
         /// <param name="file">Filename of the file to save the spectra to.</param>
-        public void ExportSpectra(int[] spectrumIDs, string file)
+        public void ExportMeasurements(int[] measurementIDs, string file)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-
-            TextWriter tw = new StreamWriter(file);
-
-            // Header
-            string strChannel = "Channel";
-            string strID = "ID";
-            string strStart = "StartTime";
-            string strStop = "StopTime";
-            string strECalOffset = "EnergyCalOffset";
-            string strECalSlope = "EnergyCalSlope";
-            string strName = "Name";
-
-            var expSpectra = from spec in rbs_Database.Measurements where spectrumIDs.Contains(spec.MeasurementID) select spec;
-
-            if (!expSpectra.Any())
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Spectra: No spectrum not found"); tw.Close(); return; }
-
-            foreach (var expSpectrum in expSpectra)
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
             {
-                strChannel += String.Format("\t {0}", expSpectrum.Channel);
-                strID += String.Format("\t {0}", expSpectrum.MeasurementID);
-                strStart += String.Format("\t {0}", expSpectrum.StartTime);
-                strStop += String.Format("\t {0}", expSpectrum.StopTime);
-                //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
-                //strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalSlope);
-                strName += String.Format("\t {0}", expSpectrum.Sample);
-            }
+                using (TextWriter tw = new StreamWriter(file))
+                {
 
-            tw.WriteLine(strChannel);
-            tw.WriteLine(strID);
-            tw.WriteLine(strStart);
-            tw.WriteLine(strStop);
-            tw.WriteLine(strECalOffset);
-            tw.WriteLine(strECalSlope);
-            tw.WriteLine(strName);
+                    // Header
+                    string strChannel = "Channel";
+                    string strID = "ID";
+                    string strStart = "StartTime";
+                    string strStop = "StopTime";
+                    string strECalOffset = "EnergyCalOffset";
+                    string strECalSlope = "EnergyCalSlope";
+                    string strName = "Name";
 
-            // Data
-            //for (int x = 0; x < expSpectrum.SpectrumX.Length; x++)
-            {
-                // TODO: Write data
+                    List<Measurement> MeasurementsToExport = db.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
+
+                    if (!MeasurementsToExport.Any())
+                    { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
+
+                    foreach (var expSpectrum in MeasurementsToExport)
+                    {
+                        strChannel += String.Format("\t {0}", expSpectrum.Channel);
+                        strID += String.Format("\t {0}", expSpectrum.MeasurementID);
+                        strStart += String.Format("\t {0}", expSpectrum.StartTime);
+                        strStop += String.Format("\t {0}", expSpectrum.StopTime);
+                        //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
+                        //strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalSlope);
+                        strName += String.Format("\t {0}", expSpectrum.Sample);
+                    }
+
+                    tw.WriteLine(strChannel);
+                    tw.WriteLine(strID);
+                    tw.WriteLine(strStart);
+                    tw.WriteLine(strStop);
+                    tw.WriteLine(strECalOffset);
+                    tw.WriteLine(strECalSlope);
+                    tw.WriteLine(strName);
+
+                    // TODO: Write data              
+                }
             }
-            tw.Close();
         }
 
-        public void UpdateSpectrum(int spectrumID, int[] spectrumY)
+        public void UpdateMeasurement(int measurementID, int[] spectrumY)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-            rbs_Database.Log = null;
-
-            var updateSpectrum = (from spec in rbs_Database.Measurements where spec.MeasurementID == spectrumID select spec).First();
-
-            if (updateSpectrum == null)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Spectrum with SpectrumID={0} not found", spectrumID); return; }
-
-            if (spectrumY.Length != 16384)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
-
-            updateSpectrum.SpectrumY = spectrumY;
-
-            updateSpectrum.Duration = new DateTime(2000,01,01) + (DateTime.Now - updateSpectrum.StartTime);
-
-            switch (updateSpectrum.StopType)
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
             {
-                case "Manual": updateSpectrum.Progress = 0; break;
-                case "Counts":
-                    int counts = 0;
-                    for (int i = 0; i < updateSpectrum.SpectrumY.Length; i++)
-                    { counts += updateSpectrum.SpectrumY[i]; }
-                    updateSpectrum.Progress = counts / (int)updateSpectrum.StopValue;
-                    break;
-                case "Time":
-                    updateSpectrum.Progress = (updateSpectrum.Duration - DateTime.MinValue).TotalMinutes / (int)updateSpectrum.StopValue; break;
-                    // TODO: Chopper
+                Measurement MeasurementToUpdate = db.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
+
+                if (MeasurementToUpdate == null)
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = {0} not found", measurementID); return; }
+
+                if (spectrumY.Length != 16384) // TODO!!!
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
+
+                MeasurementToUpdate.SpectrumY = spectrumY;
+
+                MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+
+                switch (MeasurementToUpdate.StopType)
+                {
+                    case "Manual": MeasurementToUpdate.Progress = 0; break;
+                    case "Counts":
+                        int counts = 0;
+                        for (int i = 0; i < MeasurementToUpdate.SpectrumY.Length; i++)
+                        { counts += MeasurementToUpdate.SpectrumY[i]; }
+                        MeasurementToUpdate.Progress = counts / (int)MeasurementToUpdate.StopValue;
+                        break;
+                    case "Time":
+                        MeasurementToUpdate.Progress = (MeasurementToUpdate.Duration - DateTime.MinValue).TotalMinutes / (int)MeasurementToUpdate.StopValue; break;
+                        // TODO: Chopper
+                }
+
+                db.SubmitChanges();
+
+                if (MeasurementToUpdate.Progress >= 1)
+                {
+                    MeasurementToUpdate.Progress = 1;
+                    if (EventMeasurementFinished != null) EventMeasurementFinished(MeasurementToUpdate);
+                }
+
+                if (EventMeasurementUpdate != null) EventMeasurementUpdate(MeasurementToUpdate);
             }
-
-            rbs_Database.SubmitChanges();
-
-            if (updateSpectrum.Progress >= 1)
-            {
-                updateSpectrum.Progress = 1;
-                if (EventSpectrumFinished != null) EventSpectrumFinished(updateSpectrum);
-            }
-
-            if (EventSpectrumUpdate != null) EventSpectrumUpdate(updateSpectrum);
         }
 
         /// <summary>
         /// Function that stops the Spectrum: It sets stopTime = now and runs = false.
         /// </summary>
         /// <param name="ID">ID of the spectrum to be stopped.</param>
-        public void StopSpectrum(int spectrumID)
+        public void FinishMeasurement(int measurementID)
         {
-            RBS_Database rbs_Database = new RBS_Database(ConnectionString);
+            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            {
+                Measurement MeasurementToStop = db.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
 
-            Measurement stopSpectrum = (from spec in rbs_Database.Measurements where spec.MeasurementID == spectrumID select spec).First();
+                if (MeasurementToStop == null)
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = {0} not found", measurementID); return; }
 
-            if (stopSpectrum == null)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't stop Spectrum: Spectrum with SpectrumID={0} not found", spectrumID); return; }
+                MeasurementToStop.StopTime = DateTime.Now;
+                MeasurementToStop.Runs = false;
 
-            stopSpectrum.StopTime = DateTime.Now;
-            stopSpectrum.Runs = false;
+                db.SubmitChanges();
 
-            rbs_Database.SubmitChanges();
-
-            if (EventSpectrumUpdate != null) EventSpectrumUpdate(stopSpectrum);
+                if (EventMeasurementUpdate != null) EventMeasurementUpdate(MeasurementToStop);
+            }
         }
 
-        /// <summary>
-        /// Function that updates the metadata of the spectrum (duration, progress, ...)
-        /// </summary>
-        /// <param name="ID">ID of the spectrum to be updated</param>
-        public void UpdateSpectrumInfos(int spectrumID)
+        public List<Measurement> LoadMeasurementsFromFile(string fileName)
         {
-
-        }
-
-        public List<Measurement> ImportSpectra(string fileName)
-        {
-            //RBS_Database rbs_Database = new RBS_Database(ConnectionString);
-
             List<Measurement> newMeasurements = new List<Measurement>();
             List<List<int>> spectraY = new List<List<int>>();
 
@@ -355,7 +222,7 @@ namespace newRBS.Models
                             case "Projectile":
                                 { newMeasurements[i].IncomingIonNumber = Int32.Parse(lineParts[i + 1]); break; }
                             case "Energy":
-                                { newMeasurements[i].IncomingIonEnergy = Convert.ToDouble(lineParts[i + 1].Replace(".",",")); break; }
+                                { newMeasurements[i].IncomingIonEnergy = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                             case "Scattering angle":
                                 { newMeasurements[i].OutcomingIonAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                             case "Incident angle":

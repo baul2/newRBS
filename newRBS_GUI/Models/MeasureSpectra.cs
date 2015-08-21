@@ -92,7 +92,7 @@ namespace newRBS.Models
                 spectraMeasurementTimer[channel].Stop();
                 Console.WriteLine("ID to stop: {0}", ID);
 
-                dataSpectra.StopSpectrum(ID);
+                dataSpectra.FinishMeasurement(ID);
 
                 activeChannels.Remove(channel);
             }
@@ -107,7 +107,7 @@ namespace newRBS.Models
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(channel);
             Console.WriteLine("MeasurementWorker ID = {0}; Counts = {1} ", ID, newSpectrumY.Sum());
-            dataSpectra.UpdateSpectrum(ID, newSpectrumY);
+            dataSpectra.UpdateMeasurement(ID, newSpectrumY);
         }
     }
 }

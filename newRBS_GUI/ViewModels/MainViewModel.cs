@@ -97,7 +97,7 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_DeleteMeasurementsCommand");
 
-            SimpleIoc.Default.GetInstance<SpectraListViewModel>().DeleteSelectedSpectra();
+            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().DeleteSelectedSpectra();
         }
 
         public void _ChannelConfigurationCommand()

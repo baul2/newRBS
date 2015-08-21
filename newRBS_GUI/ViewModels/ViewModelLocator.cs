@@ -45,9 +45,9 @@ namespace newRBS.ViewModels
             // The ViewModels
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<NewMeasurementViewModel>();
-            SimpleIoc.Default.Register<SpectraFilterViewModel>();
-            SimpleIoc.Default.Register<SpectraListViewModel>();
-            SimpleIoc.Default.Register<SpectraPlotViewModel>();
+            SimpleIoc.Default.Register<MeasurementFilterViewModel>();
+            SimpleIoc.Default.Register<MeasurementListViewModel>();
+            SimpleIoc.Default.Register<MeasurementPlotViewModel>();
             SimpleIoc.Default.Register<ImportSpectraViewModel>();
             SimpleIoc.Default.Register<ChannelConfigurationViewModel>();
 
@@ -65,14 +65,14 @@ namespace newRBS.ViewModels
         public NewMeasurementViewModel newMeasurementViewModel
         { get { return ServiceLocator.Current.GetInstance<NewMeasurementViewModel>(); } }
 
-        public SpectraFilterViewModel spectraFilterViewModel
-        { get { return ServiceLocator.Current.GetInstance<SpectraFilterViewModel>(); } }
+        public MeasurementFilterViewModel spectraFilterViewModel
+        { get { return ServiceLocator.Current.GetInstance<MeasurementFilterViewModel>(); } }
 
-        public SpectraListViewModel spectraListViewModel
-        { get { return ServiceLocator.Current.GetInstance<SpectraListViewModel>(); } }
+        public MeasurementListViewModel spectraListViewModel
+        { get { return ServiceLocator.Current.GetInstance<MeasurementListViewModel>(); } }
 
-        public SpectraPlotViewModel spectraPlotViewModel
-        { get { return ServiceLocator.Current.GetInstance<SpectraPlotViewModel>(); } }
+        public MeasurementPlotViewModel spectraPlotViewModel
+        { get { return ServiceLocator.Current.GetInstance<MeasurementPlotViewModel>(); } }
 
         public ImportSpectraViewModel importSpectraViewModel
         { get { return ServiceLocator.Current.GetInstance<ImportSpectraViewModel>(); } }

@@ -9,14 +9,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace newRBS.Models
-{
+{ 
     [Database(Name = "p4mist_db")]
     public class RBS_Database : DataContext
     {
         public Table<Measurement> Measurements;
         public Table<Sample> Samples;
 
-        public RBS_Database(string connection) : base(connection) { }
+        public RBS_Database(string ConnectionString) : base(ConnectionString) { }
     }
 
     /// <summary>

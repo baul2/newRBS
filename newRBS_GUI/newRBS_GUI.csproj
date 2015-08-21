@@ -123,6 +123,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Global.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
     <Compile Include="Models\RBS_Database.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
@@ -130,10 +131,10 @@
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModels\ImportSpectraViewModel.cs" />
-    <Compile Include="ViewModels\SpectraListViewModel.cs" />
-    <Compile Include="ViewModels\SpectraFilterViewModel.cs" />
+    <Compile Include="ViewModels\MeasurementListViewModel.cs" />
+    <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
     <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
-    <Compile Include="ViewModels\SpectraPlotViewModel.cs" />
+    <Compile Include="ViewModels\MeasurementPlotViewModel.cs" />
     <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModelUtils\CheckedListItem.cs" />
     <Compile Include="ViewModelUtils\DialogCloser.cs" />
@@ -235,9 +236,7 @@
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utils\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
