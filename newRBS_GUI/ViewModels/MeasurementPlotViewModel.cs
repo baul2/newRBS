@@ -133,7 +133,7 @@ namespace newRBS.ViewModels
 
             Console.WriteLine("MeasurementUpdate");
 
-            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == spectrum.MeasurementID).First();
+            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == spectrum.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
                 int index = plotModel.Series.IndexOf(updateSerie);

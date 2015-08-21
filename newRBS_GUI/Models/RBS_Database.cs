@@ -16,7 +16,12 @@ namespace newRBS.Models
         public Table<Measurement> Measurements;
         public Table<Sample> Samples;
 
-        public RBS_Database(string ConnectionString) : base(ConnectionString) { }
+        public RBS_Database(string ConnectionString) : base(ConnectionString)
+        {
+            var dlo = new DataLoadOptions();
+            dlo.LoadWith<Measurement>(c => c.Sample);
+            this.LoadOptions = dlo;
+        }
     }
 
     /// <summary>
