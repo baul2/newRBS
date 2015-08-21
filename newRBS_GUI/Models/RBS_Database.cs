@@ -9,33 +9,36 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace newRBS.Models
-{
-    public enum Chamber
+{ 
+    [Database(Name = "p4mist_db")]
+    public class RBS_Database : DataContext
     {
-        Minus10,
-        Minus30,
-    }
+        public Table<Measurement> Measurements;
+        public Table<Sample> Samples;
 
-    public struct Stop
-    {
-        public string type;
-        public double value;
+        public RBS_Database(string ConnectionString) : base(ConnectionString) { }
     }
 
     /// <summary>
     /// Class responsible for storing a single spectrum.
     /// </summary>
-    [Table(Name = "dbo.Spectra")]
+    [Table(Name = "dbo.Measurements")]
     public class Measurement : INotifyPropertyChanged
     {
-        private int _MeasurementID = 0;
+        public delegate void EventHandlerSpectrumID(int spectrumID);
+        public event EventHandlerSpectrumID EventNewSample;
+
+        private int _MeasurementID;
         private string _Name;
         private int _Channel;
+        [Column(Name = "SampleID")]
         private int _SampleID;
-        private bool? _RandomAligned;
+        private EntityRef<Sample> _Sample = new EntityRef<Sample>();
+        private string _SampleRemark;
+        private string _RandomAligned = "(undefined)";
         private DateTime _StartTime;
         private DateTime? _StopTime;
-        private TimeSpan _Duration = TimeSpan.Zero;
+        private DateTime _Duration = new DateTime(2000, 01, 01);
         private bool _Runs;
         private double? _Charge;
         private double _Progress;
@@ -44,10 +47,11 @@ namespace newRBS.Models
         private byte[] _SpectrumY = new byte[] { 0 };
         [Column(Name = "SpectrumYCalculated")]
         private byte[] _SpectrumYCalculated = new byte[] { 0 };
-        private string _StopType;
-        private int _StopValue;
+        private string _StopType = "Manual";
+        private int? _StopValue;
         private double _EnergyCalOffset;
         private double _EnergyCalSlope;
+        private string _Chamber = "(undefined)";
         private int _IncomingIonNumber;
         private int _IncomingIonMass;
         private double _IncomingIonEnergy;
@@ -71,15 +75,33 @@ namespace newRBS.Models
         public int Channel
         { get { return _Channel; } set { _Channel = value; OnPropertyChanged(); } }
 
-        [Column(CanBeNull = true, Storage = "_SampleID")]
-        public int SampleID
-        { get { return _SampleID; } set { _SampleID = value; OnPropertyChanged(); } }
+        [Association(IsForeignKey = true, Storage = "_Sample", ThisKey = "_SampleID")]
+        public Sample Sample
+        {
+            get { return _Sample.Entity; }
+            set
+            {
+                if (_Sample.Entity == value)
+                    return;
+                _Sample.Entity = value;
+                OnPropertyChanged();
+                if (value != null)
+                {
+                    if (value.SampleName == "New...")
+                    { if (EventNewSample != null) { EventNewSample(MeasurementID); } else { Console.WriteLine("EventNewSample null"); } }
+                }
+            }
+        }
 
-        [Column(CanBeNull = true, Storage = "_RandomAligned")]
-        public bool? RandomAligned
+        [Column(CanBeNull = true, Storage = "_SampleRemark")]
+        public string SampleRemark
+        { get { return _SampleRemark; } set { _SampleRemark = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_RandomAligned")]
+        public string RandomAligned
         { get { return _RandomAligned; } set { _RandomAligned = value; OnPropertyChanged(); } }
 
-        [Column( Storage = "_StartTime")]
+        [Column(Storage = "_StartTime")]
         public DateTime StartTime
         { get { return _StartTime; } set { _StartTime = value; OnPropertyChanged(); } }
 
@@ -87,11 +109,11 @@ namespace newRBS.Models
         public DateTime? StopTime
         { get { return _StopTime; } set { _StopTime = value; OnPropertyChanged(); } }
 
-        [Column( Storage = "_Duration", DbType = "time")]
-        public TimeSpan Duration
+        [Column(Storage = "_Duration")]
+        public DateTime Duration
         { get { return _Duration; } set { _Duration = value; OnPropertyChanged(); } }
 
-        [Column( Storage = "_Runs", DbType = "bit")]
+        [Column(Storage = "_Runs", DbType = "bit")]
         public bool Runs
         { get { return _Runs; } set { _Runs = value; OnPropertyChanged(); } }
 
@@ -99,14 +121,14 @@ namespace newRBS.Models
         public double? Charge
         { get { return _Charge; } set { _Charge = value; OnPropertyChanged(); } }
 
-        [Column( Storage = "_Progress")]
+        [Column(Storage = "_Progress")]
         public double Progress
         { get { return _Progress; } set { _Progress = value; OnPropertyChanged(); } }
 
         [Column(Storage = "_NumOfChannels")]
         public int NumOfChannels
         { get { return _NumOfChannels; } set { _NumOfChannels = value; OnPropertyChanged(); } }
-        
+
         public int[] SpectrumY
         {
             get
@@ -139,12 +161,12 @@ namespace newRBS.Models
             }
         }
 
-        [Column(CanBeNull = true, Storage = "_StopType")]
+        [Column(Storage = "_StopType")]
         public string StopType
         { get { return _StopType; } set { _StopType = value; OnPropertyChanged(); } }
 
         [Column(CanBeNull = true, Storage = "_StopValue")]
-        public int StopValue
+        public int? StopValue
         { get { return _StopValue; } set { _StopValue = value; OnPropertyChanged(); } }
 
         [Column(Storage = "_EnergyCalOffset")]
@@ -155,9 +177,25 @@ namespace newRBS.Models
         public double EnergyCalSlope
         { get { return _EnergyCalSlope; } set { _EnergyCalSlope = value; OnPropertyChanged(); } }
 
+        [Column(Storage = "_Chamber")]
+        public string Chamber
+        { get { return _Chamber; } set { _Chamber = value; OnPropertyChanged(); } }
+
         [Column(Storage = "_IncomingIonNumber")]
         public int IncomingIonNumber
-        { get { return _IncomingIonNumber; } set { _IncomingIonNumber = value; OnPropertyChanged(); } }
+        {
+            get { return _IncomingIonNumber; }
+            set
+            {
+                if (_IncomingIonNumber == value) return;
+                _IncomingIonNumber = value;
+                switch (value)
+                {
+                    case 1: IncomingIonMass = 1; break;
+                    case 2: IncomingIonMass = 4; break;
+                    case 3: IncomingIonMass = 7; break;
+                }
+                OnPropertyChanged(); } }
 
         [Column(Storage = "_IncomingIonMass")]
         public int IncomingIonMass
@@ -195,9 +233,8 @@ namespace newRBS.Models
         public double? Theta
         { get { return _Theta; } set { _Theta = value; OnPropertyChanged(); } }
 
-        public Chamber chamber;
 
-        public readonly int[] SpectrumX ;
+        public readonly int[] SpectrumX;
         public double[] SpectrumCalX
         {
             get
@@ -220,6 +257,7 @@ namespace newRBS.Models
         public Measurement(int channel, int incomingIonNumber, int incomingIonMass, double incomingIonEnergy, double incomingIonAngle, double outcomingIonAngle, double solidAngle, double energyCalOffset, double energyCalSlope, string stopType, int stopValue, bool runs, int numOfChannels)
         {
             Channel = channel;
+            RandomAligned = " ";
             StartTime = DateTime.Now;
             IncomingIonNumber = incomingIonNumber;
             IncomingIonMass = incomingIonMass;
@@ -239,7 +277,40 @@ namespace newRBS.Models
 
         public Measurement()
         {
+        }
 
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
+    }
+
+    [Table(Name = "dbo.Samples")]
+    public class Sample : INotifyPropertyChanged
+    {
+        private int _SampleID;
+        private string _SampleName;
+
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_SampleID", DbType = "Int IDENTITY(1,1)")]
+        public int SampleID
+        { get { return _SampleID; } }
+
+        [Column(Storage = "_SampleName")]
+        public string SampleName
+        { get { return _SampleName; } set { _SampleName = value; OnPropertyChanged(); } }
+
+        public Sample()
+        {
+        }
+
+        public Sample(string sampleName)
+        {
+            SampleName = sampleName;
         }
 
         #region INotifyPropertyChanged

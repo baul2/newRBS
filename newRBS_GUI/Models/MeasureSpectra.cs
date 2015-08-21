@@ -27,8 +27,9 @@ namespace newRBS.Models
 
         public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-        
-        public Stop stop = new Stop { type = "Manual", value = 0 };
+
+        public string StopType = "Manual";
+        public int StopValue = 0;
 
         private Timer[] spectraMeasurementTimer = new Timer[8];
 
@@ -67,7 +68,7 @@ namespace newRBS.Models
             foreach (int channel in selectedChannels)
             {
                 cAEN_x730.StartAcquisition(channel);
-                int ID = dataSpectra.NewSpectrum(channel, IncomingIonNumber, IncomingIonMass, IncomingIonEnergy, IncomingIonAngle, OutcomingIonAngle, SolidAngle, EnergyCalOffset[channel], EnergyCalSlope[channel], "Manual", 0, true, NumOfChannels);
+                int ID = dataSpectra.NewSpectrum(channel, IncomingIonNumber, IncomingIonMass, IncomingIonEnergy, IncomingIonAngle, OutcomingIonAngle, SolidAngle, EnergyCalOffset[channel], EnergyCalSlope[channel], StopType, StopValue, true, NumOfChannels);
                 IDs.Add(ID);
                 activeChannels.Add(channel, ID);
 
@@ -91,7 +92,7 @@ namespace newRBS.Models
                 spectraMeasurementTimer[channel].Stop();
                 Console.WriteLine("ID to stop: {0}", ID);
 
-                dataSpectra.StopSpectrum(ID);
+                dataSpectra.FinishMeasurement(ID);
 
                 activeChannels.Remove(channel);
             }
@@ -106,7 +107,7 @@ namespace newRBS.Models
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(channel);
             Console.WriteLine("MeasurementWorker ID = {0}; Counts = {1} ", ID, newSpectrumY.Sum());
-            dataSpectra.UpdateSpectrum(ID, newSpectrumY);
+            dataSpectra.UpdateMeasurement(ID, newSpectrumY);
         }
     }
 }

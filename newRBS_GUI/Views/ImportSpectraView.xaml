@@ -8,57 +8,89 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="ImportSpectra" SizeToContent="WidthAndHeight"
+        Title="ImportSpectra" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
         DataContext="{Binding importSpectraViewModel, Source={StaticResource Locator}}"
         xc:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
-        <Border DockPanel.Dock="Top">
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <TextBox Text="{Binding SelectedPath}" Margin="5" Width="200"/>
-                    <Button Command="{Binding OpenFileCommand}" Margin="5" Padding="3" Content="Open File"/>
-                </StackPanel>
-                <ComboBox ItemsSource="{Binding newSpectra}" DisplayMemberPath="Name" SelectedItem="{Binding selectedSpectrum}" />
-            </StackPanel>
-        </Border>
+        <StackPanel DockPanel.Dock="top" Orientation="Vertical">
+            <DockPanel LastChildFill="True" >
+                <Button DockPanel.Dock="Right" Command="{Binding OpenFileCommand}" Margin="5" Padding="3" Width="100" Content="Open File"/>
+                <TextBox Text="{Binding SelectedPath}" Margin="5"/>
+            </DockPanel>
+            <ComboBox ItemsSource="{Binding newMeausurements}" DisplayMemberPath="Name" SelectedItem="{Binding selectedMeasurement}" Margin="5" Padding="3" />
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <Border DockPanel.Dock="Bottom">
-            <StackPanel Orientation="Vertical">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Name:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
-                    <TextBox Text="{Binding selectedSpectrum.Name, Mode=TwoWay}" VerticalContentAlignment="Center" Grid.Column="1" Grid.Row="0" />
-                    <Label Content="Start time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                    <!--DatePicker SelectedDate="{Binding selectedSpectrum.StartTime}" Grid.Column="1" Grid.Row="1" /-->
-                    <xctk:DateTimePicker Value="{Binding selectedSpectrum.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yy-MM-dd hh:mm" Grid.Column="1" Grid.Row="1" />
-                </Grid>
-                <StackPanel Orientation="Horizontal">
-                    <Button Command="{Binding AddCurrentSpectrumCommand}" Content="Add current spectrum" Margin="5" Padding="3"/>
-                    <Button Content="Add all spectra" Margin="5" Padding="3"/>
-                    <Button Content="Cancel" Margin="5" Padding="3"/>
-                </StackPanel>
+                <Label Content="Name:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="0"/>
+                <TextBox Text="{Binding selectedMeasurement.Name, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
+
+                <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
+                <ComboBox ItemsSource="{Binding SampleList}" DisplayMemberPath="SampleName" SelectedItem="{Binding selectedMeasurement.Sample, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="1" />
+                <Label Content="Sample remark:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="1"/>
+                <TextBox Text="{Binding selectedMeasurement.SampleRemark, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="1" />
+
+                <Label Content="Chamber:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="2"/>
+                <ComboBox ItemsSource="{Binding Chambers}" SelectedItem="{Binding selectedMeasurement.Chamber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
+                <Label Content="Orientation:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="2"/>
+                <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding selectedMeasurement.RandomAligned, Mode=TwoWay}" Margin="3" Grid.Column="3" Grid.Row="2" />
+
+                <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
+                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="Name" SelectedValuePath="AtomicNumber" SelectedValue="{Binding selectedMeasurement.IncomingIonNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
+                <Label Content="Ion energy (keV):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="3"/>
+                <TextBox Text="{Binding selectedMeasurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
+
+                <Label Content="Ion out angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="4"/>
+                <TextBox Text="{Binding selectedMeasurement.OutcomingIonAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="4" />
+                <Label Content="Solid angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="4"/>
+                <TextBox Text="{Binding selectedMeasurement.SolidAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="4" />
+
+                <Label Content="Start time:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="6"/>
+                <xctk:DateTimePicker Value="{Binding selectedMeasurement.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yy-MM-dd HH:mm" Margin="3" Grid.Column="1" Grid.Row="6" />
+                <Label Content="Duration:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="6"/>
+                <xctk:TimePicker Value="{Binding selectedMeasurement.Duration, Mode=TwoWay}" Format="Custom" FormatString="HH:mm:ss" Margin="3" Grid.Column="3" Grid.Row="6"/>
+
+                <Label Content="Stop type:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="7"/>
+                <ComboBox ItemsSource="{Binding StopTypeList}" SelectedItem="{Binding selectedMeasurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="7" />
+                <Label Content="Stop value:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="7"/>
+                <TextBox Text="{Binding selectedMeasurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7" />
+
+                <Label Content="ECal offset:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="8"/>
+                <TextBox Text="{Binding selectedMeasurement.EnergyCalOffset, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="8" />
+                <Label Content="ECal slope:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="8"/>
+                <TextBox Text="{Binding selectedMeasurement.EnergyCalSlope, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="8" />
+            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding AddCurrentMeasurementCommand}" MinWidth="100" Content="Add current measurement" Margin="5" Padding="5"/>
+                <Button Command="{Binding AddAllMeasurementsCommand}" MinWidth="100" Content="Add all measurements" Margin="5" Padding="5"/>
+                <Button Command="{Binding CancelCommand}" MinWidth="100" Content="Cancel" Margin="5" Padding="5"/>
             </StackPanel>
-        </Border>
-        <Border>
-            <oxy:Plot MinHeight="200" InvalidateFlag="{Binding areaData.Count, Delay=100}">
-                <oxy:Plot.Axes>
-                    <oxy:LinearAxis Title="Energy (keV)" Position="Bottom"/>
-                    <oxy:LinearAxis Title="Counts" Position="Left"/>
-                </oxy:Plot.Axes>
-                <oxy:Plot.Series>
-                    <oxy:AreaSeries  ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
-                </oxy:Plot.Series>
-            </oxy:Plot>
-        </Border>
+        </StackPanel>
+        <oxy:Plot MinHeight="200" InvalidateFlag="{Binding areaData.Count, Delay=100}">
+            <oxy:Plot.Axes>
+                <oxy:LinearAxis Title="Energy (keV)" Position="Bottom"/>
+                <oxy:LinearAxis Title="Counts" Position="Left"/>
+            </oxy:Plot.Axes>
+            <oxy:Plot.Series>
+                <oxy:AreaSeries  ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
+            </oxy:Plot.Series>
+        </oxy:Plot>
     </DockPanel>
 </Window>

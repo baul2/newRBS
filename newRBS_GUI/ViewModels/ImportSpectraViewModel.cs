@@ -33,31 +33,61 @@ namespace newRBS.ViewModels
         public double y2 { get; set; }
     }
 
+    public class Ion
+    {
+        public string Name { get; set; }
+        public int AtomicNumber { get; set; }
+        public int AtomicMass { get; set; }
+
+        public Ion (string name, int atomicNumber, int atomicMass)
+        {
+            Name = name;
+            AtomicNumber = atomicNumber;
+            AtomicMass = atomicMass;
+        }
+    }
+
     public class ImportSpectraViewModel : ViewModelBase
     {
         public ICommand OpenFileCommand { get; set; }
-        public ICommand AddCurrentSpectrumCommand { get; set; }
+        public ICommand AddCurrentMeasurementCommand { get; set; }
+        public ICommand AddAllMeasurementsCommand { get; set; }
+        public ICommand CancelCommand { get; set; }
 
         private Models.DataSpectra dataSpectra;
+
+        //private Models.Sample noneSample;
+        private Models.RBS_Database rbs_Database;
 
         private bool? _DialogResult;
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<Models.Measurement> newSpectra { get; set; }
+        public ObservableCollection<Models.Measurement> newMeausurements { get; set; }
 
-        private Models.Measurement _selectedSpectrum;
-        public Models.Measurement selectedSpectrum
+        private Models.Measurement _selectedMeasurement = new Models.Measurement();
+        public Models.Measurement selectedMeasurement
         {
-            get { return _selectedSpectrum; }
+            get { return _selectedMeasurement; }
             set
             {
-                _selectedSpectrum = value;
+                if (value == null) return;
+
+                if (_selectedMeasurement != null)
+                    _selectedMeasurement.EventNewSample -= new Models.Measurement.EventHandlerSpectrumID(AddNewSample);// Unsubscribe to events from old selected Measurement
+
+                _selectedMeasurement = value;
+
+                // Hooking up to events from new selected Measurement
+                _selectedMeasurement.EventNewSample += new Models.Measurement.EventHandlerSpectrumID(AddNewSample);
+
+                // Preparing the plot data
                 areaData.Clear();
                 int[] temp = value.SpectrumY;
                 for (int i = 0; i < temp.Count(); i++)
                     areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
-                RaisePropertyChanged("selectedSpectrum");
+
+                RaisePropertyChanged("selectedMeasurement");
             }
         }
 
@@ -65,7 +95,7 @@ namespace newRBS.ViewModels
         public string SelectedPath
         { get { return _SelectedPath; } set { _SelectedPath = value; RaisePropertyChanged("SelectedPath"); } }
 
-        private ObservableCollection<AreaData> _areaData;
+        private ObservableCollection<AreaData> _areaData = new ObservableCollection<AreaData>();
         public ObservableCollection<AreaData> areaData
         { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
 
@@ -73,15 +103,77 @@ namespace newRBS.ViewModels
         public string FileContent
         { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
 
+        private ObservableCollection<Models.Sample> _SampleList = new ObservableCollection<Models.Sample>();
+        public ObservableCollection<Models.Sample> SampleList
+        { get { return _SampleList; } set { _SampleList = value; RaisePropertyChanged("SampleList"); } }
+
+        public ObservableCollection<string> Orientations { get; set; }
+        public ObservableCollection<string> Chambers { get; set; }
+        public ObservableCollection<string> StopTypeList { get; set; }
+        public ObservableCollection<Ion> Ions { get; set; }
+
         public ImportSpectraViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
-            OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
-            AddCurrentSpectrumCommand = new RelayCommand(() => _AddCurrentSpectrumCommand(), () => true);
 
-            areaData = new ObservableCollection<AreaData>() { new AreaData { x1 = 1, y1 = 10, x2 = 1, y2 = 0 }, new AreaData { x1 = 2, y1 = 20, x2 = 2, y2 = 0 } };
-            newSpectra = new ObservableCollection<Models.Measurement>();
-            selectedSpectrum = new Models.Measurement();
+            OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
+            AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
+            AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
+            CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
+
+            newMeausurements = new ObservableCollection<Models.Measurement>();
+
+            rbs_Database = new Models.RBS_Database("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
+            rbs_Database.Log = Console.Out;
+
+            List<Models.Sample> Samples = (from sample in rbs_Database.Samples select sample).ToList();
+
+            SampleList.Add(new Models.Sample("New..."));
+            foreach (Models.Sample sample in Samples)
+                SampleList.Add(sample);
+
+            Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
+            Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
+            StopTypeList = new ObservableCollection<string> { "Manual", "Time", "Counts", "Chopper" };
+            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li",3,7)};
+        }
+
+        private void AddNewSample(int measurementID)
+        {
+            Console.WriteLine("AddNewSample");
+
+            ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new sample name:", "");
+            if (inputDialog.ShowDialog() == true)
+            {
+                Console.WriteLine(inputDialog.Answer);
+                if (inputDialog.Answer == "")
+                    return;
+
+                if (SampleList.FirstOrDefault(x => x.SampleName == inputDialog.Answer) != null)
+                {
+                    Console.WriteLine("Sample already exists!");
+
+                    MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    selectedMeasurement.Sample = SampleList.First(x => x.SampleName == inputDialog.Answer);
+                    Console.WriteLine(selectedMeasurement.Sample.SampleName);
+                    return;
+                }
+
+                // New sample
+                Console.WriteLine("new sample");
+                //selectedMeasurement.Sample = SampleList.Where(x => x.SampleName == "(undefined)").First();
+                Console.WriteLine("asdf");
+                Models.Sample newSample = new Models.Sample(inputDialog.Answer);
+                //rbs_Database.Samples.InsertOnSubmit(newSample);
+                //rbs_Database.SubmitChanges();
+                Console.WriteLine("asdf2");
+                SampleList.Add(newSample);
+                Console.WriteLine("SampleList.Add");
+                selectedMeasurement.Sample = newSample;
+                Console.WriteLine(selectedMeasurement.Sample.SampleName);
+                Console.WriteLine(SampleList.Contains(selectedMeasurement.Sample));
+            }
         }
 
         public void _OpenFileCommand()
@@ -91,19 +183,56 @@ namespace newRBS.ViewModels
 
             SelectedPath = dialog.FileName;
 
-            List<Models.Measurement> loadedSpectra = dataSpectra.ImportSpectra(SelectedPath);
+            List<Models.Measurement> importedMeasurements = dataSpectra.LoadMeasurementsFromFile(SelectedPath);
 
-            newSpectra.Clear();
+            newMeausurements.Clear();
 
-            foreach (Models.Measurement spectrum in loadedSpectra)
-                newSpectra.Add(spectrum);
+            for (int i = 0; i < importedMeasurements.Count(); i++)
+                importedMeasurements[i].Sample = rbs_Database.Samples.First(x => x.SampleName == "(undefined)");
 
-            selectedSpectrum = newSpectra.First();
+            foreach (Models.Measurement importedMeasurement in importedMeasurements)
+            {
+                newMeausurements.Add(importedMeasurement);
+            }
+
+            Console.WriteLine(SampleList.Contains(importedMeasurements[0].Sample));
+            selectedMeasurement = newMeausurements.First();
         }
 
-        public void _AddCurrentSpectrumCommand()
+        public void _AddCurrentMeasurementCommand()
         {
-            dataSpectra.AddSpectrum(selectedSpectrum);
+            Console.WriteLine("_AddCurrentMeasurementCommand");
+            rbs_Database.Measurements.InsertOnSubmit(selectedMeasurement);
+            rbs_Database.SubmitChanges();
+
+            selectedMeasurement = null;
+
+            newMeausurements.Remove(selectedMeasurement);
+            Console.WriteLine(newMeausurements.Count());
+            if (newMeausurements.Count() > 0)
+                selectedMeasurement = newMeausurements.First();
+            else
+            {
+                DialogResult = false;
+                _DialogResult = null;
+            }
+        }
+
+        public void _AddAllMeasurementsCommand()
+        {
+            Console.WriteLine("_AddAllMeasurementsCommand");
+            rbs_Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
+            rbs_Database.SubmitChanges();
+
+            DialogResult = false;
+            _DialogResult = null;
+        }
+
+        public void _CancelCommand()
+        {
+            Console.WriteLine("_CancelCommand");
+            DialogResult = false;
+            _DialogResult = null;
         }
     }
 }

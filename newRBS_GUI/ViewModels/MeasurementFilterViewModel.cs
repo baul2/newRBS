@@ -37,7 +37,7 @@ namespace newRBS.ViewModels
         public AsyncObservableCollection<Filter> Children { get; set; }
     }
 
-    public class SpectraFilterViewModel : INotifyPropertyChanged
+    public class MeasurementFilterViewModel : INotifyPropertyChanged
     {
         private Models.DataSpectra dataSpectra { get; set; }
         //private SpectraListViewModel spectraListViewModel;
@@ -48,11 +48,11 @@ namespace newRBS.ViewModels
         public ICommand ExpandFilterList { get; set; }
         public ICommand TestButtonClick { get; set; }
 
-        private bool _spectraFilterPanelVis = true;
-        public bool spectraFilterPanelVis
+        private bool _measurementFilterPanelVis = true;
+        public bool measurementFilterPanelVis
         {
-            get { return _spectraFilterPanelVis; }
-            set { _spectraFilterPanelVis = value; OnPropertyChanged("spectraFilterPanelVis"); }
+            get { return _measurementFilterPanelVis; }
+            set { _measurementFilterPanelVis = value; OnPropertyChanged("measurementFilterPanelVis"); }
         }
 
         public AsyncObservableCollection<string> filterTypeList { get; set; }
@@ -60,8 +60,7 @@ namespace newRBS.ViewModels
         private int _filterTypeIndex;
         public int filterTypeIndex
         {
-            get
-            { return _filterTypeIndex; }
+            get { return _filterTypeIndex; }
             set
             {
                 _filterTypeIndex = value;
@@ -73,8 +72,7 @@ namespace newRBS.ViewModels
         private Filter _selectedFilter;
         public Filter selectedFilter
         {
-            get
-            { return _selectedFilter; }
+            get { return _selectedFilter; }
             set
             {
                 Console.WriteLine("new selectedFilter");
@@ -88,9 +86,9 @@ namespace newRBS.ViewModels
 
         public object CurrSelItem { get; set; }
 
-        public RelayCommand<ViewModelUtils.TreeViewHelper.DependencyPropertyEventArgs> MySelItemChgCmd { get; set; }
+        public RelayCommand<TreeViewHelper.DependencyPropertyEventArgs> MySelItemChgCmd { get; set; }
 
-        private void TreeViewItemSelectedChangedCallBack(ViewModelUtils.TreeViewHelper.DependencyPropertyEventArgs e)
+        private void TreeViewItemSelectedChangedCallBack(TreeViewHelper.DependencyPropertyEventArgs e)
         {
             if (e != null && e.DependencyPropertyChangedEventArgs.NewValue != null)
             {
@@ -110,14 +108,14 @@ namespace newRBS.ViewModels
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public SpectraFilterViewModel()
+        public MeasurementFilterViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
 
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
             TestButtonClick = new RelayCommand(() => _TestButtonClick(), () => true);
 
-            filterTypeList = new AsyncObservableCollection<string>();
+            filterTypeList = new AsyncObservableCollection<string> { "Date", "Sample", "Channel" };
             filterTree = new TreeViewModel();
             filterTree.Items = new AsyncObservableCollection<Filter>();
             selectedFilter = new Filter() { Name = "All", Type = "All" };
@@ -125,29 +123,24 @@ namespace newRBS.ViewModels
             MySelItemChgCmd = new RelayCommand<ViewModelUtils.TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
             CurrSelItem = new object();
 
-            filterTypeList.Add("Date");
-            filterTypeList.Add("Sample");
-            filterTypeList.Add("Channel");
-
             filterTypeIndex = 0;
         }
 
         private void _ExpandFilterList()
         {
             Console.WriteLine("Expand");
-            spectraFilterPanelVis = !spectraFilterPanelVis;
+            measurementFilterPanelVis = !measurementFilterPanelVis;
         }
 
         private void _TestButtonClick()
         {
-            Console.WriteLine("TestButtionClick-SpectraFilterViewModel");
+            Console.WriteLine("TestButtionClick-measurementFilterViewModel");
         }
 
         private void FillFilterList(string filterType)
         {
-            Console.WriteLine("Update adf filter list with filterType: {0}", filterType);
+            Console.WriteLine("Update filter list with filterType: {0}", filterType);
             //filterTree.Items.Clear();
-            Console.WriteLine(filterTree.Items.Count());
             if (filterTree.Items.Count() > 0)
             {
                 foreach (Filter n in filterTree.Items)
@@ -156,9 +149,9 @@ namespace newRBS.ViewModels
                     filterTree.Items.RemoveAt(0);
                 foreach (Filter n in filterTree.Items)
                     Console.WriteLine(n.Name);
-                //Console.WriteLine(filterTree.Items[0].Name);
             }
             Console.WriteLine("clear done");
+
             switch (filterType)
             {
                 case "Date":
@@ -168,47 +161,56 @@ namespace newRBS.ViewModels
                     filterTree.Items.Add(new Filter() { Name = "This Month", Type = "Date", SubType = "ThisMonth" });
                     filterTree.Items.Add(new Filter() { Name = "This Year", Type = "Date", SubType = "ThisYear" });
 
-                    List<int> allYears = dataSpectra.GetAllYears();
-                    foreach (int Year in allYears)
+                    using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
                     {
-                        Filter newYearNode = new Filter() { Name = Year.ToString(), Type = "Date", SubType = "Year", year = Year };
-
-                        List<int> allMonths = dataSpectra.GetAllMonths(Year);
-                        if (allMonths.Count > 0)
+                        List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
+                        foreach (int Year in allYears)
                         {
-                            newYearNode.Children = new AsyncObservableCollection<Filter>();
-                            foreach (int Month in allMonths)
+                            Filter newYearNode = new Filter() { Name = Year.ToString(), Type = "Date", SubType = "Year", year = Year };
+
+                            List<int> allMonths = (from spec in db.Measurements where spec.StartTime.Year == Year select spec.StartTime.Month).Distinct().ToList();
+                            if (allMonths.Count > 0)
                             {
-                                Filter newMonthNode = new Filter() { Name = Month.ToString("D2"), Type = "Date", SubType = "Month", year = Year, month = Month };
-
-                                List<int> allDays = dataSpectra.GetAllDays(Year, Month);
-                                if (allDays.Count > 0)
+                                newYearNode.Children = new AsyncObservableCollection<Filter>();
+                                foreach (int Month in allMonths)
                                 {
-                                    newMonthNode.Children = new AsyncObservableCollection<Filter>();
-                                    foreach (int Day in allDays)
-                                    {
-                                        Filter newDayNode = new Filter() { Name = Day.ToString("D2"), Type = "Date", SubType = "Day", year = Year, month = Month, day = Day };
-                                        newMonthNode.Children.Add(newDayNode);
-                                    }
-                                }
-                                newYearNode.Children.Add(newMonthNode);
-                            }
-                        }
-                        filterTree.Items.Add(newYearNode);
-                    }
+                                    Filter newMonthNode = new Filter() { Name = Month.ToString("D2"), Type = "Date", SubType = "Month", year = Year, month = Month };
 
+                                    List<int> allDays = (from spec in db.Measurements where spec.StartTime.Year == Year && spec.StartTime.Month == Month select spec.StartTime.Day).Distinct().ToList();
+                                    if (allDays.Count > 0)
+                                    {
+                                        newMonthNode.Children = new AsyncObservableCollection<Filter>();
+                                        foreach (int Day in allDays)
+                                        {
+                                            Filter newDayNode = new Filter() { Name = Day.ToString("D2"), Type = "Date", SubType = "Day", year = Year, month = Month, day = Day };
+                                            newMonthNode.Children.Add(newDayNode);
+                                        }
+                                    }
+                                    newYearNode.Children.Add(newMonthNode);
+                                }
+                            }
+                            filterTree.Items.Add(newYearNode);
+                        }
+                    }
                     break;
+
                 case "Channel":
                     Console.WriteLine("Channel");
                     filterTree.Items.Add(new Filter() { Name = "All", Type = "All" });
-                    List<int> allChannels = dataSpectra.GetAllChannels();
-                    Console.WriteLine("NumChannels {0}", allChannels.Count());
-                    foreach (int Channel in allChannels)
+
+                    using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
                     {
-                        Console.WriteLine(Channel);
-                        filterTree.Items.Add(new Filter() { Name = Channel.ToString(), Type = "Channel", channel = Channel });
+                        List<int> allChannels = (from spec in db.Measurements select spec.Channel).Distinct().ToList();
+                        Console.WriteLine("NumChannels {0}", allChannels.Count());
+
+                        foreach (int Channel in allChannels)
+                        {
+                            Console.WriteLine(Channel);
+                            filterTree.Items.Add(new Filter() { Name = Channel.ToString(), Type = "Channel", channel = Channel });
+                        }
                     }
                     break;
+
                 default:
                     Console.WriteLine("No action found for filterType: {0}", filterType);
                     break;

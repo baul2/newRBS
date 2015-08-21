@@ -49,6 +49,14 @@
                 Binding="{Binding Measurement.MeasurementID}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
+                Header="Sample" 
+                Binding="{Binding Measurement.Sample.SampleName}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="SampleRemark" 
+                Binding="{Binding Measurement.SampleRemark}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
                 Header="Channel" 
                 Binding="{Binding Measurement.Channel}"/>
             <DataGridCheckBoxColumn 
@@ -59,7 +67,7 @@
                 Binding="{Binding Measurement.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
             <DataGridTextColumn 
                 Header="Duration" 
-                Binding="{Binding Measurement.Duration, StringFormat=hh\\:mm\\:ss}"/>
+                Binding="{Binding Measurement.Duration, StringFormat=HH\\:mm\\:ss}"/>
             <DataGridTextColumn 
                 Header="Progress" 
                 Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"/>

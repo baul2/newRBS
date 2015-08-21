@@ -15,7 +15,7 @@
         <Border DockPanel.Dock="Left" Visibility="{Binding spectraFilterPanelVis, Converter={StaticResource BoolToVis}}" MinWidth="150">
             <Grid>
                 <StackPanel>
-                    <Expander Header="Spectra filter" IsExpanded="True">
+                    <Expander Header="Measurement filter" IsExpanded="True">
                         <StackPanel>
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
                             <TreeView ItemsSource="{Binding Path=filterTree.Items}" ViewModelUtils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  ViewModelUtils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">

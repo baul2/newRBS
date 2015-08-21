@@ -59,12 +59,12 @@ namespace newRBS.ViewModels
         #endregion
     }
 
-    public class SpectraListViewModel
+    public class MeasurementListViewModel
     {
         private Models.DataSpectra dataSpectra { get; set; }
 
-        public delegate void EventHandlerSpectrumID(int SpectrumID);
-        public event EventHandlerSpectrumID EventSpectrumToPlot, EventSpectrumNotToPlot;
+        public delegate void EventHandlerMeasurementID(int SpectrumID);
+        public event EventHandlerMeasurementID EventMeasurementToPlot, EventMeasurementNotToPlot;
 
         public List<MyMeasurement> ModifiedItems { get; set; }
         public AsyncObservableCollection<MyMeasurement> MeasurementList { get; set; }
@@ -73,17 +73,17 @@ namespace newRBS.ViewModels
 
         private Filter lastFilter;
 
-        public SpectraListViewModel()
+        public MeasurementListViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
 
             // Hooking up to events from DataSpectra
-            dataSpectra.EventSpectrumNew += new Models.DataSpectra.EventHandlerSpectrum(SpectrumNew);
-            dataSpectra.EventSpectrumRemove += new Models.DataSpectra.EventHandlerSpectrumID(SpectrumRemove);
-            dataSpectra.EventSpectrumUpdate += new Models.DataSpectra.EventHandlerSpectrum(SpectrumUpdate);
+            dataSpectra.EventMeasurementNew += new Models.DataSpectra.EventHandlerMeasurement(MeasurementNew);
+            dataSpectra.EventMeasurementRemove += new Models.DataSpectra.EventHandlerMeasurementID(MeasurementRemove);
+            dataSpectra.EventMeasurementUpdate += new Models.DataSpectra.EventHandlerMeasurement(MeasurementUpdate);
 
             // Hooking up to events from SpectraFilter
-            SimpleIoc.Default.GetInstance<SpectraFilterViewModel>().EventNewFilter += new SpectraFilterViewModel.EventHandlerFilter(ChangeFilter);
+            SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);
 
             ModifiedItems = new List<MyMeasurement>();
             MeasurementList = new AsyncObservableCollection<MyMeasurement>();
@@ -141,9 +141,9 @@ namespace newRBS.ViewModels
             if (e.PropertyName == "Measurement") return;
 
             if (myMeasurement.Selected == true)
-            { if (EventSpectrumToPlot != null) EventSpectrumToPlot(myMeasurement.Measurement.MeasurementID); }
+            { if (EventMeasurementToPlot != null) EventMeasurementToPlot(myMeasurement.Measurement.MeasurementID); }
             else
-            { if (EventSpectrumNotToPlot != null) EventSpectrumNotToPlot(myMeasurement.Measurement.MeasurementID); }
+            { if (EventMeasurementNotToPlot != null) EventMeasurementNotToPlot(myMeasurement.Measurement.MeasurementID); }
         }
 
         public void ChangeFilter(Filter selectedFilter)
@@ -151,48 +151,81 @@ namespace newRBS.ViewModels
             MeasurementList.Clear();
             Console.WriteLine("FilterType: {0}", selectedFilter.Type);
 
-            switch (selectedFilter.Type)
+            using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
             {
-                case "All":
-                    {
-                        List<Models.Measurement> temp = dataSpectra.GetSpectra_All();
-                        foreach (Models.Measurement spec in temp)
-                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
-                        break;
-                    }
-                case "Date":
-                    {
-                        List<Models.Measurement> temp = dataSpectra.GetSpectra_Date(selectedFilter);
-                        foreach (Models.Measurement spec in temp)
-                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
-                        break;
-                    }
-                case "Sample":
-                    {
+                List<Models.Measurement> MeasurementList = new List<Models.Measurement>();
 
+                switch (selectedFilter.Type)
+                {
+                    case "All":
+                        { MeasurementList = db.Measurements.ToList(); break; }
+
+                    case "Date":
+                        {
+                            switch (selectedFilter.SubType)
+                            {
+                                case "Today":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date == DateTime.Today).ToList(); break; }
+                                //from spec in rbs_Database.Measurements where spec.StartTime.Date == DateTime.Today select spec; break; }
+
+                                case "ThisWeek":
+                                    {
+                                        int DayOfWeek = (int)DateTime.Today.DayOfWeek;
+                                        MeasurementList = db.Measurements.Where(x => x.StartTime.DayOfYear > (DateTime.Today.DayOfYear - DayOfWeek) && x.StartTime.DayOfYear < (DateTime.Today.DayOfYear - DayOfWeek + 7)).ToList(); //Todo!!!
+                                        break;
+                                    }
+
+                                case "ThisMonth":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Month == DateTime.Now.Month).ToList(); break; }
+                                //Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Month == DateTime.Today.Month select spec; break; }
+
+                                case "ThisYear":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == DateTime.Now.Year).ToList(); break; }
+                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == DateTime.Today.Year select spec; break; }
+
+                                case "Year":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year).ToList(); break; }
+                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year select spec; break; }
+
+                                case "Month":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month).ToList(); break; }
+                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month select spec; break; }
+
+                                case "Day":
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month && x.StartTime.Date.Day == selectedFilter.day).ToList(); break; }
+                                    //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month && spec.StartTime.Date.Day == selectedFilter.day select spec; break; }
+                            }
+                        }
                         break;
-                    }
-                case "Channel":
-                    {
-                        List<Models.Measurement> temp = dataSpectra.GetSpectra_Channel(selectedFilter);
-                        foreach (Models.Measurement spec in temp)
-                            MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = spec });
-                        break;
-                    }
+
+                    case "Sample":
+                        { break; }
+
+                    case "Channel":
+                        { MeasurementList = db.Measurements.Where(x => x.Channel == selectedFilter.channel).ToList(); break; }
+                }
+
+                foreach (Models.Measurement measurement in MeasurementList)
+                {
+                    this.MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
+                    Console.Write(measurement.Sample.SampleName + " ");
+                }
             }
+
             viewSource.View.Refresh();
             Console.WriteLine("Length of spectraList: {0}", MeasurementList.Count());
             lastFilter = selectedFilter;
         }
 
-        private void SpectrumNew(Models.Measurement measurement)
+
+        private void MeasurementNew(Models.Measurement measurement)
         {
             Console.WriteLine("SpectrumNew");
             MeasurementList.Add(new MyMeasurement() { Selected = true, Measurement = measurement });
-            if (EventSpectrumToPlot != null) EventSpectrumToPlot(measurement.MeasurementID);
+            if (EventMeasurementToPlot != null) EventMeasurementToPlot(measurement.MeasurementID);
         }
 
-        private void SpectrumRemove(int spectrumID)
+        private void MeasurementRemove(int spectrumID)
         {
             Console.WriteLine("SpectrumRemove");
             MyMeasurement delSpectra = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrumID).First();
@@ -201,7 +234,7 @@ namespace newRBS.ViewModels
                 MeasurementList.Remove(delSpectra);
         }
 
-        private void SpectrumUpdate(Models.Measurement spectrum)
+        private void MeasurementUpdate(Models.Measurement spectrum)
         {
             var item = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrum.MeasurementID).First();
 
