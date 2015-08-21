@@ -63,6 +63,8 @@ namespace newRBS.Models
             {
                 Measurement newSpectrum = new Measurement(channel, incomingIonNumber, incomingIonMass, incomingIonEnergy, incomingIonAngle, outcomingIonAngle, solidAngle, energyCalOffset, energyCalSlope, stopType, stopValue, runs, numOfChannels);
 
+                newSpectrum.Sample = db.Samples.Single(x => x.SampleName == "(undefined)");
+
                 db.Measurements.InsertOnSubmit(newSpectrum);
                 db.SubmitChanges();
 
@@ -252,10 +254,14 @@ namespace newRBS.Models
                         }
                     }
                 }
+
                 for (int i = 0; i < numSpectra; i++)
                 {
                     newMeasurements[i].SpectrumY = spectraY[i].ToArray();
+                    newMeasurements[i].NumOfChannels = newMeasurements[i].SpectrumY.Count();
+                    newMeasurements[i].StopTime = newMeasurements[i].StartTime + (newMeasurements[i].Duration - new DateTime(2000, 01, 01));
                 }
+
                 return newMeasurements;
             }
         }

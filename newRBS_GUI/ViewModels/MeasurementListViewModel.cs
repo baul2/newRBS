@@ -206,10 +206,7 @@ namespace newRBS.ViewModels
                 }
 
                 foreach (Models.Measurement measurement in MeasurementList)
-                {
                     this.MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
-                    Console.Write(measurement.Sample.SampleName + " ");
-                }
             }
 
             viewSource.View.Refresh();
