@@ -138,6 +138,7 @@
     <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModelUtils\CheckedListItem.cs" />
     <Compile Include="ViewModelUtils\DialogCloser.cs" />
+    <Compile Include="ViewModelUtils\NameValueClass.cs" />
     <Compile Include="ViewModelUtils\TreeViewHelper.cs" />
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>

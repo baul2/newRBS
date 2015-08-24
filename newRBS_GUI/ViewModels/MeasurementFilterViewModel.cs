@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
+using newRBS.ViewModels.Utils;
 
 namespace newRBS.ViewModels
 {
@@ -120,7 +120,7 @@ namespace newRBS.ViewModels
             filterTree.Items = new AsyncObservableCollection<Filter>();
             selectedFilter = new Filter() { Name = "All", Type = "All" };
 
-            MySelItemChgCmd = new RelayCommand<ViewModelUtils.TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
+            MySelItemChgCmd = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
             CurrSelItem = new object();
 
             filterTypeIndex = 0;

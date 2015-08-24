@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace newRBS.ViewModelUtils
+namespace newRBS.ViewModels.Utils
 {
     public class TreeViewHelper
     {

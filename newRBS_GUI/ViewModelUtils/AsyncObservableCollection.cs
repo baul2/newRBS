@@ -17,7 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 
-namespace newRBS.ViewModelUtils
+namespace newRBS.ViewModels.Utils
 {
     public class AsyncObservableCollection<T> : ObservableCollection<T>
     {
