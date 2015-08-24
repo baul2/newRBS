@@ -4,13 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
-        xmlns:xc="clr-namespace:newRBS.ViewModelUtils"
+        xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         Title="ImportSpectra" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
-        DataContext="{Binding importSpectraViewModel, Source={StaticResource Locator}}"
-        xc:DialogCloser.DialogResult="{Binding DialogResult}">
+        utils:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
         <StackPanel DockPanel.Dock="top" Orientation="Vertical">
             <DockPanel LastChildFill="True" >

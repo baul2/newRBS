@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
+using newRBS.ViewModels.Utils;
 
 namespace newRBS.ViewModels
 {
@@ -120,7 +120,7 @@ namespace newRBS.ViewModels
             filterTree.Items = new AsyncObservableCollection<Filter>();
             selectedFilter = new Filter() { Name = "All", Type = "All" };
 
-            MySelItemChgCmd = new RelayCommand<ViewModelUtils.TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
+            MySelItemChgCmd = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
             CurrSelItem = new object();
 
             filterTypeIndex = 0;
@@ -163,6 +163,15 @@ namespace newRBS.ViewModels
 
                     using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
                     {
+                        //
+                        //Console.WriteLine("--------------------------------");
+                        //Console.WriteLine(db.Materials.FirstOrDefault(x => x.MaterialID == 1).MaterialName);
+                        //
+                        //db.Materials.FirstOrDefault(x => x.MaterialID == 2).Layers.Add(new Models.Layer(2, "test"));
+                        //
+                        //                      db.SubmitChanges();
+                        //                    Console.WriteLine("--------------------------------");
+                        //
                         List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
                         {

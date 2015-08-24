@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
+using newRBS.ViewModels.Utils;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Annotations;

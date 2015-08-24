@@ -16,7 +16,6 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
 using Microsoft.Win32;
 using System.IO;
 using OxyPlot;

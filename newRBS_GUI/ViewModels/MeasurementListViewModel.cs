@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
+using newRBS.ViewModels.Utils;
 using Microsoft.Win32;
 
 namespace newRBS.ViewModels
@@ -69,7 +69,7 @@ namespace newRBS.ViewModels
         public List<MyMeasurement> ModifiedItems { get; set; }
         public AsyncObservableCollection<MyMeasurement> MeasurementList { get; set; }
 
-        public CollectionViewSource viewSource { get; set; }
+        public CollectionViewSource MeasurementListViewSource { get; set; }
 
         private Filter lastFilter;
 
@@ -89,9 +89,9 @@ namespace newRBS.ViewModels
             MeasurementList = new AsyncObservableCollection<MyMeasurement>();
             MeasurementList.CollectionChanged += OnCollectionChanged;
 
-            viewSource = new CollectionViewSource();
-            viewSource.Source = MeasurementList;
-            viewSource.SortDescriptions.Add(new SortDescription("Measurement.StartTime", ListSortDirection.Descending));
+            MeasurementListViewSource = new CollectionViewSource();
+            MeasurementListViewSource.Source = MeasurementList;
+            MeasurementListViewSource.SortDescriptions.Add(new SortDescription("Measurement.StartTime", ListSortDirection.Descending));
 
             ChangeFilter(new Filter() { Name = "Today", Type = "Date", SubType = "Today" });
         }
@@ -209,7 +209,7 @@ namespace newRBS.ViewModels
                     this.MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
             }
 
-            viewSource.View.Refresh();
+            MeasurementListViewSource.View.Refresh();
             Console.WriteLine("Length of spectraList: {0}", MeasurementList.Count());
             lastFilter = selectedFilter;
         }

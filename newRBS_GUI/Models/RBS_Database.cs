@@ -9,17 +9,22 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace newRBS.Models
-{ 
+{
     [Database(Name = "p4mist_db")]
     public class RBS_Database : DataContext
     {
         public Table<Measurement> Measurements;
         public Table<Sample> Samples;
+        public Table<Material> Materials;
+        public Table<Layer> Layers;
+        public Table<Element> Elements;
 
         public RBS_Database(string ConnectionString) : base(ConnectionString)
         {
             var dlo = new DataLoadOptions();
             dlo.LoadWith<Measurement>(c => c.Sample);
+            dlo.LoadWith<Material>(c => c.Layers);
+            dlo.LoadWith<Layer>(c => c.Elements);
             this.LoadOptions = dlo;
         }
     }
@@ -200,7 +205,9 @@ namespace newRBS.Models
                     case 2: IncomingIonMass = 4; break;
                     case 3: IncomingIonMass = 7; break;
                 }
-                OnPropertyChanged(); } }
+                OnPropertyChanged();
+            }
+        }
 
         [Column(Storage = "_IncomingIonMass")]
         public int IncomingIonMass
@@ -310,12 +317,162 @@ namespace newRBS.Models
         { get { return _SampleName; } set { _SampleName = value; OnPropertyChanged(); } }
 
         public Sample()
-        {
-        }
+        { }
 
         public Sample(string sampleName)
         {
             SampleName = sampleName;
+        }
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
+    }
+
+    [Table(Name = "dbo.Materials")]
+    public class Material : INotifyPropertyChanged
+    {
+        private int _MaterialID;
+        private string _MaterialName;
+        private EntitySet<Layer> _Layers = new EntitySet<Layer>();
+
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_MaterialID", DbType = "Int IDENTITY(1,1)")]
+        public int MaterialID
+        { get { return _MaterialID; } }
+
+        [Column(Storage = "_MaterialName")]
+        public string MaterialName
+        { get { return _MaterialName; } set { _MaterialName = value; OnPropertyChanged(); } }
+
+        [Association(Storage = "_Layers", ThisKey = "MaterialID", OtherKey = "MaterialID")]
+        public EntitySet<Layer> Layers
+        { get { return _Layers; } set { _Layers.Assign(value); OnPropertyChanged(); } }
+
+        public Material()
+        { }
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
+    }
+
+    [Table(Name = "dbo.Layers")]
+    public class Layer : INotifyPropertyChanged
+    {
+        private int _LayerID;
+        private int _MaterialID;
+        private int _LayerIndex;    // 0 - surface layer, ...
+        private string _LayerName;
+        private double _Density;    // g/cm³
+        private double _Thickness;  // nm
+        private EntitySet<Element> _Elements = new EntitySet<Element>();
+
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_LayerID", DbType = "Int IDENTITY(1,1)")]
+        public int LayerID
+        { get { return _LayerID; } }
+
+        [Column(Storage = "_MaterialID")]
+        public int MaterialID
+        { get { return _MaterialID; } set { _MaterialID = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_LayerIndex")]
+        public int LayerIndex
+        { get { return _LayerIndex; } set { _LayerIndex = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_LayerName")]
+        public string LayerName
+        { get { return _LayerName; } set { _LayerName = value; OnPropertyChanged(); } }
+
+        [Association(Storage = "_Elements", ThisKey = "LayerID", OtherKey = "LayerID")]
+        public EntitySet<Element> Elements
+        { get { return _Elements; } set { _Elements.Assign(value); OnPropertyChanged(); } }
+
+        [Column(Storage = "_Density")]
+        public double Density
+        { get { return _Density; } set { _Density = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_Thickness")]
+        public double Thickness
+        { get { return _Thickness; } set { _Thickness = value; OnPropertyChanged(); } }
+
+        public Layer()
+        { }
+
+        public Layer(int materialID, string layerName)
+        {
+            MaterialID = materialID;
+            LayerName = layerName;
+        }
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = "")
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
+    }
+
+    [Table(Name = "dbo.Elements")]
+    public class Element : INotifyPropertyChanged
+    {
+        private int _ElementID;
+        private int _LayerID;
+        private int _MaterialID;
+        private string _ElementName;
+        private double _StoichiometricFactor;
+        private double _AtomicNumber;
+        private double _MassNumber;
+
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Storage = "_ElementID", DbType = "Int IDENTITY(1,1)")]
+        public int ElementID
+        { get { return _ElementID; } }
+
+        [Column(Storage = "_LayerID")]
+        public int LayerID
+        { get { return _LayerID; } set { _LayerID = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_MaterialID")]
+        public int MaterialID
+        { get { return _MaterialID; } set { _MaterialID = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_ElementName")]
+        public string ElementName
+        { get { return _ElementName; } set { _ElementName = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_StoichiometricFactor")]
+        public double StoichiometricFactor
+        { get { return _StoichiometricFactor; } set { _StoichiometricFactor = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_AtomicNumber")]
+        public double AtomicNumber
+        { get { return _AtomicNumber; } set { _AtomicNumber = value; OnPropertyChanged(); } }
+
+        [Column(Storage = "_MassNumber")]
+        public double MassNumber
+        { get { return _MassNumber; } set { _MassNumber = value; OnPropertyChanged(); } }
+
+        public Element()
+        { }
+
+        public Element(int layerID, string elementName)
+        {
+            LayerID = layerID;
+            ElementName = elementName;
         }
 
         #region INotifyPropertyChanged

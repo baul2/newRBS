@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace newRBS.ViewModelUtils
+namespace newRBS.ViewModels.Utils
 {
     class DialogCloser
     {

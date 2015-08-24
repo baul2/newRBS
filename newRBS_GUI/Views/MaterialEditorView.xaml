@@ -1,0 +1,51 @@
+﻿<Window x:Class="newRBS.Views.MaterialEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:newRBS.Views"
+        xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
+        mc:Ignorable="d"
+        Title="MaterialEditor"  SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="300" MinWidth="450"
+        utils:DialogCloser.DialogResult="{Binding DialogResult}">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <GroupBox Header="Materials">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Add" Command="{Binding AddMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Remove" Command="{Binding RemoveMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Rename" Command="{Binding RenameMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                        </StackPanel>
+                        <ListBox ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial, Mode=TwoWay}" DisplayMemberPath="MaterialName" MinWidth="150" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Layers">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Add" Command="{Binding AddLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Remove" Command="{Binding RemoveLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Move up" Command="{Binding MoveLayerUpCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Move down" Command="{Binding MoveLayerDownCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding LayersViewSource.View}" SelectedItem="{Binding SelectedLayer, Mode=TwoWay}" AutoGenerateColumns="True" MinWidth="300" CanUserAddRows="false"/>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Elements" MinHeight="250" >
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Add" Command="{Binding AddElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Remove" Command="{Binding RemoveElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding Elements}" SelectedItem="{Binding SelectedElement, Mode=TwoWay}" AutoGenerateColumns="True" MinWidth="300" CanUserAddRows="false"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Save" Command="{Binding SaveCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="5" Padding="3" MinWidth="50"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

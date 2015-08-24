@@ -16,7 +16,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
-using newRBS.ViewModelUtils;
+using newRBS.ViewModels.Utils;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Annotations;
@@ -71,9 +71,17 @@ namespace newRBS.ViewModels
             {
                 _selectedChannel = Int32.Parse(value);
                 channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
-                RaisePropertyChanged(); }
+                RaisePropertyChanged();
+            }
         }
 
+        public ObservableCollection<NameValueClass> InputRange { get; set; }
+        public ObservableCollection<NameValueClass> Decimation { get; set; }
+        public ObservableCollection<NameValueClass> DigitalProbeGain { get; set; }
+        public ObservableCollection<NameValueClass> TriggerFilterSmoothing { get; set; }
+        public ObservableCollection<NameValueClass> BaselineMean { get; set; }
+        public ObservableCollection<NameValueClass> PeakMean { get; set; }
+        
         public ChannelConfigurationViewModel()
         {
             StartCommand = new RelayCommand(() => _StartCommand(), () => true);
@@ -98,8 +106,14 @@ namespace newRBS.ViewModels
             selectedDP2 = Enum.GetName(typeof(Models.CAENDPP_PHA_DigitalProbe2_t), Models.CAENDPP_PHA_DigitalProbe2_t.Trigger);
 
             channels = new ObservableCollection<string> { "0", "1", "2", "3", "4", "5", "6", "7" };
-
             selectedChannel = "0";
+
+            InputRange = new ObservableCollection<NameValueClass>() { new NameValueClass("2.0", 9), new NameValueClass("0.5", 10) };
+            Decimation = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("2", 1), new NameValueClass("4", 2), new NameValueClass("8", 3) };
+            DigitalProbeGain = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("2", 1), new NameValueClass("4", 2), new NameValueClass("8", 3) };
+            TriggerFilterSmoothing = new ObservableCollection<NameValueClass>() { new NameValueClass("4", 4), new NameValueClass("8", 8), new NameValueClass("16", 16), new NameValueClass("32", 32) };
+            BaselineMean = new ObservableCollection<NameValueClass>() { new NameValueClass("0", 0), new NameValueClass("16", 1), new NameValueClass("64", 2), new NameValueClass("256", 3), new NameValueClass("1024", 4), new NameValueClass("4096", 5), new NameValueClass("16384", 6) };
+            PeakMean = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("4", 1), new NameValueClass("16", 2), new NameValueClass("64", 3) }; 
 
             channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
 
@@ -116,22 +130,22 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Time (µs)", TitleFontSize = 16, AxisTitleDistance = 8, Minimum = 0 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "LSB", TitleFontSize = 16, AxisTitleDistance = 12};
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "LSB", TitleFontSize = 16, AxisTitleDistance = 12 };
 
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
 
             var AP1Series = new LineSeries
-            {Tag = "AP1Series",StrokeThickness = 2,MarkerSize = 3,CanTrackerInterpolatePoints = false,Smooth = false,};
+            { Tag = "AP1Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
 
             var AP2Series = new LineSeries
-            {Tag = "AP2Series",StrokeThickness = 2,MarkerSize = 3,CanTrackerInterpolatePoints = false,Smooth = false,};
+            { Tag = "AP2Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
 
             var DP1Series = new LineSeries
-            {Tag = "DP1Series",StrokeThickness = 2,MarkerSize = 3,CanTrackerInterpolatePoints = false,Smooth = false,};
+            { Tag = "DP1Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
 
             var DP2Series = new LineSeries
-            {Tag = "DP2Series",StrokeThickness = 2,MarkerSize = 3,CanTrackerInterpolatePoints = false,Smooth = false,};
+            { Tag = "DP2Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
 
             plotModel.Series.Add(AP1Series);
             plotModel.Series.Add(AP2Series);
@@ -155,7 +169,7 @@ namespace newRBS.ViewModels
 
             for (int i = 0; i < waveform.NumSamples; i++)
             {
-                x = i * waveform.LenSample / 1000; 
+                x = i * waveform.LenSample / 1000;
                 (plotModel.Series[0] as LineSeries).Points.Add(new DataPoint(x, waveform.AT1[i]));
                 (plotModel.Series[1] as LineSeries).Points.Add(new DataPoint(x, waveform.AT2[i]));
                 (plotModel.Series[2] as LineSeries).Points.Add(new DataPoint(x, 1000 * waveform.DT1[i]));
@@ -195,8 +209,6 @@ namespace newRBS.ViewModels
 
         private void _SaveToFileCommand()
         {
-            Console.WriteLine("_SaveToFileCommand");
-
             XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
