@@ -163,6 +163,15 @@ namespace newRBS.ViewModels
 
                     using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
                     {
+                        //
+                        //Console.WriteLine("--------------------------------");
+                        //Console.WriteLine(db.Materials.FirstOrDefault(x => x.MaterialID == 1).MaterialName);
+                        //
+                        //db.Materials.FirstOrDefault(x => x.MaterialID == 2).Layers.Add(new Models.Layer(2, "test"));
+                        //
+                        //                      db.SubmitChanges();
+                        //                    Console.WriteLine("--------------------------------");
+                        //
                         List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
                         {

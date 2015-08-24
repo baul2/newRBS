@@ -7,7 +7,6 @@
         xmlns:xc="clr-namespace:newRBS.ViewModels.Utils"
         mc:Ignorable="d"
         Title="StartMeasurementView" SizeToContent="WidthAndHeight"
-        DataContext="{Binding newMeasurementViewModel, Source={StaticResource Locator}}"
         xc:DialogCloser.DialogResult="{Binding DialogResult}">
     <Grid>
         <StackPanel Orientation="Vertical">

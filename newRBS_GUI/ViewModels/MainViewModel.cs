@@ -37,11 +37,13 @@ namespace newRBS.ViewModels
         public ICommand NewMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
 
+        public ICommand ChannelConfigurationCommand { get; set; }
+
         public ICommand ImportMeasurementsCommand { get; set; }
         public ICommand ExportMeasurementsCommand { get; set; }
         public ICommand DeleteMeasurementsCommand { get; set; }
         
-        public ICommand ChannelConfigurationCommand { get; set; }
+        public ICommand MaterialEditorCommand { get; set; }  
 
         TraceSource trace = new TraceSource("MainViewModel");
 
@@ -53,19 +55,22 @@ namespace newRBS.ViewModels
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
 
+            ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
+
             ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementCommand(), () => true);
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
             DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
 
-            ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
+            MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
         }
 
         public void _NewMeasurementCommand()
         {
             Console.WriteLine("_NewMeasurementCommand");
 
+            NewMeasurementViewModel newMeasurementViewModel = new NewMeasurementViewModel();
             Views.NewMeasurementView newMeasurementView = new Views.NewMeasurementView();
-            
+            newMeasurementView.DataContext = newMeasurementViewModel;       
             newMeasurementView.ShowDialog();
         }
 
@@ -82,8 +87,9 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_ImportMeasurementCommand");
 
+            ImportSpectraViewModel importSpectraViewModel = new ImportSpectraViewModel();
             Views.ImportSpectra importSpectra = new Views.ImportSpectra();
-
+            importSpectra.DataContext = importSpectraViewModel;
             importSpectra.ShowDialog();
         }
 
@@ -109,9 +115,20 @@ namespace newRBS.ViewModels
             if (measureSpectra.IsAcquiring() == true)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
 
+            ChannelConfigurationViewModel channelConfigurationViewModel = new ChannelConfigurationViewModel();
             Views.ChannelConfigurationView channelConfiguration = new Views.ChannelConfigurationView();
-
+            channelConfiguration.DataContext = channelConfigurationViewModel;
             channelConfiguration.ShowDialog();
+        }
+
+        public void _MaterialEditorCommand()
+        {
+            Console.WriteLine("_MaterialEditorCommand");
+
+            MaterialEditorViewModel materialEditorViewModel = new MaterialEditorViewModel();
+            Views.MaterialEditor materialEditor = new Views.MaterialEditor();
+            materialEditor.DataContext = materialEditorViewModel;
+            materialEditor.ShowDialog();
         }
     }
 }

@@ -14,12 +14,15 @@
                 <Button Command="{Binding StopMeasurementCommand}" Content="Stop Measurement" />
             </ToolBar>
             <ToolBar>
+                <Button Command="{Binding ChannelConfigurationCommand}" Content="Configure Channels" />
+            </ToolBar>
+            <ToolBar>
                 <Button Command="{Binding ImportMeasurementsCommand}" Content="Import Measurements" />
                 <Button Command="{Binding ExportMeasurementsCommand}" Content="Export Measurements" />
                 <Button Command="{Binding DeleteMeasurementsCommand}" Content="Delete Measurements" />
             </ToolBar>
             <ToolBar>
-                <Button Command="{Binding ChannelConfigurationCommand}" Content="Configure Channels" />
+                <Button Command="{Binding MaterialEditorCommand}" Content="Material Editor" />
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">

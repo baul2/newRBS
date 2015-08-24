@@ -54,6 +54,10 @@
       <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\glib-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
       <Private>True</Private>
@@ -124,6 +128,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Global.cs" />
+    <Compile Include="Models\DataMaterial.cs" />
+    <Compile Include="Models\DataSimpleMaterial.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
     <Compile Include="Models\RBS_Database.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
@@ -131,6 +137,7 @@
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModels\ImportSpectraViewModel.cs" />
+    <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementListViewModel.cs" />
     <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
     <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
@@ -145,6 +152,9 @@
     </Compile>
     <Compile Include="Views\ImportSpectraView.xaml.cs">
       <DependentUpon>ImportSpectraView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MaterialEditorView.xaml.cs">
+      <DependentUpon>MaterialEditorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SpectraFilterView.xaml.cs">
       <DependentUpon>SpectraFilterView.xaml</DependentUpon>
@@ -185,6 +195,10 @@
       <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\MaterialEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SpectraFilterView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
