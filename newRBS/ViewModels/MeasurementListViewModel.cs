@@ -151,7 +151,7 @@ namespace newRBS.ViewModels
             MeasurementList.Clear();
             Console.WriteLine("FilterType: {0}", selectedFilter.Type);
 
-            using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
+            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
             {
                 List<Models.Measurement> MeasurementList = new List<Models.Measurement>();
 
@@ -166,7 +166,6 @@ namespace newRBS.ViewModels
                             {
                                 case "Today":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date == DateTime.Today).ToList(); break; }
-                                //from spec in rbs_Database.Measurements where spec.StartTime.Date == DateTime.Today select spec; break; }
 
                                 case "ThisWeek":
                                     {
@@ -177,23 +176,18 @@ namespace newRBS.ViewModels
 
                                 case "ThisMonth":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Month == DateTime.Now.Month).ToList(); break; }
-                                //Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Month == DateTime.Today.Month select spec; break; }
 
                                 case "ThisYear":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == DateTime.Now.Year).ToList(); break; }
-                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == DateTime.Today.Year select spec; break; }
 
                                 case "Year":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year).ToList(); break; }
-                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year select spec; break; }
 
                                 case "Month":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month).ToList(); break; }
-                                //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month select spec; break; }
 
                                 case "Day":
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month && x.StartTime.Date.Day == selectedFilter.day).ToList(); break; }
-                                    //{ Spec = from spec in rbs_Database.Measurements where spec.StartTime.Date.Year == selectedFilter.year && spec.StartTime.Date.Month == selectedFilter.month && spec.StartTime.Date.Day == selectedFilter.day select spec; break; }
                             }
                         }
                         break;
@@ -205,12 +199,18 @@ namespace newRBS.ViewModels
                         { MeasurementList = db.Measurements.Where(x => x.Channel == selectedFilter.channel).ToList(); break; }
                 }
 
+                Models.Sample tempSample;
+
                 foreach (Models.Measurement measurement in MeasurementList)
+                {
+                    tempSample = measurement.Sample;
+                    // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
                     this.MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
+                }
             }
 
             MeasurementListViewSource.View.Refresh();
-            Console.WriteLine("Length of spectraList: {0}", MeasurementList.Count());
+
             lastFilter = selectedFilter;
         }
 

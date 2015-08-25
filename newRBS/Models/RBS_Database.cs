@@ -8,7 +8,7 @@ using System.Data.Linq.Mapping;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace newRBS.Models
+namespace newRBS_notUsed.Models
 {
     [Database(Name = "p4mist_db")]
     public class RBS_Database : DataContext

@@ -161,17 +161,10 @@ namespace newRBS.ViewModels
                     filterTree.Items.Add(new Filter() { Name = "This Month", Type = "Date", SubType = "ThisMonth" });
                     filterTree.Items.Add(new Filter() { Name = "This Year", Type = "Date", SubType = "ThisYear" });
 
-                    using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
+                    using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
                     {
-                        //
-                        //Console.WriteLine("--------------------------------");
-                        //Console.WriteLine(db.Materials.FirstOrDefault(x => x.MaterialID == 1).MaterialName);
-                        //
-                        //db.Materials.FirstOrDefault(x => x.MaterialID == 2).Layers.Add(new Models.Layer(2, "test"));
-                        //
-                        //                      db.SubmitChanges();
-                        //                    Console.WriteLine("--------------------------------");
-                        //
+                        Console.WriteLine("test: {0}", db.Measurements.First(x=>x.SampleID == 1).Runs);
+                        Console.WriteLine("All count: {0}", db.Measurements.ToList().Count());
                         List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
                         {
@@ -207,7 +200,7 @@ namespace newRBS.ViewModels
                     Console.WriteLine("Channel");
                     filterTree.Items.Add(new Filter() { Name = "All", Type = "All" });
 
-                    using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))
+                    using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
                     {
                         List<int> allChannels = (from spec in db.Measurements select spec.Channel).Distinct().ToList();
                         Console.WriteLine("NumChannels {0}", allChannels.Count());

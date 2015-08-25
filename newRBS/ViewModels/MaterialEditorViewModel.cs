@@ -41,7 +41,7 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        private Models.RBS_Database Database;
+        private Models.DatabaseDataContext Database;
 
         public ObservableCollection<Models.Material> Materials { get; set; }
 
@@ -95,7 +95,7 @@ namespace newRBS.ViewModels
 
         public MaterialEditorViewModel()
         {
-            Database = new Models.RBS_Database(MyGlobals.ConString);
+            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
 
             Materials = new ObservableCollection<Models.Material>(Database.Materials.ToList());
             Layers = new ObservableCollection<Models.Layer>();
@@ -166,7 +166,7 @@ namespace newRBS.ViewModels
             if (SelectedMaterial == null) return;
 
             Models.Layer newLayer = new Models.Layer { LayerIndex = Layers.Count(), MaterialID = SelectedMaterial.MaterialID, Density = 1 };
-
+            
             Database.Layers.InsertOnSubmit(newLayer);
             Layers.Add(newLayer);
         }

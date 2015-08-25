@@ -56,7 +56,7 @@ namespace newRBS.ViewModels
         private Models.DataSpectra dataSpectra;
 
         //private Models.Sample noneSample;
-        private Models.RBS_Database rbs_Database;
+        private Models.DatabaseDataContext Database;
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -73,16 +73,16 @@ namespace newRBS.ViewModels
                 if (value == null) return;
 
                 if (_selectedMeasurement != null)
-                    _selectedMeasurement.EventNewSample -= new Models.Measurement.EventHandlerSpectrumID(AddNewSample);// Unsubscribe to events from old selected Measurement
+                    _selectedMeasurement.PropertyChanged -= new PropertyChangedEventHandler(AddNewSample);// Unsubscribe to events from old selected Measurement
 
                 _selectedMeasurement = value;
 
                 // Hooking up to events from new selected Measurement
-                _selectedMeasurement.EventNewSample += new Models.Measurement.EventHandlerSpectrumID(AddNewSample);
+                _selectedMeasurement.PropertyChanged += new PropertyChangedEventHandler(AddNewSample);
 
                 // Preparing the plot data
                 areaData.Clear();
-                int[] temp = value.SpectrumY;
+                int[] temp = ArrayConversion.ByteToInt(value.SpectrumY.ToArray());
                 for (int i = 0; i < temp.Count(); i++)
                     areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
 
@@ -122,12 +122,14 @@ namespace newRBS.ViewModels
 
             newMeausurements = new ObservableCollection<Models.Measurement>();
 
-            rbs_Database = new Models.RBS_Database("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
-            rbs_Database.Log = Console.Out;
+            Database = new Models.DatabaseDataContext("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
+            Database.Log = Console.Out;
 
-            List<Models.Sample> Samples = (from sample in rbs_Database.Samples select sample).ToList();
+            List<Models.Sample> Samples = (from sample in Database.Samples select sample).ToList();
 
-            SampleList.Add(new Models.Sample("New..."));
+            Models.Sample newSample = new Models.Sample();
+            newSample.SampleName = "New...";
+            SampleList.Add(newSample);
             foreach (Models.Sample sample in Samples)
                 SampleList.Add(sample);
 
@@ -137,8 +139,17 @@ namespace newRBS.ViewModels
             Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li",3,7)};
         }
 
-        private void AddNewSample(int measurementID)
+        private void AddNewSample(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName != "SampleID") return;
+
+            int SampleID = (int)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+            Console.WriteLine("SampleID: {0}", SampleID);
+
+            Console.WriteLine(Database.Samples.FirstOrDefault(x=>x.SampleID == SampleID).SampleName);
+
+            if (Database.Samples.FirstOrDefault(x => x.SampleID == SampleID).SampleName != "New...") return;
+
             Console.WriteLine("AddNewSample");
 
             ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new sample name:", "");
@@ -163,9 +174,10 @@ namespace newRBS.ViewModels
                 Console.WriteLine("new sample");
                 //selectedMeasurement.Sample = SampleList.Where(x => x.SampleName == "(undefined)").First();
                 Console.WriteLine("asdf");
-                Models.Sample newSample = new Models.Sample(inputDialog.Answer);
-                //rbs_Database.Samples.InsertOnSubmit(newSample);
-                //rbs_Database.SubmitChanges();
+                Models.Sample newSample = new Models.Sample();
+                newSample.SampleName = inputDialog.Answer;
+                //DatabaseDataContext.Samples.InsertOnSubmit(newSample);
+                //DatabaseDataContext.SubmitChanges();
                 Console.WriteLine("asdf2");
                 SampleList.Add(newSample);
                 Console.WriteLine("SampleList.Add");
@@ -187,7 +199,7 @@ namespace newRBS.ViewModels
             newMeausurements.Clear();
 
             for (int i = 0; i < importedMeasurements.Count(); i++)
-                importedMeasurements[i].Sample = rbs_Database.Samples.First(x => x.SampleName == "(undefined)");
+                importedMeasurements[i].Sample = Database.Samples.First(x => x.SampleName == "(undefined)");
 
             foreach (Models.Measurement importedMeasurement in importedMeasurements)
             {
@@ -201,8 +213,8 @@ namespace newRBS.ViewModels
         public void _AddCurrentMeasurementCommand()
         {
             Console.WriteLine("_AddCurrentMeasurementCommand");
-            rbs_Database.Measurements.InsertOnSubmit(selectedMeasurement);
-            rbs_Database.SubmitChanges();
+            Database.Measurements.InsertOnSubmit(selectedMeasurement);
+            Database.SubmitChanges();
 
             selectedMeasurement = null;
 
@@ -220,8 +232,8 @@ namespace newRBS.ViewModels
         public void _AddAllMeasurementsCommand()
         {
             Console.WriteLine("_AddAllMeasurementsCommand");
-            rbs_Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
-            rbs_Database.SubmitChanges();
+            Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
+            Database.SubmitChanges();
 
             DialogResult = false;
             _DialogResult = null;
