@@ -87,10 +87,10 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_ImportMeasurementCommand");
 
-            ImportSpectraViewModel importSpectraViewModel = new ImportSpectraViewModel();
-            Views.ImportSpectra importSpectra = new Views.ImportSpectra();
-            importSpectra.DataContext = importSpectraViewModel;
-            importSpectra.ShowDialog();
+            ImportMeasurementsViewModel importMeasurementsViewModel = new ImportMeasurementsViewModel();
+            Views.ImportMeasurementsView importMeasurementsView = new Views.ImportMeasurementsView();
+            importMeasurementsView.DataContext = importMeasurementsViewModel;
+            importMeasurementsView.ShowDialog();
         }
 
         public void _ExportMeasurementsCommand()

@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newRBS_Console", "newRBS_Console\newRBS_Console.csproj", "{DD12256C-064D-403B-9D01-A985BA193E3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newRBS_GUI", "newRBS_GUI\newRBS_GUI.csproj", "{42A35883-2036-4AEC-A010-5E8FA19F0D1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "newRBS", "newRBS\newRBS.csproj", "{42A35883-2036-4AEC-A010-5E8FA19F0D1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

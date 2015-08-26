@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace newRBS_GUI
+namespace newRBS
 {
     /// <summary>
     /// Interaction logic for App.xaml

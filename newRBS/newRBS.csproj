@@ -7,8 +7,8 @@
     <ProjectGuid>{42A35883-2036-4AEC-A010-5E8FA19F0D1A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>newRBS_GUI</RootNamespace>
-    <AssemblyName>newRBS_GUI</AssemblyName>
+    <RootNamespace>newRBS</RootNamespace>
+    <AssemblyName>newRBS</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -128,6 +128,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Global.cs" />
+    <Compile Include="Models\Database.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Database.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Database_PartialMethods.cs" />
     <Compile Include="Models\DataMaterial.cs" />
     <Compile Include="Models\DataSimpleMaterial.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
@@ -136,7 +142,7 @@
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\ImportSpectraViewModel.cs" />
+    <Compile Include="ViewModels\ImportMeasurementViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementListViewModel.cs" />
     <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
@@ -145,13 +151,14 @@
     <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModelUtils\CheckedListItem.cs" />
     <Compile Include="ViewModelUtils\DialogCloser.cs" />
+    <Compile Include="Utils\ArrayConversion.cs" />
     <Compile Include="ViewModelUtils\NameValueClass.cs" />
     <Compile Include="ViewModelUtils\TreeViewHelper.cs" />
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ImportSpectraView.xaml.cs">
-      <DependentUpon>ImportSpectraView.xaml</DependentUpon>
+    <Compile Include="Views\ImportMeasurementView.xaml.cs">
+      <DependentUpon>ImportMeasurementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MaterialEditorView.xaml.cs">
       <DependentUpon>MaterialEditorView.xaml</DependentUpon>
@@ -179,7 +186,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ImportSpectraView.xaml">
+    <Page Include="Views\ImportMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -234,10 +241,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Models\Database.dbml.layout">
+      <DependentUpon>Database.dbml</DependentUpon>
+    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Models\Database.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>Database.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

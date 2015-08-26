@@ -26,7 +26,7 @@ namespace newRBS.Models
 
         public void AddSpectrum(Measurement measurement)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 db.Measurements.InsertOnSubmit(measurement);
 
@@ -38,10 +38,10 @@ namespace newRBS.Models
 
         public void DeleteSpectra(List<int> measurementIDs)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 List<Measurement> MeasurementsToDelete = db.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
-                //from spec in rbs_Database.Measurements where measurementIDs.Contains(spec.MeasurementID) select spec;
+                //from spec in DatabaseDataContext.Measurements where measurementIDs.Contains(spec.MeasurementID) select spec;
 
                 db.Measurements.DeleteAllOnSubmit(MeasurementsToDelete);
                 db.SubmitChanges();
@@ -59,9 +59,24 @@ namespace newRBS.Models
         /// <returns>ID of the new spectrum.</returns>
         public int NewSpectrum(int channel, int incomingIonNumber, int incomingIonMass, double incomingIonEnergy, double incomingIonAngle, double outcomingIonAngle, double solidAngle, double energyCalOffset, double energyCalSlope, string stopType, int stopValue, bool runs, int numOfChannels)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
-                Measurement newSpectrum = new Measurement(channel, incomingIonNumber, incomingIonMass, incomingIonEnergy, incomingIonAngle, outcomingIonAngle, solidAngle, energyCalOffset, energyCalSlope, stopType, stopValue, runs, numOfChannels);
+                Measurement newSpectrum = new Measurement
+                {
+                    Channel = channel,
+                    IncomingIonNumber = incomingIonNumber,
+                    IncomingIonMass = incomingIonMass,
+                    IncomingIonEnergy = incomingIonEnergy,
+                    IncomingIonAngle = incomingIonAngle,
+                    OutcomingIonAngle = outcomingIonAngle,
+                    SolidAngle = solidAngle,
+                    EnergyCalOffset = energyCalOffset,
+                    EnergyCalSlope = energyCalSlope,
+                    StopType = stopType,
+                    StopValue = stopValue,
+                    Runs = runs,
+                    NumOfChannels = numOfChannels
+                };
 
                 newSpectrum.Sample = db.Samples.Single(x => x.SampleName == "(undefined)");
 
@@ -81,7 +96,7 @@ namespace newRBS.Models
         /// <param name="file">Filename of the file to save the spectra to.</param>
         public void ExportMeasurements(int[] measurementIDs, string file)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 using (TextWriter tw = new StreamWriter(file))
                 {
@@ -126,7 +141,7 @@ namespace newRBS.Models
 
         public void UpdateMeasurement(int measurementID, int[] spectrumY)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 Measurement MeasurementToUpdate = db.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
 
@@ -136,7 +151,7 @@ namespace newRBS.Models
                 if (spectrumY.Length != 16384) // TODO!!!
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
-                MeasurementToUpdate.SpectrumY = spectrumY;
+                MeasurementToUpdate.SpectrumY = ArrayConversion.IntToByte(spectrumY);
 
                 MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
 
@@ -145,8 +160,8 @@ namespace newRBS.Models
                     case "Manual": MeasurementToUpdate.Progress = 0; break;
                     case "Counts":
                         int counts = 0;
-                        for (int i = 0; i < MeasurementToUpdate.SpectrumY.Length; i++)
-                        { counts += MeasurementToUpdate.SpectrumY[i]; }
+                        for (int i = 0; i < spectrumY.Length; i++)
+                        { counts += spectrumY[i]; }
                         MeasurementToUpdate.Progress = counts / (int)MeasurementToUpdate.StopValue;
                         break;
                     case "Time":
@@ -172,7 +187,7 @@ namespace newRBS.Models
         /// <param name="ID">ID of the spectrum to be stopped.</param>
         public void FinishMeasurement(int measurementID)
         {
-            using (RBS_Database db = new RBS_Database(MyGlobals.ConString))
+            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 Measurement MeasurementToStop = db.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
 
@@ -257,9 +272,12 @@ namespace newRBS.Models
 
                 for (int i = 0; i < numSpectra; i++)
                 {
-                    newMeasurements[i].SpectrumY = spectraY[i].ToArray();
-                    newMeasurements[i].NumOfChannels = newMeasurements[i].SpectrumY.Count();
+                    newMeasurements[i].SpectrumY = ArrayConversion.IntToByte(spectraY[i].ToArray());
+                    newMeasurements[i].NumOfChannels = spectraY[i].Count();
+                    newMeasurements[i].RandomAligned = "(undefined)";
+                    newMeasurements[i].StopType = "(undefined)";
                     newMeasurements[i].StopTime = newMeasurements[i].StartTime + (newMeasurements[i].Duration - new DateTime(2000, 01, 01));
+                    newMeasurements[i].Chamber = "(undefined)";
                 }
 
                 return newMeasurements;

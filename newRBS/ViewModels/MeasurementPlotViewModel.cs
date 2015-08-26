@@ -94,7 +94,7 @@ namespace newRBS.ViewModels
 
             Models.Measurement measurement;
 
-            using (Models.RBS_Database db = new Models.RBS_Database(MyGlobals.ConString))   
+            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))   
                 measurement = db.Measurements.SingleOrDefault(x => x.MeasurementID == measurementID);
 
             if (measurement == null) { trace.TraceEvent(TraceEventType.Error, 0, "Failed to load data for SpectrumID: {0}", measurementID); return; }
@@ -114,9 +114,10 @@ namespace newRBS.ViewModels
 
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
-            for (int x = 0; x < measurement.SpectrumY.Count(); x++)
+            int[] spectrumY = ArrayConversion.ByteToInt(measurement.SpectrumY.ToArray());
+            for (int x = 0; x < spectrumY.Count(); x++)
             {
-                areaSeries.Points.Add(new DataPoint(x, measurement.SpectrumY[x]));
+                areaSeries.Points.Add(new DataPoint(x, spectrumY[x]));
                 areaSeries.Points2.Add(new DataPoint(x, 0));
             }
             plotModel.Series.Add(areaSeries);
@@ -139,9 +140,11 @@ namespace newRBS.ViewModels
                 int index = plotModel.Series.IndexOf(updateSerie);
 
                 (plotModel.Series[index] as AreaSeries).Points.Clear();
-                for (int x = 0; x < spectrum.SpectrumY.Count(); x++)
+
+                int[] spectrumY = ArrayConversion.ByteToInt(spectrum.SpectrumY.ToArray());
+                for (int x = 0; x < spectrumY.Count(); x++)
                 {
-                    (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(x, spectrum.SpectrumY[x]));
+                    (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(x, spectrumY[x]));
                 }
                 plotModel.InvalidatePlot(true);
             }

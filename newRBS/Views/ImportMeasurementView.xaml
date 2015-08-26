@@ -1,4 +1,4 @@
-﻿<Window x:Class="newRBS.Views.ImportSpectra"
+﻿<Window x:Class="newRBS.Views.ImportMeasurementsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -42,7 +42,7 @@
                 <TextBox Text="{Binding selectedMeasurement.Name, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
 
                 <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
-                <ComboBox ItemsSource="{Binding SampleList}" DisplayMemberPath="SampleName" SelectedItem="{Binding selectedMeasurement.Sample, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="1" />
+                <ComboBox ItemsSource="{Binding SampleList}" DisplayMemberPath="SampleName" SelectedValuePath="SampleID" SelectedValue="{Binding selectedMeasurement.SampleID, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="1" />
                 <Label Content="Sample remark:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="1"/>
                 <TextBox Text="{Binding selectedMeasurement.SampleRemark, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="1" />
 

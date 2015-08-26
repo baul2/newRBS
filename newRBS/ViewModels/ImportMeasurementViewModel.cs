@@ -38,7 +38,7 @@ namespace newRBS.ViewModels
         public int AtomicNumber { get; set; }
         public int AtomicMass { get; set; }
 
-        public Ion (string name, int atomicNumber, int atomicMass)
+        public Ion(string name, int atomicNumber, int atomicMass)
         {
             Name = name;
             AtomicNumber = atomicNumber;
@@ -46,7 +46,7 @@ namespace newRBS.ViewModels
         }
     }
 
-    public class ImportSpectraViewModel : ViewModelBase
+    public class ImportMeasurementsViewModel : ViewModelBase
     {
         public ICommand OpenFileCommand { get; set; }
         public ICommand AddCurrentMeasurementCommand { get; set; }
@@ -56,7 +56,7 @@ namespace newRBS.ViewModels
         private Models.DataSpectra dataSpectra;
 
         //private Models.Sample noneSample;
-        private Models.RBS_Database rbs_Database;
+        private Models.DatabaseDataContext Database;
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -71,18 +71,21 @@ namespace newRBS.ViewModels
             set
             {
                 if (value == null) return;
-
+                Console.WriteLine("selectedMeasurement");
                 if (_selectedMeasurement != null)
-                    _selectedMeasurement.EventNewSample -= new Models.Measurement.EventHandlerSpectrumID(AddNewSample);// Unsubscribe to events from old selected Measurement
+                {
+                    // Unsubscribe to events from old selected Measurement
+                    _selectedMeasurement.NewSampleToAdd -= new PropertyChangedEventHandler(AddNewSample);
+                }
 
                 _selectedMeasurement = value;
 
                 // Hooking up to events from new selected Measurement
-                _selectedMeasurement.EventNewSample += new Models.Measurement.EventHandlerSpectrumID(AddNewSample);
+                _selectedMeasurement.NewSampleToAdd += new PropertyChangedEventHandler(AddNewSample);
 
                 // Preparing the plot data
                 areaData.Clear();
-                int[] temp = value.SpectrumY;
+                int[] temp = ArrayConversion.ByteToInt(value.SpectrumY.ToArray());
                 for (int i = 0; i < temp.Count(); i++)
                     areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
 
@@ -102,7 +105,7 @@ namespace newRBS.ViewModels
         public string FileContent
         { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
 
-        private ObservableCollection<Models.Sample> _SampleList = new ObservableCollection<Models.Sample>();
+        private ObservableCollection<Models.Sample> _SampleList;
         public ObservableCollection<Models.Sample> SampleList
         { get { return _SampleList; } set { _SampleList = value; RaisePropertyChanged("SampleList"); } }
 
@@ -111,7 +114,7 @@ namespace newRBS.ViewModels
         public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<Ion> Ions { get; set; }
 
-        public ImportSpectraViewModel()
+        public ImportMeasurementsViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
 
@@ -122,23 +125,23 @@ namespace newRBS.ViewModels
 
             newMeausurements = new ObservableCollection<Models.Measurement>();
 
-            rbs_Database = new Models.RBS_Database("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
-            rbs_Database.Log = Console.Out;
+            Database = new Models.DatabaseDataContext("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
+            Database.Log = Console.Out;
 
-            List<Models.Sample> Samples = (from sample in rbs_Database.Samples select sample).ToList();
-
-            SampleList.Add(new Models.Sample("New..."));
-            foreach (Models.Sample sample in Samples)
-                SampleList.Add(sample);
+            SampleList = new ObservableCollection<Models.Sample>((from sample in Database.Samples select sample).ToList());
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li",3,7)};
+            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
+            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
         }
 
-        private void AddNewSample(int measurementID)
+        private void AddNewSample(object sender, PropertyChangedEventArgs e)
         {
+            //if (e.PropertyName != "Sample") return;
+            //var temp = (Models.Sample)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+            //if (temp.SampleName != "New...") return;
+
             Console.WriteLine("AddNewSample");
 
             ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new sample name:", "");
@@ -161,48 +164,49 @@ namespace newRBS.ViewModels
 
                 // New sample
                 Console.WriteLine("new sample");
-                //selectedMeasurement.Sample = SampleList.Where(x => x.SampleName == "(undefined)").First();
-                Console.WriteLine("asdf");
-                Models.Sample newSample = new Models.Sample(inputDialog.Answer);
-                //rbs_Database.Samples.InsertOnSubmit(newSample);
-                //rbs_Database.SubmitChanges();
-                Console.WriteLine("asdf2");
+
+                Models.Sample newSample = new Models.Sample();
+                newSample.SampleName = inputDialog.Answer;
+
+                Database.Samples.InsertOnSubmit(newSample);
+                Database.SubmitChanges();
+
                 SampleList.Add(newSample);
-                Console.WriteLine("SampleList.Add");
-                selectedMeasurement.Sample = newSample;
-                Console.WriteLine(selectedMeasurement.Sample.SampleName);
-                Console.WriteLine(SampleList.Contains(selectedMeasurement.Sample));
+                selectedMeasurement.SampleID = newSample.SampleID;
             }
         }
 
         public void _OpenFileCommand()
         {
-            var dialog = new OpenFileDialog { };
+            var dialog = new OpenFileDialog();
             dialog.ShowDialog();
 
-            SelectedPath = dialog.FileName;
+            if ((SelectedPath = dialog.FileName) == null) return;
 
             List<Models.Measurement> importedMeasurements = dataSpectra.LoadMeasurementsFromFile(SelectedPath);
+
+            Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
 
             newMeausurements.Clear();
 
             for (int i = 0; i < importedMeasurements.Count(); i++)
-                importedMeasurements[i].Sample = rbs_Database.Samples.First(x => x.SampleName == "(undefined)");
-
-            foreach (Models.Measurement importedMeasurement in importedMeasurements)
             {
-                newMeausurements.Add(importedMeasurement);
+                importedMeasurements[i].SampleID = undefinedSample.SampleID;
+                newMeausurements.Add(importedMeasurements[i]);
             }
 
-            Console.WriteLine(SampleList.Contains(importedMeasurements[0].Sample));
             selectedMeasurement = newMeausurements.First();
         }
 
         public void _AddCurrentMeasurementCommand()
         {
             Console.WriteLine("_AddCurrentMeasurementCommand");
-            rbs_Database.Measurements.InsertOnSubmit(selectedMeasurement);
-            rbs_Database.SubmitChanges();
+
+            Database.Measurements.InsertOnSubmit(selectedMeasurement);
+
+            Database.SubmitChanges();
+
+
 
             selectedMeasurement = null;
 
@@ -220,8 +224,8 @@ namespace newRBS.ViewModels
         public void _AddAllMeasurementsCommand()
         {
             Console.WriteLine("_AddAllMeasurementsCommand");
-            rbs_Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
-            rbs_Database.SubmitChanges();
+            Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
+            Database.SubmitChanges();
 
             DialogResult = false;
             _DialogResult = null;
