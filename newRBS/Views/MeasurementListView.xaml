@@ -4,16 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.Views"
+             xmlns:utils="clr-namespace:newRBS.Views.Utils"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800"
              DataContext="{Binding spectraListViewModel, Source={StaticResource Locator}}">
     <DataGrid 
         ItemsSource="{Binding MeasurementListViewSource.View}" 
+        SelectedValuePath="Measurement.MeasurementID"
+        SelectedValue="{Binding SelectedMeasurementID, Mode=TwoWay}"
         AutoGenerateColumns="False"
         CanUserAddRows="False"
         AlternationCount="2"
         HorizontalGridLinesBrush ="WhiteSmoke"
         VerticalGridLinesBrush="LightGray">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="MouseDoubleClick">
+                <cmd:EventToCommand Command="{Binding DataGridDoubleClickCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
         <DataGrid.RowStyle>
             <Style TargetType="{x:Type DataGridRow}">
                 <Style.Triggers>
@@ -31,7 +41,7 @@
                 </Style.Triggers>
             </Style>
         </DataGrid.RowStyle>
-        
+
         <DataGrid.Columns>
             <DataGridTemplateColumn Header="Selected">
                 <DataGridTemplateColumn.CellTemplate>
@@ -40,10 +50,6 @@
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
-            <!--DataGridCheckBoxColumn 
-                Header="Selected"
-                Binding="{Binding selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                IsReadOnly="False"/-->
             <DataGridTextColumn 
                 Header="SpectrumID" 
                 Binding="{Binding Measurement.MeasurementID}"
@@ -58,22 +64,28 @@
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Channel" 
-                Binding="{Binding Measurement.Channel}"/>
+                Binding="{Binding Measurement.Channel}"
+                IsReadOnly="True"/>
             <DataGridCheckBoxColumn 
                 Header="Runs"
-                Binding="{Binding Measurement.Runs}"/>
+                Binding="{Binding Measurement.Runs}"
+                IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="StartTime" 
-                Binding="{Binding Measurement.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                Binding="{Binding Measurement.StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Duration" 
-                Binding="{Binding Measurement.Duration, StringFormat=HH\\:mm\\:ss}"/>
+                Binding="{Binding Measurement.Duration, StringFormat=HH\\:mm\\:ss}"
+                IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Progress" 
-                Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"/>
+                Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"
+                IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="StopTime" 
-                Binding="{Binding Measurement.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                Binding="{Binding Measurement.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                IsReadOnly="True"/>
         </DataGrid.Columns>
     </DataGrid>
 </UserControl>

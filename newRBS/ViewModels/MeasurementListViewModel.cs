@@ -59,8 +59,21 @@ namespace newRBS.ViewModels
         #endregion
     }
 
-    public class MeasurementListViewModel
+    public class MeasurementListViewModel : ViewModelBase
     {
+        //public ICommand DataGridDoubleClick { get; set; }
+
+        private RelayCommand<EventArgs> _dataGridDoubleClickCommand;
+        public RelayCommand<EventArgs> DataGridDoubleClickCommand
+        {
+            get
+            {
+                return _dataGridDoubleClickCommand
+                  ?? (_dataGridDoubleClickCommand = new RelayCommand<EventArgs>(
+                    eventargs => { _DataGridDoubleClickCommand(eventargs); }));
+            }
+        }
+
         private Models.DataSpectra dataSpectra { get; set; }
 
         public delegate void EventHandlerMeasurementID(int SpectrumID);
@@ -71,7 +84,14 @@ namespace newRBS.ViewModels
 
         public CollectionViewSource MeasurementListViewSource { get; set; }
 
-        private Filter lastFilter;
+        private FilterClass lastFilter;
+
+        private int _SelectedMeasurementID;
+        public int SelectedMeasurementID
+        {
+            get { return _SelectedMeasurementID; }
+            set { _SelectedMeasurementID = value; RaisePropertyChanged(); }
+        }
 
         public MeasurementListViewModel()
         {
@@ -93,7 +113,25 @@ namespace newRBS.ViewModels
             MeasurementListViewSource.Source = MeasurementList;
             MeasurementListViewSource.SortDescriptions.Add(new SortDescription("Measurement.StartTime", ListSortDirection.Descending));
 
-            ChangeFilter(new Filter() { Name = "Today", Type = "Date", SubType = "Today" });
+            ChangeFilter(new FilterClass() { Name = "Today", Type = "Date", SubType = "Today" });
+        }
+
+        private void _DataGridDoubleClickCommand(EventArgs eventArgs)
+        {
+            Console.WriteLine("_DataGridDoubleClick");
+
+            MeasurementInfoViewModel measurementInfoViewModel = new MeasurementInfoViewModel(SelectedMeasurementID); 
+            Views.MeasurementInfoView measurementInfoView = new Views.MeasurementInfoView();
+            measurementInfoView.DataContext = measurementInfoViewModel;
+            measurementInfoView.ShowDialog();
+
+            // Update selected row
+            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
+            {
+                MyMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
+                myMeasurement.Measurement = db.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
+                Models.Sample temp = myMeasurement.Measurement.Sample; // To load the sample bevor the scope of db ends
+            }
         }
 
         public void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -146,7 +184,7 @@ namespace newRBS.ViewModels
             { if (EventMeasurementNotToPlot != null) EventMeasurementNotToPlot(myMeasurement.Measurement.MeasurementID); }
         }
 
-        public void ChangeFilter(Filter selectedFilter)
+        public void ChangeFilter(FilterClass selectedFilter)
         {
             MeasurementList.Clear();
             Console.WriteLine("FilterType: {0}", selectedFilter.Type);
@@ -181,22 +219,22 @@ namespace newRBS.ViewModels
                                     { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == DateTime.Now.Year).ToList(); break; }
 
                                 case "Year":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year).ToList(); break; }
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year).ToList(); break; }
 
                                 case "Month":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month).ToList(); break; }
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year && x.StartTime.Date.Month == selectedFilter.Month).ToList(); break; }
 
                                 case "Day":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.year && x.StartTime.Date.Month == selectedFilter.month && x.StartTime.Date.Day == selectedFilter.day).ToList(); break; }
+                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year && x.StartTime.Date.Month == selectedFilter.Month && x.StartTime.Date.Day == selectedFilter.Day).ToList(); break; }
                             }
                         }
                         break;
 
                     case "Sample":
-                        { break; }
+                        { MeasurementList = db.Measurements.Where(x => x.Sample.SampleName == selectedFilter.SampleName).ToList(); break; }
 
                     case "Channel":
-                        { MeasurementList = db.Measurements.Where(x => x.Channel == selectedFilter.channel).ToList(); break; }
+                        { MeasurementList = db.Measurements.Where(x => x.Channel == selectedFilter.Channel).ToList(); break; }
                 }
 
                 Models.Sample tempSample;

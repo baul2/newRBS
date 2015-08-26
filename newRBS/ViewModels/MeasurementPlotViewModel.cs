@@ -164,7 +164,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void ClearPlot(Filter newFilter)
+        private void ClearPlot(FilterClass newFilter)
         {
             Console.WriteLine("ClearPlot");
 

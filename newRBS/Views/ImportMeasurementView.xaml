@@ -20,7 +20,7 @@
             <ComboBox ItemsSource="{Binding newMeausurements}" DisplayMemberPath="Name" SelectedItem="{Binding selectedMeasurement}" Margin="5" Padding="3" />
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical">
-            <viewutils:MeasurementInfoView DataContext="{Binding MeasurementInfo}"/>
+            <viewutils:MeasurementInfo DataContext="{Binding MeasurementInfo}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Command="{Binding AddCurrentMeasurementCommand}" MinWidth="100" Content="Add current measurement" Margin="5" Padding="5"/>
                 <Button Command="{Binding AddAllMeasurementsCommand}" MinWidth="100" Content="Add all measurements" Margin="5" Padding="5"/>
