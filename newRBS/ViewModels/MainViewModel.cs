@@ -42,8 +42,11 @@ namespace newRBS.ViewModels
         public ICommand ImportMeasurementsCommand { get; set; }
         public ICommand ExportMeasurementsCommand { get; set; }
         public ICommand DeleteMeasurementsCommand { get; set; }
-        
-        public ICommand MaterialEditorCommand { get; set; }  
+
+        public ICommand MaterialEditorCommand { get; set; }
+        public ICommand SampleEditorCommand { get; set; }
+
+        public ICommand SimulateSpectrumCommand { get; set; }
 
         TraceSource trace = new TraceSource("MainViewModel");
 
@@ -62,6 +65,9 @@ namespace newRBS.ViewModels
             DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
+            SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
+
+            SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
         }
 
         public void _NewMeasurementCommand()
@@ -70,7 +76,7 @@ namespace newRBS.ViewModels
 
             NewMeasurementViewModel newMeasurementViewModel = new NewMeasurementViewModel();
             Views.NewMeasurementView newMeasurementView = new Views.NewMeasurementView();
-            newMeasurementView.DataContext = newMeasurementViewModel;       
+            newMeasurementView.DataContext = newMeasurementViewModel;
             newMeasurementView.ShowDialog();
         }
 
@@ -126,9 +132,29 @@ namespace newRBS.ViewModels
             Console.WriteLine("_MaterialEditorCommand");
 
             MaterialEditorViewModel materialEditorViewModel = new MaterialEditorViewModel();
-            Views.MaterialEditor materialEditor = new Views.MaterialEditor();
-            materialEditor.DataContext = materialEditorViewModel;
-            materialEditor.ShowDialog();
+            Views.MaterialEditorView materialEditorView = new Views.MaterialEditorView();
+            materialEditorView.DataContext = materialEditorViewModel;
+            materialEditorView.ShowDialog();
+        }
+
+        public void _SampleEditorCommand()
+        {
+            Console.WriteLine("_SampleEditorCommand");
+
+            SampleEditorViewModel sampleEditorViewModel = new SampleEditorViewModel();
+            Views.SampleEditorView materialEditorView = new Views.SampleEditorView();
+            materialEditorView.DataContext = sampleEditorViewModel;
+            materialEditorView.ShowDialog();
+        }
+
+        public void _SimulateSpectrumCommand()
+        {
+            Console.WriteLine("_SimulateSpectrumCommand");
+
+            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
+            Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
+            simulateSpectrumView.DataContext = simulateSpectrumViewModel;
+            simulateSpectrumView.ShowDialog();
         }
     }
 }

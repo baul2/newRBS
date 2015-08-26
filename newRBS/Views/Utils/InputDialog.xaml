@@ -1,4 +1,4 @@
-﻿<Window x:Class="newRBS.ViewUtils.InputDialog"
+﻿<Window x:Class="newRBS.Views.Utils.InputDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Input" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"

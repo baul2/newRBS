@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace newRBS.Views
 {
     /// <summary>
-    /// Interaktionslogik für MaterialEditor.xaml
+    /// Interaktionslogik für SimulateSpectrumView.xaml
     /// </summary>
-    public partial class MaterialEditorView : Window
+    public partial class SimulateSpectrumView : Window
     {
-        public MaterialEditorView()
+        public SimulateSpectrumView()
         {
             InitializeComponent();
         }

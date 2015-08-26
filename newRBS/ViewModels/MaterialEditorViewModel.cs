@@ -125,7 +125,7 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_AddMaterialCommand");
 
-            ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new material name:", "new Material");
+            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", "new Material");
             if (inputDialog.ShowDialog() == true)
             {
   
@@ -154,7 +154,7 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_RenameMaterialCommand");
 
-            ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new material name:", SelectedMaterial.MaterialName);
+            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", SelectedMaterial.MaterialName);
             if (inputDialog.ShowDialog() == true)
                 SelectedMaterial.MaterialName = inputDialog.Answer;
         }

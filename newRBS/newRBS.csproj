@@ -136,6 +136,20 @@
     <Compile Include="Models\Database_PartialMethods.cs" />
     <Compile Include="Models\DataMaterial.cs" />
     <Compile Include="Models\DataSimpleMaterial.cs" />
+    <Compile Include="Models\EpsaraSharp\Data.cs" />
+    <Compile Include="Models\EpsaraSharp\DataBeam.cs" />
+    <Compile Include="Models\EpsaraSharp\DataDetector.cs" />
+    <Compile Include="Models\EpsaraSharp\DataIsotopeReaction.cs" />
+    <Compile Include="Models\EpsaraSharp\DataMaterial.cs" />
+    <Compile Include="Models\EpsaraSharp\DataMatrix.cs" />
+    <Compile Include="Models\EpsaraSharp\DataMeasurement.cs" />
+    <Compile Include="Models\EpsaraSharp\DataMeasurementForallCallback.cs" />
+    <Compile Include="Models\EpsaraSharp\DataRbsMeasurement.cs" />
+    <Compile Include="Models\EpsaraSharp\DataSimpleMaterial.cs" />
+    <Compile Include="Models\EpsaraSharp\DataSimpleMeasurement.cs" />
+    <Compile Include="Models\EpsaraSharp\DataVector.cs" />
+    <Compile Include="Models\EpsaraSharp\EpsaraSharp.DataMeasurementForallCallbackNative.cs" />
+    <Compile Include="Models\EpsaraSharp\PhyscoreOdeInputParameter.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
     <Compile Include="Models\RBS_Database.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
@@ -148,12 +162,16 @@
     <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
     <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
     <Compile Include="ViewModels\MeasurementPlotViewModel.cs" />
-    <Compile Include="ViewModelUtils\AsyncObservableCollection.cs" />
-    <Compile Include="ViewModelUtils\CheckedListItem.cs" />
-    <Compile Include="ViewModelUtils\DialogCloser.cs" />
+    <Compile Include="ViewModels\SampleEditorViewModel.cs" />
+    <Compile Include="ViewModels\SimulateSpectrumViewModel.cs" />
+    <Compile Include="ViewModels\Utils\AreaData.cs" />
+    <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
+    <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
+    <Compile Include="ViewModels\Utils\DialogCloser.cs" />
     <Compile Include="Utils\ArrayConversion.cs" />
-    <Compile Include="ViewModelUtils\NameValueClass.cs" />
-    <Compile Include="ViewModelUtils\TreeViewHelper.cs" />
+    <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
+    <Compile Include="ViewModels\Utils\NameValueClass.cs" />
+    <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
     </Compile>
@@ -163,24 +181,33 @@
     <Compile Include="Views\MaterialEditorView.xaml.cs">
       <DependentUpon>MaterialEditorView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SpectraFilterView.xaml.cs">
-      <DependentUpon>SpectraFilterView.xaml</DependentUpon>
+    <Compile Include="Views\SampleEditorView.xaml.cs">
+      <DependentUpon>SampleEditorView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SpectraListView.xaml.cs">
-      <DependentUpon>SpectraListView.xaml</DependentUpon>
+    <Compile Include="Views\SimulateSpectrumView.xaml.cs">
+      <DependentUpon>SimulateSpectrumView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MeasurementFilterView.xaml.cs">
+      <DependentUpon>MeasurementFilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MeasurementListView.xaml.cs">
+      <DependentUpon>MeasurementListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\DataSpectra.cs" />
     <Compile Include="Models\MeasureSpectra.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
-    <Compile Include="Views\SpectraPlotView.xaml.cs">
-      <DependentUpon>SpectraPlotView.xaml</DependentUpon>
+    <Compile Include="Views\MeasurementPlotView.xaml.cs">
+      <DependentUpon>MeasurementPlotView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NewMeasurementView.xaml.cs">
       <DependentUpon>NewMeasurementView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewUtils\InputDialog.xaml.cs">
+    <Compile Include="Views\Utils\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Utils\MeasurementInfoView.xaml.cs">
+      <DependentUpon>MeasurementInfoView.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\ChannelConfigurationView.xaml">
       <SubType>Designer</SubType>
@@ -206,15 +233,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SpectraFilterView.xaml">
+    <Page Include="Views\SampleEditorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SpectraListView.xaml">
+    <Page Include="Views\SimulateSpectrumView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SpectraPlotView.xaml">
+    <Page Include="Views\MeasurementFilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MeasurementListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MeasurementPlotView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -222,7 +257,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ViewUtils\InputDialog.xaml">
+    <Page Include="Views\Utils\InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Utils\MeasurementInfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
