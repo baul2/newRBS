@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace newRBS.ViewUtils
+namespace newRBS.Views.Utils
 {
     /// <summary>
     /// Interaction logic for InputDialog.xaml

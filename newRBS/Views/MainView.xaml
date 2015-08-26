@@ -23,6 +23,10 @@
             </ToolBar>
             <ToolBar>
                 <Button Command="{Binding MaterialEditorCommand}" Content="Material Editor" />
+                <Button Command="{Binding SampleEditorCommand}" Content="Sample Editor" />
+            </ToolBar>
+            <ToolBar>
+                <Button Command="{Binding SimulateSpectrumCommand}" Content="Simulate Spectrum" />
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">

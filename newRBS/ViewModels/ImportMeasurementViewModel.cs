@@ -19,33 +19,12 @@ using Microsoft.Practices.ServiceLocation;
 using Microsoft.Win32;
 using System.IO;
 using OxyPlot;
+using newRBS.ViewModels.Utils;
 
 
 
 namespace newRBS.ViewModels
 {
-    public class AreaData
-    {
-        public double x1 { get; set; }
-        public double y1 { get; set; }
-        public double x2 { get; set; }
-        public double y2 { get; set; }
-    }
-
-    public class Ion
-    {
-        public string Name { get; set; }
-        public int AtomicNumber { get; set; }
-        public int AtomicMass { get; set; }
-
-        public Ion(string name, int atomicNumber, int atomicMass)
-        {
-            Name = name;
-            AtomicNumber = atomicNumber;
-            AtomicMass = atomicMass;
-        }
-    }
-
     public class ImportMeasurementsViewModel : ViewModelBase
     {
         public ICommand OpenFileCommand { get; set; }
@@ -55,7 +34,6 @@ namespace newRBS.ViewModels
 
         private Models.DataSpectra dataSpectra;
 
-        //private Models.Sample noneSample;
         private Models.DatabaseDataContext Database;
 
         private bool? _DialogResult;
@@ -64,6 +42,8 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<Models.Measurement> newMeausurements { get; set; }
 
+        public MeasurementInfoClass MeasurementInfo { get; set; }
+
         private Models.Measurement _selectedMeasurement = new Models.Measurement();
         public Models.Measurement selectedMeasurement
         {
@@ -71,26 +51,29 @@ namespace newRBS.ViewModels
             set
             {
                 if (value == null) return;
-                Console.WriteLine("selectedMeasurement");
-                if (_selectedMeasurement != null)
-                {
-                    // Unsubscribe to events from old selected Measurement
-                    _selectedMeasurement.NewSampleToAdd -= new PropertyChangedEventHandler(AddNewSample);
-                }
-
+                Models.Measurement oldMeasurement = _selectedMeasurement;
                 _selectedMeasurement = value;
-
-                // Hooking up to events from new selected Measurement
-                _selectedMeasurement.NewSampleToAdd += new PropertyChangedEventHandler(AddNewSample);
-
-                // Preparing the plot data
-                areaData.Clear();
-                int[] temp = ArrayConversion.ByteToInt(value.SpectrumY.ToArray());
-                for (int i = 0; i < temp.Count(); i++)
-                    areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
-
+                NewSelectedMeasurement(oldMeasurement);
                 RaisePropertyChanged("selectedMeasurement");
             }
+        }
+
+        private void NewSelectedMeasurement(Models.Measurement oldMeasurement)
+        {
+            // Unsubscribe to events from old selected Measurement
+            if (oldMeasurement != null) oldMeasurement.NewSampleToAdd -= new PropertyChangedEventHandler(AddNewSample);
+
+            // Hooking up to events from new selected Measurement
+            _selectedMeasurement.NewSampleToAdd += new PropertyChangedEventHandler(AddNewSample);
+
+            // Updating the grid data
+            MeasurementInfo.Measurement = selectedMeasurement;
+
+            // Updating the plot data
+            areaData.Clear();
+            int[] temp = ArrayConversion.ByteToInt(selectedMeasurement.SpectrumY.ToArray());
+            for (int i = 0; i < temp.Count(); i++)
+                areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
         }
 
         private string _SelectedPath;
@@ -105,15 +88,6 @@ namespace newRBS.ViewModels
         public string FileContent
         { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
 
-        private ObservableCollection<Models.Sample> _SampleList;
-        public ObservableCollection<Models.Sample> SampleList
-        { get { return _SampleList; } set { _SampleList = value; RaisePropertyChanged("SampleList"); } }
-
-        public ObservableCollection<string> Orientations { get; set; }
-        public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<string> StopTypeList { get; set; }
-        public ObservableCollection<Ion> Ions { get; set; }
-
         public ImportMeasurementsViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
@@ -125,39 +99,30 @@ namespace newRBS.ViewModels
 
             newMeausurements = new ObservableCollection<Models.Measurement>();
 
-            Database = new Models.DatabaseDataContext("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
+            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
             Database.Log = Console.Out;
 
-            SampleList = new ObservableCollection<Models.Sample>((from sample in Database.Samples select sample).ToList());
-
-            Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
-            Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
+            MeasurementInfo = new MeasurementInfoClass(Database);
         }
 
         private void AddNewSample(object sender, PropertyChangedEventArgs e)
         {
-            //if (e.PropertyName != "Sample") return;
-            //var temp = (Models.Sample)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
-            //if (temp.SampleName != "New...") return;
-
             Console.WriteLine("AddNewSample");
 
-            ViewUtils.InputDialog inputDialog = new ViewUtils.InputDialog("Enter new sample name:", "");
+            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
             if (inputDialog.ShowDialog() == true)
             {
                 Console.WriteLine(inputDialog.Answer);
                 if (inputDialog.Answer == "")
                     return;
 
-                if (SampleList.FirstOrDefault(x => x.SampleName == inputDialog.Answer) != null)
+                if (MeasurementInfo.Samples.FirstOrDefault(x => x.SampleName == inputDialog.Answer) != null)
                 {
                     Console.WriteLine("Sample already exists!");
 
                     MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    selectedMeasurement.Sample = SampleList.First(x => x.SampleName == inputDialog.Answer);
+                    selectedMeasurement.Sample = MeasurementInfo.Samples.First(x => x.SampleName == inputDialog.Answer);
                     Console.WriteLine(selectedMeasurement.Sample.SampleName);
                     return;
                 }
@@ -167,11 +132,12 @@ namespace newRBS.ViewModels
 
                 Models.Sample newSample = new Models.Sample();
                 newSample.SampleName = inputDialog.Answer;
+                newSample.MaterialID = 1;
 
                 Database.Samples.InsertOnSubmit(newSample);
                 Database.SubmitChanges();
 
-                SampleList.Add(newSample);
+                MeasurementInfo.Samples.Add(newSample);
                 selectedMeasurement.SampleID = newSample.SampleID;
             }
         }

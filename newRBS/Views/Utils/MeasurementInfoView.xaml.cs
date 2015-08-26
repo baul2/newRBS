@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace newRBS.Views
+namespace newRBS.Views.Utils
 {
     /// <summary>
-    /// Interaktionslogik für MaterialEditor.xaml
+    /// Interaktionslogik für MeasurementInfoView.xaml
     /// </summary>
-    public partial class MaterialEditorView : Window
+    public partial class MeasurementInfoView : UserControl
     {
-        public MaterialEditorView()
+        public MeasurementInfoView()
         {
             InitializeComponent();
         }

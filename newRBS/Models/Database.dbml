@@ -54,6 +54,7 @@
       <Column Name="MaterialName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
       <Association Name="Material_Element" Member="Elements" ThisKey="MaterialID" OtherKey="MaterialID" Type="Element" />
       <Association Name="Material_Layer" Member="Layers" ThisKey="MaterialID" OtherKey="MaterialID" Type="Layer" />
+      <Association Name="Material_Sample" Member="Samples" ThisKey="MaterialID" OtherKey="MaterialID" Type="Sample" />
     </Type>
   </Table>
   <Table Name="dbo.Layers" Member="Layers">
@@ -72,7 +73,9 @@
     <Type Name="Sample">
       <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="SampleName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="MaterialID" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Association Name="Sample_Measurement" Member="Measurements" ThisKey="SampleID" OtherKey="SampleID" Type="Measurement" />
+      <Association Name="Material_Sample" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>
