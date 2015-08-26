@@ -142,7 +142,7 @@
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\ImportSpectraViewModel.cs" />
+    <Compile Include="ViewModels\ImportMeasurementViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementListViewModel.cs" />
     <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
@@ -157,8 +157,8 @@
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ImportSpectraView.xaml.cs">
-      <DependentUpon>ImportSpectraView.xaml</DependentUpon>
+    <Compile Include="Views\ImportMeasurementView.xaml.cs">
+      <DependentUpon>ImportMeasurementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MaterialEditorView.xaml.cs">
       <DependentUpon>MaterialEditorView.xaml</DependentUpon>
@@ -186,7 +186,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ImportSpectraView.xaml">
+    <Page Include="Views\ImportMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

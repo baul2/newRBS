@@ -38,7 +38,7 @@ namespace newRBS.ViewModels
         public int AtomicNumber { get; set; }
         public int AtomicMass { get; set; }
 
-        public Ion (string name, int atomicNumber, int atomicMass)
+        public Ion(string name, int atomicNumber, int atomicMass)
         {
             Name = name;
             AtomicNumber = atomicNumber;
@@ -46,7 +46,7 @@ namespace newRBS.ViewModels
         }
     }
 
-    public class ImportSpectraViewModel : ViewModelBase
+    public class ImportMeasurementsViewModel : ViewModelBase
     {
         public ICommand OpenFileCommand { get; set; }
         public ICommand AddCurrentMeasurementCommand { get; set; }
@@ -71,14 +71,17 @@ namespace newRBS.ViewModels
             set
             {
                 if (value == null) return;
-
+                Console.WriteLine("selectedMeasurement");
                 if (_selectedMeasurement != null)
-                    _selectedMeasurement.PropertyChanged -= new PropertyChangedEventHandler(AddNewSample);// Unsubscribe to events from old selected Measurement
+                {
+                    // Unsubscribe to events from old selected Measurement
+                    _selectedMeasurement.NewSampleToAdd -= new PropertyChangedEventHandler(AddNewSample);
+                }
 
                 _selectedMeasurement = value;
 
                 // Hooking up to events from new selected Measurement
-                _selectedMeasurement.PropertyChanged += new PropertyChangedEventHandler(AddNewSample);
+                _selectedMeasurement.NewSampleToAdd += new PropertyChangedEventHandler(AddNewSample);
 
                 // Preparing the plot data
                 areaData.Clear();
@@ -102,7 +105,7 @@ namespace newRBS.ViewModels
         public string FileContent
         { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
 
-        private ObservableCollection<Models.Sample> _SampleList = new ObservableCollection<Models.Sample>();
+        private ObservableCollection<Models.Sample> _SampleList;
         public ObservableCollection<Models.Sample> SampleList
         { get { return _SampleList; } set { _SampleList = value; RaisePropertyChanged("SampleList"); } }
 
@@ -111,7 +114,7 @@ namespace newRBS.ViewModels
         public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<Ion> Ions { get; set; }
 
-        public ImportSpectraViewModel()
+        public ImportMeasurementsViewModel()
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
 
@@ -125,30 +128,19 @@ namespace newRBS.ViewModels
             Database = new Models.DatabaseDataContext("Data Source = SVRH; User ID = p4mist; Password = testtesttesttest");
             Database.Log = Console.Out;
 
-            List<Models.Sample> Samples = (from sample in Database.Samples select sample).ToList();
-
-            Models.Sample newSample = new Models.Sample();
-            newSample.SampleName = "New...";
-            SampleList.Add(newSample);
-            foreach (Models.Sample sample in Samples)
-                SampleList.Add(sample);
+            SampleList = new ObservableCollection<Models.Sample>((from sample in Database.Samples select sample).ToList());
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li",3,7)};
+            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
+            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
         }
 
         private void AddNewSample(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != "SampleID") return;
-
-            int SampleID = (int)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
-            Console.WriteLine("SampleID: {0}", SampleID);
-
-            Console.WriteLine(Database.Samples.FirstOrDefault(x=>x.SampleID == SampleID).SampleName);
-
-            if (Database.Samples.FirstOrDefault(x => x.SampleID == SampleID).SampleName != "New...") return;
+            //if (e.PropertyName != "Sample") return;
+            //var temp = (Models.Sample)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+            //if (temp.SampleName != "New...") return;
 
             Console.WriteLine("AddNewSample");
 
@@ -172,49 +164,49 @@ namespace newRBS.ViewModels
 
                 // New sample
                 Console.WriteLine("new sample");
-                //selectedMeasurement.Sample = SampleList.Where(x => x.SampleName == "(undefined)").First();
-                Console.WriteLine("asdf");
+
                 Models.Sample newSample = new Models.Sample();
                 newSample.SampleName = inputDialog.Answer;
-                //DatabaseDataContext.Samples.InsertOnSubmit(newSample);
-                //DatabaseDataContext.SubmitChanges();
-                Console.WriteLine("asdf2");
+
+                Database.Samples.InsertOnSubmit(newSample);
+                Database.SubmitChanges();
+
                 SampleList.Add(newSample);
-                Console.WriteLine("SampleList.Add");
-                selectedMeasurement.Sample = newSample;
-                Console.WriteLine(selectedMeasurement.Sample.SampleName);
-                Console.WriteLine(SampleList.Contains(selectedMeasurement.Sample));
+                selectedMeasurement.SampleID = newSample.SampleID;
             }
         }
 
         public void _OpenFileCommand()
         {
-            var dialog = new OpenFileDialog { };
+            var dialog = new OpenFileDialog();
             dialog.ShowDialog();
 
-            SelectedPath = dialog.FileName;
+            if ((SelectedPath = dialog.FileName) == null) return;
 
             List<Models.Measurement> importedMeasurements = dataSpectra.LoadMeasurementsFromFile(SelectedPath);
+
+            Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
 
             newMeausurements.Clear();
 
             for (int i = 0; i < importedMeasurements.Count(); i++)
-                importedMeasurements[i].Sample = Database.Samples.First(x => x.SampleName == "(undefined)");
-
-            foreach (Models.Measurement importedMeasurement in importedMeasurements)
             {
-                newMeausurements.Add(importedMeasurement);
+                importedMeasurements[i].SampleID = undefinedSample.SampleID;
+                newMeausurements.Add(importedMeasurements[i]);
             }
 
-            Console.WriteLine(SampleList.Contains(importedMeasurements[0].Sample));
             selectedMeasurement = newMeausurements.First();
         }
 
         public void _AddCurrentMeasurementCommand()
         {
             Console.WriteLine("_AddCurrentMeasurementCommand");
+
             Database.Measurements.InsertOnSubmit(selectedMeasurement);
+
             Database.SubmitChanges();
+
+
 
             selectedMeasurement = null;
 

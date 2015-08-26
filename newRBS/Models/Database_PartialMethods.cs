@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Data;
+using System.ComponentModel;
 
 namespace newRBS.Models
 {
@@ -20,6 +21,20 @@ namespace newRBS.Models
             dlo.LoadWith<Layer>(c => c.Elements);
             //this.LoadOptions = dlo;
             //this.Log = Console.Out;
+        }
+    }
+
+    public partial class Measurement
+    {
+        public event PropertyChangedEventHandler NewSampleToAdd;
+
+        partial void OnSampleIDChanged()
+        {
+            //Console.WriteLine("OnSampleIDChanged");
+
+            if (SampleID == 2)
+                if ((this.NewSampleToAdd != null))
+                    this.NewSampleToAdd(this, new PropertyChangedEventArgs("SampleID"));
         }
     }
 }

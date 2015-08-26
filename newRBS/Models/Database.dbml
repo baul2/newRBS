@@ -13,13 +13,6 @@
       <Association Name="Layer_Element" Member="Layer" ThisKey="LayerID" OtherKey="LayerID" Type="Layer" IsForeignKey="true" />
     </Type>
   </Table>
-  <Table Name="dbo.Samples" Member="Samples">
-    <Type Name="Sample">
-      <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="SampleName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Association Name="Sample_Measurement" Member="Measurement" ThisKey="SampleID" OtherKey="MeasurementID" Type="Measurement" Cardinality="One" />
-    </Type>
-  </Table>
   <Table Name="dbo.Measurements" Member="Measurements">
     <Type Name="Measurement">
       <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -52,7 +45,7 @@
       <Column Name="Y" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Phi" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Association Name="Sample_Measurement" Member="Sample" ThisKey="MeasurementID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
+      <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Materials" Member="Materials">
@@ -73,6 +66,13 @@
       <Column Name="Thickness" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Association Name="Layer_Element" Member="Elements" ThisKey="LayerID" OtherKey="LayerID" Type="Element" />
       <Association Name="Material_Layer" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Samples" Member="Samples">
+    <Type Name="Sample">
+      <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="SampleName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Sample_Measurement" Member="Measurements" ThisKey="SampleID" OtherKey="SampleID" Type="Measurement" />
     </Type>
   </Table>
 </Database>

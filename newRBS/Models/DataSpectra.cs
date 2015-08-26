@@ -274,7 +274,10 @@ namespace newRBS.Models
                 {
                     newMeasurements[i].SpectrumY = ArrayConversion.IntToByte(spectraY[i].ToArray());
                     newMeasurements[i].NumOfChannels = spectraY[i].Count();
+                    newMeasurements[i].RandomAligned = "(undefined)";
+                    newMeasurements[i].StopType = "(undefined)";
                     newMeasurements[i].StopTime = newMeasurements[i].StartTime + (newMeasurements[i].Duration - new DateTime(2000, 01, 01));
+                    newMeasurements[i].Chamber = "(undefined)";
                 }
 
                 return newMeasurements;
