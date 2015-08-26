@@ -10,15 +10,14 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace newRBS.Views.Utils
+namespace newRBS.Views
 {
     /// <summary>
     /// Interaktionslogik für MeasurementInfoView.xaml
     /// </summary>
-    public partial class MeasurementInfoView : UserControl
+    public partial class MeasurementInfoView : Window
     {
         public MeasurementInfoView()
         {

@@ -10,16 +10,26 @@
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Command="{Binding NewMeasurementCommand}" Content="Start Measurement" />
-                <Button Command="{Binding StopMeasurementCommand}" Content="Stop Measurement" />
+                <Button Command="{Binding NewMeasurementCommand}" ToolTip="Start Measurement">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\media-play-3x.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding StopMeasurementCommand}" ToolTip="Stop Measurement">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\media-stop-3x.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding ChannelConfigurationCommand}" ToolTip="Configure Channels">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\wrench-3x.png" Height="24"/>
+                </Button>
             </ToolBar>
             <ToolBar>
-                <Button Command="{Binding ChannelConfigurationCommand}" Content="Configure Channels" />
-            </ToolBar>
-            <ToolBar>
-                <Button Command="{Binding ImportMeasurementsCommand}" Content="Import Measurements" />
-                <Button Command="{Binding ExportMeasurementsCommand}" Content="Export Measurements" />
-                <Button Command="{Binding DeleteMeasurementsCommand}" Content="Delete Measurements" />
+                <Button Command="{Binding ImportMeasurementsCommand}" ToolTip="Import Measurements">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\envelope-open-3x.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding ExportMeasurementsCommand}" ToolTip="Export Measurements">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\share-boxed-3x.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding DeleteMeasurementsCommand}" ToolTip="Delete Measurements">
+                    <Image Source="C:\Users\user\Desktop\CAEN\newRBS\newRBS\Images\delete-3x.png" Height="24"/>
+                </Button>
             </ToolBar>
             <ToolBar>
                 <Button Command="{Binding MaterialEditorCommand}" Content="Material Editor" />

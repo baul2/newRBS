@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.ViewModels"
-             xmlns:ViewModelUtils="clr-namespace:newRBS.ViewModels.Utils"
+             xmlns:viewmodelutils="clr-namespace:newRBS.ViewModels.Utils"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              DataContext="{Binding spectraFilterViewModel, Source={StaticResource Locator}}">
@@ -18,9 +18,9 @@
                     <Expander Header="Measurement filter" IsExpanded="True">
                         <StackPanel>
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
-                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" ViewModelUtils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  ViewModelUtils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
+                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" viewmodelutils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  viewmodelutils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
                                 <TreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type local:Filter}" ItemsSource="{Binding Children}">
+                                    <HierarchicalDataTemplate DataType="{x:Type viewmodelutils:FilterClass}" ItemsSource="{Binding Children}">
                                         <TextBlock Text="{Binding Name}"></TextBlock>
                                     </HierarchicalDataTemplate>
                                 </TreeView.Resources>

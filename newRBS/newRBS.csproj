@@ -158,6 +158,7 @@
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModels\ImportMeasurementViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
+    <Compile Include="ViewModels\MeasurementInfoViewModel.cs" />
     <Compile Include="ViewModels\MeasurementListViewModel.cs" />
     <Compile Include="ViewModels\MeasurementFilterViewModel.cs" />
     <Compile Include="ViewModels\NewMeasurementViewModel.cs" />
@@ -169,6 +170,7 @@
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
     <Compile Include="Utils\ArrayConversion.cs" />
+    <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
     <Compile Include="ViewModels\Utils\NameValueClass.cs" />
     <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
@@ -180,6 +182,9 @@
     </Compile>
     <Compile Include="Views\MaterialEditorView.xaml.cs">
       <DependentUpon>MaterialEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MeasurementInfoView.xaml.cs">
+      <DependentUpon>MeasurementInfoView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SampleEditorView.xaml.cs">
       <DependentUpon>SampleEditorView.xaml</DependentUpon>
@@ -206,8 +211,8 @@
     <Compile Include="Views\Utils\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Utils\MeasurementInfoView.xaml.cs">
-      <DependentUpon>MeasurementInfoView.xaml</DependentUpon>
+    <Compile Include="Views\Utils\MeasurementInfo.xaml.cs">
+      <DependentUpon>MeasurementInfo.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\ChannelConfigurationView.xaml">
       <SubType>Designer</SubType>
@@ -230,6 +235,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\MaterialEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MeasurementInfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -261,7 +270,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Utils\MeasurementInfoView.xaml">
+    <Page Include="Views\Utils\MeasurementInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -305,7 +314,16 @@
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Images\media-play-3x.png" />
+    <EmbeddedResource Include="Images\media-stop-3x.png" />
+    <EmbeddedResource Include="Images\wrench-3x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\delete-3x.png" />
+    <EmbeddedResource Include="Images\envelope-open-3x.png" />
+    <EmbeddedResource Include="Images\share-boxed-3x.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
