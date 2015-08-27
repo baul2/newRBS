@@ -17,9 +17,9 @@ namespace newRBS.Views
     /// <summary>
     /// Interaction logic for ImportSpectra.xaml
     /// </summary>
-    public partial class ImportMeasurementsView : Window
+    public partial class MeasurementImportView : Window
     {
-        public ImportMeasurementsView()
+        public MeasurementImportView()
         {
             InitializeComponent();
         }

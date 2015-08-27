@@ -15,7 +15,7 @@ namespace newRBS.Models
     public class MeasureSpectra
     {
         private CAEN_x730 cAEN_x730;
-        private DataSpectra dataSpectra;
+        private DatabaseUtils dataSpectra;
 
         public int NumOfChannels = 16384;
         public int IncomingIonNumber = 2;
@@ -36,14 +36,14 @@ namespace newRBS.Models
         private Dictionary<int, int> activeChannels = new Dictionary<int, int>(); // <Channel,ID>
 
         /// <summary>
-        /// Initializes the class and stores the handled instances of <see cref="CAEN_x730"/> and <see cref="DataSpectra"/>
+        /// Initializes the class and stores the handled instances of <see cref="CAEN_x730"/> and <see cref="DatabaseUtils"/>
         /// </summary>
         /// <param name="cAEN_x730">Instance of the class responsible for the CAEN N6730</param>
         /// <param name="dataSpectra">Instance of the class responsible for storing the measured spectra</param>
         public MeasureSpectra()
         {
             cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
         }
 
         public bool IsAcquiring()
@@ -99,7 +99,7 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that is called by the spectraMeasurementTimer. It reads a spectrum sends it to the <see cref="DataSpectra"/> class.
+        /// Function that is called by the spectraMeasurementTimer. It reads a spectrum sends it to the <see cref="DatabaseUtils"/> class.
         /// </summary>
         /// <param name="ID">ID of the measurement where the spectra will be send to.</param>
         /// <param name="channel">Channel to read the spectrum from.</param>

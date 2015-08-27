@@ -83,6 +83,8 @@ namespace newRBS.Models
         public byte[] DT2;
         public UInt32 NumSamples;
         public double LenSample;
+        public DateTime AcquisitionTime;
+        public int AcquisitionChannel;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]

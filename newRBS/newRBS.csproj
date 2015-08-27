@@ -133,7 +133,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Database_PartialMethods.cs" />
+    <Compile Include="Models\DatabasePartialMethods.cs" />
     <Compile Include="Models\DataMaterial.cs" />
     <Compile Include="Models\DataSimpleMaterial.cs" />
     <Compile Include="Models\EpsaraSharp\Data.cs" />
@@ -156,7 +156,7 @@
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\ImportMeasurementViewModel.cs" />
+    <Compile Include="ViewModels\MeasurementImportViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementInfoViewModel.cs" />
     <Compile Include="ViewModels\MeasurementListViewModel.cs" />
@@ -177,8 +177,8 @@
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ImportMeasurementView.xaml.cs">
-      <DependentUpon>ImportMeasurementView.xaml</DependentUpon>
+    <Compile Include="Views\MeasurementImportView.xaml.cs">
+      <DependentUpon>MeasurementImportView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MaterialEditorView.xaml.cs">
       <DependentUpon>MaterialEditorView.xaml</DependentUpon>
@@ -198,7 +198,7 @@
     <Compile Include="Views\MeasurementListView.xaml.cs">
       <DependentUpon>MeasurementListView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\DataSpectra.cs" />
+    <Compile Include="Models\DatabaseUtils.cs" />
     <Compile Include="Models\MeasureSpectra.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
@@ -218,7 +218,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ImportMeasurementView.xaml">
+    <Page Include="Views\MeasurementImportView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -315,14 +315,14 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Images\media-play-3x.png" />
-    <EmbeddedResource Include="Images\media-stop-3x.png" />
-    <EmbeddedResource Include="Images\wrench-3x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Images\delete-3x.png" />
-    <EmbeddedResource Include="Images\envelope-open-3x.png" />
-    <EmbeddedResource Include="Images\share-boxed-3x.png" />
+    <Resource Include="Images\121.png" />
+    <Resource Include="Images\129.png" />
+    <Resource Include="Images\142.png" />
+    <Resource Include="Images\162.png" />
+    <Resource Include="Images\17.png" />
+    <Resource Include="Images\193.png" />
+    <Resource Include="Images\31.png" />
+    <Resource Include="Images\89.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

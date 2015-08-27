@@ -93,8 +93,8 @@ namespace newRBS.ViewModels
         {
             Console.WriteLine("_ImportMeasurementCommand");
 
-            ImportMeasurementsViewModel importMeasurementsViewModel = new ImportMeasurementsViewModel();
-            Views.ImportMeasurementsView importMeasurementsView = new Views.ImportMeasurementsView();
+            MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel();
+            Views.MeasurementImportView importMeasurementsView = new Views.MeasurementImportView();
             importMeasurementsView.DataContext = importMeasurementsViewModel;
             importMeasurementsView.ShowDialog();
         }

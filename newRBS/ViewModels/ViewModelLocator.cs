@@ -50,7 +50,7 @@ namespace newRBS.ViewModels
 
             // The Models
             SimpleIoc.Default.Register<Models.CAEN_x730>();
-            SimpleIoc.Default.Register<Models.DataSpectra>();
+            SimpleIoc.Default.Register<Models.DatabaseUtils>();
             SimpleIoc.Default.Register<Models.MeasureSpectra>();
             SimpleIoc.Default.Register<Models.MeasureWaveform>();
         }
@@ -73,8 +73,8 @@ namespace newRBS.ViewModels
         public Models.CAEN_x730 cAen_X730
         { get { return ServiceLocator.Current.GetInstance<Models.CAEN_x730>(); } }
 
-        public Models.DataSpectra dataSpectra
-        { get { return ServiceLocator.Current.GetInstance<Models.DataSpectra>(); } }
+        public Models.DatabaseUtils dataSpectra
+        { get { return ServiceLocator.Current.GetInstance<Models.DatabaseUtils>(); } }
 
         public Models.MeasureSpectra measureSpectra
         { get { return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>(); } }

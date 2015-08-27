@@ -239,6 +239,8 @@ namespace newRBS.Models
             waveform.DT2 = new byte[dgtzParams.WFParams.recordLength];
             waveform.NumSamples = 0;
             waveform.LenSample = 0;
+            waveform.AcquisitionTime = DateTime.Now;
+            waveform.AcquisitionChannel = channel;
 
             for (int i = 0; i < 100; i++)
             {
