@@ -74,7 +74,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        private Models.DataSpectra dataSpectra { get; set; }
+        private Models.DatabaseUtils dataSpectra { get; set; }
 
         public delegate void EventHandlerMeasurementID(int SpectrumID);
         public event EventHandlerMeasurementID EventMeasurementToPlot, EventMeasurementNotToPlot;
@@ -95,12 +95,12 @@ namespace newRBS.ViewModels
 
         public MeasurementListViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
 
             // Hooking up to events from DataSpectra
-            dataSpectra.EventMeasurementNew += new Models.DataSpectra.EventHandlerMeasurement(MeasurementNew);
-            dataSpectra.EventMeasurementRemove += new Models.DataSpectra.EventHandlerMeasurementID(MeasurementRemove);
-            dataSpectra.EventMeasurementUpdate += new Models.DataSpectra.EventHandlerMeasurement(MeasurementUpdate);
+            dataSpectra.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNew);
+            dataSpectra.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurementID(MeasurementRemove);
+            dataSpectra.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);

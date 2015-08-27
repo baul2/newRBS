@@ -13,7 +13,7 @@ namespace newRBS.Models
     /// <summary>
     /// Class responsible for managing a spectrum dictionary (<see cref="spectra"/>) with items \<ID, <see cref="DataSpectrum"/>\>.
     /// </summary>
-    public class DataSpectra
+    public class DatabaseUtils
     {
 
         public delegate void EventHandlerMeasurement(Measurement spectrum);
@@ -29,7 +29,6 @@ namespace newRBS.Models
             using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
                 db.Measurements.InsertOnSubmit(measurement);
-
                 db.SubmitChanges();
 
                 if (EventMeasurementNew != null) { EventMeasurementNew(measurement); } else { Console.WriteLine("EventSpectrumNew null"); }

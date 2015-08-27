@@ -25,14 +25,14 @@ using newRBS.ViewModels.Utils;
 
 namespace newRBS.ViewModels
 {
-    public class ImportMeasurementsViewModel : ViewModelBase
+    public class MeasurementImportViewModel : ViewModelBase
     {
         public ICommand OpenFileCommand { get; set; }
         public ICommand AddCurrentMeasurementCommand { get; set; }
         public ICommand AddAllMeasurementsCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-        private Models.DataSpectra dataSpectra;
+        private Models.DatabaseUtils dataSpectra;
 
         private Models.DatabaseDataContext Database;
 
@@ -58,6 +58,35 @@ namespace newRBS.ViewModels
             }
         }
 
+        private string _SelectedPath;
+        public string SelectedPath
+        { get { return _SelectedPath; } set { _SelectedPath = value; RaisePropertyChanged("SelectedPath"); } }
+
+        private ObservableCollection<AreaData> _areaData = new ObservableCollection<AreaData>();
+        public ObservableCollection<AreaData> areaData
+        { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
+
+        private string _FileContent;
+        public string FileContent
+        { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
+
+        public MeasurementImportViewModel()
+        {
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
+
+            OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
+            AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
+            AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
+            CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
+
+            newMeausurements = new ObservableCollection<Models.Measurement>();
+
+            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database.Log = Console.Out;
+
+            MeasurementInfo = new MeasurementInfoClass(Database);
+        }
+
         private void NewSelectedMeasurement(Models.Measurement oldMeasurement)
         {
             // Unsubscribe to events from old selected Measurement
@@ -74,35 +103,6 @@ namespace newRBS.ViewModels
             int[] temp = ArrayConversion.ByteToInt(selectedMeasurement.SpectrumY.ToArray());
             for (int i = 0; i < temp.Count(); i++)
                 areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
-        }
-
-        private string _SelectedPath;
-        public string SelectedPath
-        { get { return _SelectedPath; } set { _SelectedPath = value; RaisePropertyChanged("SelectedPath"); } }
-
-        private ObservableCollection<AreaData> _areaData = new ObservableCollection<AreaData>();
-        public ObservableCollection<AreaData> areaData
-        { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
-
-        private string _FileContent;
-        public string FileContent
-        { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
-
-        public ImportMeasurementsViewModel()
-        {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
-
-            OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
-            AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
-            AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
-            CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
-
-            newMeausurements = new ObservableCollection<Models.Measurement>();
-
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
-            Database.Log = Console.Out;
-
-            MeasurementInfo = new MeasurementInfoClass(Database);
         }
 
         private void AddNewSample(object sender, PropertyChangedEventArgs e)

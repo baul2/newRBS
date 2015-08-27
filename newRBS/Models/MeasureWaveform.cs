@@ -56,7 +56,7 @@ namespace newRBS.Models
 
         }
 
-        public void StartMeasurement(int channel)
+        public void StartAcquisition(int channel)
         {
             Console.WriteLine("Waveform measurement will start");
 
@@ -69,7 +69,7 @@ namespace newRBS.Models
             waveformTimer.Start();
         }
 
-        public void StopMeasurement()
+        public void StopAcquisition()
         {
             if (activeChannels.Count == 0)
                 return;

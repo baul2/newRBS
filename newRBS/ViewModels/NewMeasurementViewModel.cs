@@ -22,7 +22,7 @@ namespace newRBS.ViewModels
 {
     public class NewMeasurementViewModel : ViewModelBase
     {
-        private Models.DataSpectra dataSpectra;
+        private Models.DatabaseUtils dataSpectra;
         private Models.MeasureSpectra measureSpectra;
 
         public ICommand StartMeasurementCommand { get; set; }
@@ -36,7 +36,7 @@ namespace newRBS.ViewModels
 
         public NewMeasurementViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DataSpectra>();
+            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
             StartMeasurementCommand = new RelayCommand(() => _StartMeasurementCommand(), () => true);

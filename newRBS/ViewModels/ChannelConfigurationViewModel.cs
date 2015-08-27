@@ -34,6 +34,8 @@ namespace newRBS.ViewModels
 
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
+        public ICommand SaveWaveformCommand { get; set; }
+
         public ICommand SendToDeviceCommand { get; set; }
         public ICommand SaveToFileCommand { get; set; }
         public ICommand LoadFromFileCommand { get; set; }
@@ -44,7 +46,7 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<string> channels { get; set; }
+        public ObservableCollection<int> channels { get; set; }
 
         public ObservableCollection<string> AP1Items { get; set; }
         public ObservableCollection<string> AP2Items { get; set; }
@@ -64,12 +66,12 @@ namespace newRBS.ViewModels
         private string _selectedDP2; public string selectedDP2 { get { return _selectedDP2; } set { _selectedDP2 = value; RaisePropertyChanged(); } }
 
         private int _selectedChannel;
-        public string selectedChannel
+        public int selectedChannel
         {
-            get { return _selectedChannel.ToString(); }
+            get { return _selectedChannel; }
             set
             {
-                _selectedChannel = Int32.Parse(value);
+                _selectedChannel = value;
                 channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
                 RaisePropertyChanged();
             }
@@ -81,11 +83,13 @@ namespace newRBS.ViewModels
         public ObservableCollection<NameValueClass> TriggerFilterSmoothing { get; set; }
         public ObservableCollection<NameValueClass> BaselineMean { get; set; }
         public ObservableCollection<NameValueClass> PeakMean { get; set; }
-        
+
         public ChannelConfigurationViewModel()
         {
             StartCommand = new RelayCommand(() => _StartCommand(), () => true);
             StopCommand = new RelayCommand(() => _StopCommand(), () => true);
+            SaveWaveformCommand = new RelayCommand(() => _SaveWaveformCommand(), () => true);
+
             SendToDeviceCommand = new RelayCommand(() => _SendToDeviceCommand(), () => true);
             SaveToFileCommand = new RelayCommand(() => _SaveToFileCommand(), () => true);
             LoadFromFileCommand = new RelayCommand(() => _LoadFromFileCommand(), () => true);
@@ -105,15 +109,15 @@ namespace newRBS.ViewModels
             selectedDP1 = Enum.GetName(typeof(Models.CAENDPP_PHA_DigitalProbe1_t), Models.CAENDPP_PHA_DigitalProbe1_t.Peaking);
             selectedDP2 = Enum.GetName(typeof(Models.CAENDPP_PHA_DigitalProbe2_t), Models.CAENDPP_PHA_DigitalProbe2_t.Trigger);
 
-            channels = new ObservableCollection<string> { "0", "1", "2", "3", "4", "5", "6", "7" };
-            selectedChannel = "0";
+            channels = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
+            selectedChannel = 0;
 
             InputRange = new ObservableCollection<NameValueClass>() { new NameValueClass("2.0", 9), new NameValueClass("0.5", 10) };
             Decimation = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("2", 1), new NameValueClass("4", 2), new NameValueClass("8", 3) };
             DigitalProbeGain = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("2", 1), new NameValueClass("4", 2), new NameValueClass("8", 3) };
             TriggerFilterSmoothing = new ObservableCollection<NameValueClass>() { new NameValueClass("4", 4), new NameValueClass("8", 8), new NameValueClass("16", 16), new NameValueClass("32", 32) };
             BaselineMean = new ObservableCollection<NameValueClass>() { new NameValueClass("0", 0), new NameValueClass("16", 1), new NameValueClass("64", 2), new NameValueClass("256", 3), new NameValueClass("1024", 4), new NameValueClass("4096", 5), new NameValueClass("16384", 6) };
-            PeakMean = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("4", 1), new NameValueClass("16", 2), new NameValueClass("64", 3) }; 
+            PeakMean = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("4", 1), new NameValueClass("16", 2), new NameValueClass("64", 3) };
 
             channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
 
@@ -155,8 +159,6 @@ namespace newRBS.ViewModels
 
         private void WaveformUpdate(Models.Waveform waveform)
         {
-            Console.WriteLine("WaveformUpdate");
-
             double x;
 
             if (waveform.NumSamples == 0)
@@ -180,8 +182,6 @@ namespace newRBS.ViewModels
 
         private void _StartCommand()
         {
-            Console.WriteLine("_StartCommand");
-
             plotModel.Series[0].Title = selectedAP1;
             plotModel.Series[1].Title = selectedAP2;
             plotModel.Series[2].Title = selectedDP1;
@@ -192,18 +192,43 @@ namespace newRBS.ViewModels
             Models.CAENDPP_PHA_DigitalProbe1_t DP1 = (Models.CAENDPP_PHA_DigitalProbe1_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe1_t), selectedDP1, true);
             Models.CAENDPP_PHA_DigitalProbe2_t DP2 = (Models.CAENDPP_PHA_DigitalProbe2_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe2_t), selectedDP2, true);
             measureWaveform.SetWaveformConfig(AP1, AP2, DP1, DP2, false);
-            measureWaveform.StartMeasurement(Int32.Parse(selectedChannel));
+            measureWaveform.StartAcquisition(selectedChannel);
         }
 
         private void _StopCommand()
         {
-            Console.WriteLine("_StopCommand");
-            measureWaveform.StopMeasurement();
+            measureWaveform.StopAcquisition();
+        }
+
+        private void _SaveWaveformCommand()
+        {
+            Console.WriteLine("_SaveWaveformCommand");
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "ASCII file (*.dat)|*.dat";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
+
+                TextWriter WriteFileStream = new StreamWriter(saveFileDialog.FileName.Replace(".dat", "-ChannelConfiguration.xml"));
+                SerializerObj.Serialize(WriteFileStream, channelParams);
+                WriteFileStream.Close();
+
+                WriteFileStream = new StreamWriter(saveFileDialog.FileName);
+                WriteFileStream.WriteLine("Acquisition time\t{0}", measureWaveform.waveform.AcquisitionTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                WriteFileStream.WriteLine("Acquisition channel\t{0}", measureWaveform.waveform.AcquisitionChannel);
+                WriteFileStream.WriteLine("Number of samples\t{0}", measureWaveform.waveform.NumSamples);
+                WriteFileStream.WriteLine("Length of a sample (ns)\t{0}", measureWaveform.waveform.LenSample);
+                WriteFileStream.WriteLine("Sample number\t{0}\t{1}\t{2}\t{3}", selectedAP1, selectedAP2, selectedDP1, selectedDP2);
+                for (int i = 0; i < measureWaveform.waveform.AT1.Count(); i++)
+                    WriteFileStream.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", i, measureWaveform.waveform.AT1[i], measureWaveform.waveform.AT2[i], measureWaveform.waveform.DT1[i], measureWaveform.waveform.DT2[i]);
+                
+                WriteFileStream.Close();
+            }
         }
 
         private void _SendToDeviceCommand()
         {
-            Console.WriteLine("_SendToDeviceCommand");
             measureWaveform.SetChannelConfig(_selectedChannel, channelParams);
         }
 
