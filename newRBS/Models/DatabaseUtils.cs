@@ -13,14 +13,14 @@ namespace newRBS.Models
     /// <summary>
     /// Class responsible for managing a spectrum dictionary (<see cref="spectra"/>) with items \<ID, <see cref="DataSpectrum"/>\>.
     /// </summary>
-    public class DatabaseUtils
+    public static class DatabaseUtils
     {
         public delegate void EventHandlerMeasurement(Measurement measurement);
-        public event EventHandlerMeasurement EventMeasurementNew, EventMeasurementUpdate, EventMeasurementFinished, EventMeasurementRemove;
+        public static event EventHandlerMeasurement EventMeasurementNew, EventMeasurementUpdate, EventMeasurementFinished, EventMeasurementRemove;
 
-        TraceSource trace = new TraceSource("DatabaseUtils");
+        private static TraceSource trace = new TraceSource("DatabaseUtils");
 
-        public void SendMeasurementNewEvent(Measurement measurement)
+        public static void SendMeasurementNewEvent(Measurement measurement)
         {
             if (EventMeasurementNew != null)
             {
@@ -28,7 +28,7 @@ namespace newRBS.Models
             }
         }
 
-        public void SendMeasurementUpdateEvent(Measurement measurement)
+        public static void SendMeasurementUpdateEvent(Measurement measurement)
         {
             if (EventMeasurementUpdate != null)
             {
@@ -36,7 +36,7 @@ namespace newRBS.Models
             }
         }
 
-        public void SendMeasurementRemoveEvent(Measurement measurement)
+        public static void SendMeasurementRemoveEvent(Measurement measurement)
         {
             if (EventMeasurementRemove != null)
             {
@@ -49,7 +49,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="IDs">Array of IDs of the spectra to save.</param>
         /// <param name="file">Filename of the file to save the spectra to.</param>
-        public void ExportMeasurements(int[] measurementIDs, string file)
+        public static void ExportMeasurements(int[] measurementIDs, string file)
         {
             using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
             {
@@ -94,7 +94,7 @@ namespace newRBS.Models
             }
         }
 
-        public List<Measurement> LoadMeasurementsFromFile(string fileName)
+        public static List<Measurement> LoadMeasurementsFromFile(string fileName)
         {
             List<Measurement> newMeasurements = new List<Measurement>();
             List<List<int>> spectraY = new List<List<int>>();

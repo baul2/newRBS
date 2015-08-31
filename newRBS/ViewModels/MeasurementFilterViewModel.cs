@@ -27,9 +27,6 @@ namespace newRBS.ViewModels
 
     public class MeasurementFilterViewModel : INotifyPropertyChanged
     {
-        private Models.DatabaseUtils dataSpectra { get; set; }
-        //private SpectraListViewModel spectraListViewModel;
-
         public delegate void EventHandlerFilter(List<int> MeasurementIDList);
         public event EventHandlerFilter EventNewFilter;
 
@@ -94,8 +91,6 @@ namespace newRBS.ViewModels
 
         public MeasurementFilterViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
             TestButtonClick = new RelayCommand(() => _TestButtonClick(), () => true);
 

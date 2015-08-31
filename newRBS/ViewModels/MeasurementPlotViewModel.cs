@@ -27,8 +27,6 @@ namespace newRBS.ViewModels
 {
     public class MeasurementPlotViewModel
     {
-        private Models.DatabaseUtils dataSpectra { get; set; }
-
         private List<int> MeasurementIDList;
 
         public PlotModel plotModel { get; set; }
@@ -39,11 +37,9 @@ namespace newRBS.ViewModels
 
         public MeasurementPlotViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
             // Hooking up to events from DatabaseUtils 
-            SimpleIoc.Default.GetInstance<Models.DatabaseUtils>().EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
-            SimpleIoc.Default.GetInstance<Models.DatabaseUtils>().EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
+            Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
+            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
 
             // Hooking up to events from SpectraList
             SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementToPlot += new MeasurementListViewModel.EventHandlerMeasurement(MeasurementToPlot);

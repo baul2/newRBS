@@ -74,8 +74,6 @@ namespace newRBS.ViewModels
             }
         }
 
-        private Models.DatabaseUtils databaseUtils { get; set; }
-
         public delegate void EventHandlerMeasurement(Models.Measurement measurement);
         public event EventHandlerMeasurement EventMeasurementToPlot, EventMeasurementNotToPlot;
 
@@ -93,12 +91,10 @@ namespace newRBS.ViewModels
 
         public MeasurementListViewModel()
         {
-            databaseUtils = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
             // Hooking up to events from DatabaseUtils
-            databaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(DeleteRemovedMeasurementFromList);
-            databaseUtils.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(AddNewMeasurementToList);
-            databaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdateMeasurementInList);
+            Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(DeleteRemovedMeasurementFromList);
+            Models.DatabaseUtils.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(AddNewMeasurementToList);
+            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdateMeasurementInList);
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);

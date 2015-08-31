@@ -16,7 +16,6 @@ namespace newRBS.Models
     public class MeasureSpectra
     {
         private CAEN_x730 cAEN_x730;
-        private DatabaseUtils dataSpectra;
 
         TraceSource trace = new TraceSource("MeasureSpectra");
 
@@ -51,7 +50,6 @@ namespace newRBS.Models
         public MeasureSpectra()
         {
             cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
         }
 
         public bool IsAcquiring()

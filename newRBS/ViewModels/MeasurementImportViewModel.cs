@@ -32,8 +32,6 @@ namespace newRBS.ViewModels
         public ICommand AddAllMeasurementsCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-        private Models.DatabaseUtils dataSpectra;
-
         private Models.DatabaseDataContext Database;
 
         private bool? _DialogResult;
@@ -72,8 +70,6 @@ namespace newRBS.ViewModels
 
         public MeasurementImportViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
             OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
             AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
             AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
@@ -149,7 +145,7 @@ namespace newRBS.ViewModels
 
             if ((SelectedPath = dialog.FileName) == null) return;
 
-            List<Models.Measurement> importedMeasurements = dataSpectra.LoadMeasurementsFromFile(SelectedPath);
+            List<Models.Measurement> importedMeasurements = Models.DatabaseUtils.LoadMeasurementsFromFile(SelectedPath);
 
             Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
 

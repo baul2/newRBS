@@ -50,7 +50,7 @@ namespace newRBS.Models
             ExecuteDynamicInsert(measurement);
 
             int temp = measurement.Sample.SampleID;
-            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementNewEvent(measurement);
+            DatabaseUtils.SendMeasurementNewEvent(measurement);
         }
 
         partial void UpdateMeasurement(Measurement measurement)
@@ -60,7 +60,7 @@ namespace newRBS.Models
             ExecuteDynamicUpdate(measurement);
 
             int temp = measurement.Sample.SampleID;
-            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementUpdateEvent(measurement);
+            DatabaseUtils.SendMeasurementUpdateEvent(measurement);
         }
 
         partial void DeleteMeasurement(Measurement measurement)
@@ -69,7 +69,7 @@ namespace newRBS.Models
 
             ExecuteDynamicDelete(measurement);
 
-            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementRemoveEvent(measurement);
+            DatabaseUtils.SendMeasurementRemoveEvent(measurement);
         }
     }
 }
