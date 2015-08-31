@@ -14,9 +14,9 @@
                 <GroupBox Header="Samples" MinHeight="200">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <Button Content="Add" Command="{Binding AddMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
-                            <Button Content="Remove" Command="{Binding RemoveMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
-                            <Button Content="Rename" Command="{Binding RenameMaterialCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Add" Command="{Binding AddSampleCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Remove" Command="{Binding RemoveSampleCommand}" Margin="5" Padding="3" MinWidth="50"/>
+                            <Button Content="Rename" Command="{Binding RenameSampleCommand}" Margin="5" Padding="3" MinWidth="50"/>
                         </StackPanel>
                         <ListBox DockPanel.Dock="Left" ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding SelectedSample}" MinWidth="150"/>
                     </StackPanel>

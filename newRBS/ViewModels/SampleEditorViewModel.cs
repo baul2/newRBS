@@ -22,6 +22,10 @@ namespace newRBS.ViewModels
 {
     public class SampleEditorViewModel : ViewModelBase
     {
+        public ICommand AddSampleCommand { get; set; }
+        public ICommand RemoveSampleCommand { get; set; }
+        public ICommand RenameSampleCommand { get; set; }
+
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
@@ -53,6 +57,10 @@ namespace newRBS.ViewModels
         {
             Database = new Models.DatabaseDataContext(MyGlobals.ConString);
 
+            AddSampleCommand = new RelayCommand(() => _AddSampleCommand(), () => true);
+            RemoveSampleCommand = new RelayCommand(() => _RemoveSampleCommand(), () => true);
+            RenameSampleCommand = new RelayCommand(() => _RenameSampleCommand(), () => true);
+
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
@@ -62,26 +70,18 @@ namespace newRBS.ViewModels
             SelectedMaterial = new Models.Material();
 
             Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
-            Samples.Remove(Samples.First(x => x.SampleName == "New..."));
             Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
             SelectedSample = Samples.FirstOrDefault();
         }
 
         public void SelectedSampleChanged()
         {
-            Console.WriteLine("SelectedSampleChanged");
-
-            Console.WriteLine(SelectedSample.MaterialID);
-            foreach (var m in Materials)
-                Console.WriteLine("{0} {1}", m.MaterialID, m.MaterialName);
-            Console.WriteLine(Materials.FirstOrDefault(x => x.MaterialID == SelectedSample.MaterialID).MaterialName);
-            SelectedMaterial = Materials.FirstOrDefault(x => x.MaterialID == SelectedSample.MaterialID);
+            if (SelectedSample != null)
+                SelectedMaterial = Materials.FirstOrDefault(x => x.MaterialID == SelectedSample.MaterialID);
         }
 
         public void SelectedMaterialChanged()
         {
-            Console.WriteLine("SelectedMaterialChanged");
-
             if (SelectedSample == null || SelectedMaterial == null) return;
 
             SelectedSample.MaterialID = SelectedMaterial.MaterialID;
@@ -95,6 +95,36 @@ namespace newRBS.ViewModels
                     newLayerString += string.Format(", {0}", element.ElementName);
                 newLayerString += ")";
                 Layers.Add(newLayerString);
+            }
+        }
+
+        public void _AddSampleCommand()
+        {
+            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+
+            if (newSampleID == null) return;
+
+            Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+            Samples.Add(newSample);
+            SelectedSample = newSample;
+        }
+
+        public void _RemoveSampleCommand()
+        {
+            var measurements = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID);
+            foreach (Models.Measurement measurement in measurements)
+                measurement.Sample = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)");
+
+            Database.Samples.DeleteOnSubmit(SelectedSample);
+            Samples.Remove(SelectedSample);
+        }
+
+        public void _RenameSampleCommand()
+        {
+            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", SelectedSample.SampleName);
+            if (inputDialog.ShowDialog() == true)
+            {
+                Database.Samples.FirstOrDefault(x => x.SampleID == SelectedSample.SampleID).SampleName = inputDialog.Answer;
             }
         }
 
