@@ -6,29 +6,98 @@
         xmlns:local="clr-namespace:newRBS.Views"
         xmlns:xc="clr-namespace:newRBS.ViewModels.Utils"
         mc:Ignorable="d"
-        Title="StartMeasurementView" SizeToContent="WidthAndHeight"
+        Title="StartMeasurementView" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         xc:DialogCloser.DialogResult="{Binding DialogResult}">
-    <Grid>
-        <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <Label Content="Detectors:"/>
-            <ItemsControl  ItemsSource="{Binding Channels}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+    <StackPanel Orientation="Vertical">
+        <GroupBox Header="Experimental setup">
+            <Grid HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Measurement name:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="0"/>
+                <TextBox Text="{Binding Measurement.MeasurementName, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
+
+                <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
+                <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
+                    <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding Measurement.Sample, Mode=TwoWay}" Margin="3" MinWidth="80"/>
+                    <Button Content="New" Command="{Binding NewSampleCommand}" Margin="3"/>
+                </StackPanel>
+                <Label Content="Sample remark:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="1"/>
+                <TextBox Text="{Binding Measurement.SampleRemark, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="1" MinWidth="80"/>
+
+                <Label Content="Orientation:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="2"/>
+                <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
+
+                <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
+                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="Name" SelectedValuePath="AtomicNumber" SelectedValue="{Binding Measurement.IncomingIonNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
+                <Label Content="Ion energy (keV):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="3"/>
+                <TextBox Text="{Binding Measurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
+
+                <Label Content="Ion out angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="4"/>
+                <TextBox Text="{Binding Measurement.OutcomingIonAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="4" />
+                <Label Content="Solid angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="4"/>
+                <TextBox Text="{Binding Measurement.SolidAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="4" />
+
+                <Label Content="Stop type:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="7"/>
+                <ComboBox ItemsSource="{Binding StopTypeList}" SelectedItem="{Binding Measurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="7" />
+                <Label Content="Stop value:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="7"/>
+                <TextBox Text="{Binding Measurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7" />
+            </Grid>
+        </GroupBox>
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+            <TabItem Header="-10° Chamber">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Detectors:"/>
+                    <ItemsControl  ItemsSource="{Binding Channels_10}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="-30° Chamber">
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Detectors:"/>
+                    <ItemsControl ItemsSource="{Binding Channels_30}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Start" Margin="5" MinWidth="80" Command="{Binding StartMeasurementCommand}"/>
+            <Button Content="Cancel" Margin="5" MinWidth="80" Command="{Binding CancelCommand}"/>
         </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Start" Margin="5" MinWidth="80" Command="{Binding StartMeasurementCommand}"/>
-                <Button Content="Cancel" Margin="5" MinWidth="80" Command="{Binding CancelCommand}"/>
-            </StackPanel>
-        </StackPanel>
-    </Grid>
+    </StackPanel>
 </Window>

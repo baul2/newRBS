@@ -74,17 +74,13 @@ namespace newRBS.ViewModels
             }
         }
 
-        private Models.DatabaseUtils dataSpectra { get; set; }
-
-        public delegate void EventHandlerMeasurementID(int SpectrumID);
-        public event EventHandlerMeasurementID EventMeasurementToPlot, EventMeasurementNotToPlot;
+        public delegate void EventHandlerMeasurement(Models.Measurement measurement);
+        public event EventHandlerMeasurement EventMeasurementToPlot, EventMeasurementNotToPlot;
 
         public List<MyMeasurement> ModifiedItems { get; set; }
         public AsyncObservableCollection<MyMeasurement> MeasurementList { get; set; }
 
         public CollectionViewSource MeasurementListViewSource { get; set; }
-
-        private FilterClass lastFilter;
 
         private int _SelectedMeasurementID;
         public int SelectedMeasurementID
@@ -95,12 +91,10 @@ namespace newRBS.ViewModels
 
         public MeasurementListViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
-            // Hooking up to events from DataSpectra
-            dataSpectra.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNew);
-            dataSpectra.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurementID(MeasurementRemove);
-            dataSpectra.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
+            // Hooking up to events from DatabaseUtils
+            Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(DeleteRemovedMeasurementFromList);
+            Models.DatabaseUtils.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(AddNewMeasurementToList);
+            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdateMeasurementInList);
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);
@@ -112,24 +106,22 @@ namespace newRBS.ViewModels
             MeasurementListViewSource = new CollectionViewSource();
             MeasurementListViewSource.Source = MeasurementList;
             MeasurementListViewSource.SortDescriptions.Add(new SortDescription("Measurement.StartTime", ListSortDirection.Descending));
-
-            ChangeFilter(new FilterClass() { Name = "Today", Type = "Date", SubType = "Today" });
         }
 
         private void _DataGridDoubleClickCommand(EventArgs eventArgs)
         {
             Console.WriteLine("_DataGridDoubleClick");
 
-            MeasurementInfoViewModel measurementInfoViewModel = new MeasurementInfoViewModel(SelectedMeasurementID); 
+            MeasurementInfoViewModel measurementInfoViewModel = new MeasurementInfoViewModel(SelectedMeasurementID);
             Views.MeasurementInfoView measurementInfoView = new Views.MeasurementInfoView();
             measurementInfoView.DataContext = measurementInfoViewModel;
             measurementInfoView.ShowDialog();
 
             // Update selected row
-            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
             {
                 MyMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
-                myMeasurement.Measurement = db.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
+                myMeasurement.Measurement = Database.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
                 Models.Sample temp = myMeasurement.Measurement.Sample; // To load the sample bevor the scope of db ends
             }
         }
@@ -179,116 +171,76 @@ namespace newRBS.ViewModels
             if (e.PropertyName == "Measurement") return;
 
             if (myMeasurement.Selected == true)
-            { if (EventMeasurementToPlot != null) EventMeasurementToPlot(myMeasurement.Measurement.MeasurementID); }
+            { if (EventMeasurementToPlot != null) EventMeasurementToPlot(myMeasurement.Measurement); }
             else
-            { if (EventMeasurementNotToPlot != null) EventMeasurementNotToPlot(myMeasurement.Measurement.MeasurementID); }
+            { if (EventMeasurementNotToPlot != null) EventMeasurementNotToPlot(myMeasurement.Measurement); }
         }
 
-        public void ChangeFilter(FilterClass selectedFilter)
+        public void ChangeFilter(List<int> MeasurementIDList)
         {
             MeasurementList.Clear();
-            Console.WriteLine("FilterType: {0}", selectedFilter.Type);
 
-            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
+            List<Models.Measurement> newMeasurementList = new List<Models.Measurement>();
+            Models.Sample tempSample;
+
+            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
             {
-                List<Models.Measurement> MeasurementList = new List<Models.Measurement>();
+                newMeasurementList = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 
-                switch (selectedFilter.Type)
-                {
-                    case "All":
-                        { MeasurementList = db.Measurements.ToList(); break; }
-
-                    case "Date":
-                        {
-                            switch (selectedFilter.SubType)
-                            {
-                                case "Today":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date == DateTime.Today).ToList(); break; }
-
-                                case "ThisWeek":
-                                    {
-                                        int DayOfWeek = (int)DateTime.Today.DayOfWeek;
-                                        MeasurementList = db.Measurements.Where(x => x.StartTime.DayOfYear > (DateTime.Today.DayOfYear - DayOfWeek) && x.StartTime.DayOfYear < (DateTime.Today.DayOfYear - DayOfWeek + 7)).ToList(); //Todo!!!
-                                        break;
-                                    }
-
-                                case "ThisMonth":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Month == DateTime.Now.Month).ToList(); break; }
-
-                                case "ThisYear":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == DateTime.Now.Year).ToList(); break; }
-
-                                case "Year":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year).ToList(); break; }
-
-                                case "Month":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year && x.StartTime.Date.Month == selectedFilter.Month).ToList(); break; }
-
-                                case "Day":
-                                    { MeasurementList = db.Measurements.Where(x => x.StartTime.Date.Year == selectedFilter.Year && x.StartTime.Date.Month == selectedFilter.Month && x.StartTime.Date.Day == selectedFilter.Day).ToList(); break; }
-                            }
-                        }
-                        break;
-
-                    case "Sample":
-                        { MeasurementList = db.Measurements.Where(x => x.Sample.SampleName == selectedFilter.SampleName).ToList(); break; }
-
-                    case "Channel":
-                        { MeasurementList = db.Measurements.Where(x => x.Channel == selectedFilter.Channel).ToList(); break; }
-                }
-
-                Models.Sample tempSample;
-
-                foreach (Models.Measurement measurement in MeasurementList)
+                foreach (Models.Measurement measurement in newMeasurementList)
                 {
                     tempSample = measurement.Sample;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
-                    this.MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
+                    MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
                 }
             }
 
             MeasurementListViewSource.View.Refresh();
-
-            lastFilter = selectedFilter;
         }
 
-
-        private void MeasurementNew(Models.Measurement measurement)
+        private void AddNewMeasurementToList(Models.Measurement measurement)
         {
-            Console.WriteLine("SpectrumNew");
+            Console.WriteLine("AddNewMeasurementToList");
             MeasurementList.Add(new MyMeasurement() { Selected = true, Measurement = measurement });
-            if (EventMeasurementToPlot != null) EventMeasurementToPlot(measurement.MeasurementID);
+
+            if (EventMeasurementToPlot != null) EventMeasurementToPlot(measurement);
         }
 
-        private void MeasurementRemove(int spectrumID)
-        {
-            Console.WriteLine("SpectrumRemove");
-            MyMeasurement delSpectra = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrumID).First();
 
-            if (delSpectra != null)
-                MeasurementList.Remove(delSpectra);
+        private void DeleteRemovedMeasurementFromList(Models.Measurement measurement)
+        {
+            Console.WriteLine("DeleteRemovedMeasurementFromList");
+            MyMeasurement delMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
+
+            if (delMeasurement != null)
+                MeasurementList.Remove(delMeasurement);
         }
 
-        private void MeasurementUpdate(Models.Measurement spectrum)
+        private void UpdateMeasurementInList(Models.Measurement measurement)
         {
-            var item = MeasurementList.Where(x => x.Measurement.MeasurementID == spectrum.MeasurementID).First();
+            MyMeasurement updateMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
 
-            if (item != null)
+            if (updateMeasurement != null)
             {
-                int index = MeasurementList.IndexOf(item);
-                MeasurementList[index].Measurement = spectrum;
+                int index = MeasurementList.IndexOf(updateMeasurement);
+                MeasurementList[index].Measurement = measurement;
             }
         }
 
-        public void DeleteSelectedSpectra()
+        public void DeleteSelectedMeasurement()
         {
-            List<int> selectedSpectra = MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            List<int> selectedMeasurementIDs = MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+
+            if (selectedMeasurementIDs.Count() == 0) return;
 
             MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected spectra?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
 
             if (rsltMessageBox == MessageBoxResult.Yes)
-                foreach (int ID in selectedSpectra)
-                    dataSpectra.DeleteSpectra(selectedSpectra);
+                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                {
+                    Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x=>selectedMeasurementIDs.Contains(x.MeasurementID)));
+                    Database.SubmitChanges();
+                }
         }
     }
 }

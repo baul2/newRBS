@@ -151,7 +151,6 @@
     <Compile Include="Models\EpsaraSharp\EpsaraSharp.DataMeasurementForallCallbackNative.cs" />
     <Compile Include="Models\EpsaraSharp\PhyscoreOdeInputParameter.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
-    <Compile Include="Models\RBS_Database.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />

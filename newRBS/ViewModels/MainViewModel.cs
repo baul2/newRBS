@@ -72,8 +72,6 @@ namespace newRBS.ViewModels
 
         public void _NewMeasurementCommand()
         {
-            Console.WriteLine("_NewMeasurementCommand");
-
             NewMeasurementViewModel newMeasurementViewModel = new NewMeasurementViewModel();
             Views.NewMeasurementView newMeasurementView = new Views.NewMeasurementView();
             newMeasurementView.DataContext = newMeasurementViewModel;
@@ -82,8 +80,6 @@ namespace newRBS.ViewModels
 
         public void _StopMeasurementCommand()
         {
-            Console.WriteLine("_StopMeasurementCommand");
-
             Models.MeasureSpectra measureSpectra;
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
             measureSpectra.StopMeasurements();
@@ -91,8 +87,6 @@ namespace newRBS.ViewModels
 
         public void _ImportMeasurementCommand()
         {
-            Console.WriteLine("_ImportMeasurementCommand");
-
             MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel();
             Views.MeasurementImportView importMeasurementsView = new Views.MeasurementImportView();
             importMeasurementsView.DataContext = importMeasurementsViewModel;
@@ -101,20 +95,16 @@ namespace newRBS.ViewModels
 
         public void _ExportMeasurementsCommand()
         {
-            Console.WriteLine("_ExportMeasurementsCommand");
+            Console.WriteLine("_ExportMeasurementsCommand not implemented yet");
         }
 
         public void _DeleteMeasurementsCommand()
         {
-            Console.WriteLine("_DeleteMeasurementsCommand");
-
-            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().DeleteSelectedSpectra();
+            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().DeleteSelectedMeasurement();
         }
 
         public void _ChannelConfigurationCommand()
         {
-            Console.WriteLine("_ChannelConfigurationCommand");
-
             Models.MeasureSpectra measureSpectra;
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
@@ -129,8 +119,6 @@ namespace newRBS.ViewModels
 
         public void _MaterialEditorCommand()
         {
-            Console.WriteLine("_MaterialEditorCommand");
-
             MaterialEditorViewModel materialEditorViewModel = new MaterialEditorViewModel();
             Views.MaterialEditorView materialEditorView = new Views.MaterialEditorView();
             materialEditorView.DataContext = materialEditorViewModel;
@@ -139,8 +127,6 @@ namespace newRBS.ViewModels
 
         public void _SampleEditorCommand()
         {
-            Console.WriteLine("_SampleEditorCommand");
-
             SampleEditorViewModel sampleEditorViewModel = new SampleEditorViewModel();
             Views.SampleEditorView materialEditorView = new Views.SampleEditorView();
             materialEditorView.DataContext = sampleEditorViewModel;
@@ -149,8 +135,6 @@ namespace newRBS.ViewModels
 
         public void _SimulateSpectrumCommand()
         {
-            Console.WriteLine("_SimulateSpectrumCommand");
-
             SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
             Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
             simulateSpectrumView.DataContext = simulateSpectrumViewModel;

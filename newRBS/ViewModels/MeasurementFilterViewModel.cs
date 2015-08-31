@@ -27,10 +27,7 @@ namespace newRBS.ViewModels
 
     public class MeasurementFilterViewModel : INotifyPropertyChanged
     {
-        private Models.DatabaseUtils dataSpectra { get; set; }
-        //private SpectraListViewModel spectraListViewModel;
-
-        public delegate void EventHandlerFilter(FilterClass newFilter);
+        public delegate void EventHandlerFilter(List<int> MeasurementIDList);
         public event EventHandlerFilter EventNewFilter;
 
         public ICommand ExpandFilterList { get; set; }
@@ -63,12 +60,8 @@ namespace newRBS.ViewModels
             get { return _selectedFilter; }
             set
             {
-                Console.WriteLine("new selectedFilter");
-                Console.WriteLine(value.Type);
                 _selectedFilter = value;
-
-                // Send event (to SpectraListView...)
-                if (EventNewFilter != null) EventNewFilter(value);
+                NewFilterSelected(value);
             }
         }
 
@@ -98,8 +91,6 @@ namespace newRBS.ViewModels
 
         public MeasurementFilterViewModel()
         {
-            dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
-
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
             TestButtonClick = new RelayCommand(() => _TestButtonClick(), () => true);
 
@@ -128,7 +119,6 @@ namespace newRBS.ViewModels
         private void FillFilterList(string filterType)
         {
             Console.WriteLine("Update filter list with filterType: {0}", filterType);
-            //filterTree.Items.Clear();
             if (filterTree.Items.Count() > 0)
             {
                 foreach (FilterClass n in filterTree.Items)
@@ -138,7 +128,6 @@ namespace newRBS.ViewModels
                 foreach (FilterClass n in filterTree.Items)
                     Console.WriteLine(n.Name);
             }
-            Console.WriteLine("clear done");
 
             switch (filterType)
             {
@@ -151,7 +140,6 @@ namespace newRBS.ViewModels
 
                     using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
                     {
-                        Console.WriteLine("test: {0}", db.Measurements.First(x => x.SampleID == 1).Runs);
                         Console.WriteLine("All count: {0}", db.Measurements.ToList().Count());
                         List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
@@ -222,6 +210,61 @@ namespace newRBS.ViewModels
                 default:
                     Console.WriteLine("No action found for filterType: {0}", filterType);
                     break;
+            }
+        }
+
+        public void NewFilterSelected(FilterClass filter)
+        {
+            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
+            {
+                List<int> MeasurementIDList = new List<int>();
+
+                switch (filter.Type)
+                {
+                    case "All":
+                        { MeasurementIDList = db.Measurements.Select(x => x.MeasurementID).ToList(); break; }
+
+                    case "Date":
+                        {
+                            switch (filter.SubType)
+                            {
+                                case "Today":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date == DateTime.Today).Select(x => x.MeasurementID).ToList(); break; }
+
+                                case "ThisWeek":
+                                    {
+                                        int DayOfWeek = (int)DateTime.Today.DayOfWeek;
+                                        MeasurementIDList = db.Measurements.Where(x => x.StartTime.DayOfYear > (DateTime.Today.DayOfYear - DayOfWeek) && x.StartTime.DayOfYear < (DateTime.Today.DayOfYear - DayOfWeek + 7)).Select(x => x.MeasurementID).ToList(); //Todo!!!
+                                        break;
+                                    }
+
+                                case "ThisMonth":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date.Month == DateTime.Now.Month).Select(x => x.MeasurementID).ToList(); break; }
+
+                                case "ThisYear":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date.Year == DateTime.Now.Year).Select(x => x.MeasurementID).ToList(); break; }
+
+                                case "Year":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date.Year == filter.Year).Select(x => x.MeasurementID).ToList(); break; }
+
+                                case "Month":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date.Year == filter.Year && x.StartTime.Date.Month == filter.Month).Select(x => x.MeasurementID).ToList(); break; }
+
+                                case "Day":
+                                    { MeasurementIDList = db.Measurements.Where(x => x.StartTime.Date.Year == filter.Year && x.StartTime.Date.Month == filter.Month && x.StartTime.Date.Day == filter.Day).Select(x => x.MeasurementID).ToList(); break; }
+                            }
+                        }
+                        break;
+
+                    case "Sample":
+                        { MeasurementIDList = db.Measurements.Where(x => x.Sample.SampleName == filter.SampleName).Select(x => x.MeasurementID).ToList(); break; }
+
+                    case "Channel":
+                        { MeasurementIDList = db.Measurements.Where(x => x.Channel == filter.Channel).Select(x => x.MeasurementID).ToList(); break; }
+                }
+
+                // Send event (to SpectraListView...)
+                if (EventNewFilter != null) EventNewFilter(MeasurementIDList);
             }
         }
     }

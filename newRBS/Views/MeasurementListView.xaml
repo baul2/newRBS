@@ -50,9 +50,25 @@
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
+            <DataGridCheckBoxColumn 
+                Header="Runs"
+                Binding="{Binding Measurement.Runs}"
+                IsReadOnly="True"/>
             <DataGridTextColumn 
-                Header="SpectrumID" 
+                Header="Chamber" 
+                Binding="{Binding Measurement.Chamber}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="Channel" 
+                Binding="{Binding Measurement.Channel}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="MeasurementID" 
                 Binding="{Binding Measurement.MeasurementID}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="MeasurementName" 
+                Binding="{Binding Measurement.MeasurementName}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Sample" 
@@ -63,12 +79,16 @@
                 Binding="{Binding Measurement.SampleRemark}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
-                Header="Channel" 
-                Binding="{Binding Measurement.Channel}"
+                Header="Orientation" 
+                Binding="{Binding Measurement.Orientation}"
                 IsReadOnly="True"/>
-            <DataGridCheckBoxColumn 
-                Header="Runs"
-                Binding="{Binding Measurement.Runs}"
+            <DataGridTextColumn 
+                Header="Ion" 
+                Binding="{Binding Measurement.IncomingIonNumber}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
+                Header="IonEnergy" 
+                Binding="{Binding Measurement.IncomingIonEnergy}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="StartTime" 
@@ -83,8 +103,8 @@
                 Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
-                Header="StopTime" 
-                Binding="{Binding Measurement.StopTime, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                Header="Remaining" 
+                Binding="{Binding Measurement.Remaining, StringFormat=HH\\:mm\\:ss}"
                 IsReadOnly="True"/>
         </DataGrid.Columns>
     </DataGrid>
