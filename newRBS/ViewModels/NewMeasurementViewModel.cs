@@ -28,11 +28,32 @@ namespace newRBS.ViewModels
         public ICommand StartMeasurementCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-        public ObservableCollection<CheckedListItem<int>> Channels { get; set; }
-
         private bool? _DialogResult;
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
+
+        public ObservableCollection<CheckedListItem<int>> Channels_10 { get; set; }
+        public ObservableCollection<CheckedListItem<int>> Channels_30 { get; set; }
+
+        private Models.Measurement _Measurement;
+        public Models.Measurement Measurement
+        {
+            get { return _Measurement; }
+            set { _Measurement = value; RaisePropertyChanged(); }
+        }
+
+        private ObservableCollection<Models.Sample> _Samples;
+        public ObservableCollection<Models.Sample> Samples
+        { get { return _Samples; } set { _Samples = value; RaisePropertyChanged(); } }
+
+        public ObservableCollection<string> Orientations { get; set; }
+        public ObservableCollection<string> Chambers { get; set; }
+        public ObservableCollection<string> StopTypeList { get; set; }
+        public ObservableCollection<Ion> Ions { get; set; }
+
+        private int _SelectedTabIndex = 0;
+        public int SelectedTabIndex
+        { get { return _SelectedTabIndex; } set { _SelectedTabIndex = value; RaisePropertyChanged(); } }
 
         public NewMeasurementViewModel()
         {
@@ -42,29 +63,59 @@ namespace newRBS.ViewModels
             StartMeasurementCommand = new RelayCommand(() => _StartMeasurementCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
-            Channels = new ObservableCollection<CheckedListItem<int>>();
+            Channels_10 = new ObservableCollection<CheckedListItem<int>> { new CheckedListItem<int>(0), new CheckedListItem<int>(1), new CheckedListItem<int>(2), new CheckedListItem<int>(3) };
+            Channels_30 = new ObservableCollection<CheckedListItem<int>> { new CheckedListItem<int>(4), new CheckedListItem<int>(5) };
 
-            Channels.Add(new CheckedListItem<int>(0));
-            Channels.Add(new CheckedListItem<int>(1));
-            Channels.Add(new CheckedListItem<int>(2));
-            Channels.Add(new CheckedListItem<int>(3));
+            Channels_10[0].IsChecked = true;
+            Channels_30[0].IsChecked = true;
 
-            Channels[0].IsChecked = true;
+            Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
+            Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
+            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
+            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
+
+            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            {
+                Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+                Models.Measurement m = Database.Measurements.OrderByDescending(x => x.StartTime).First();
+                Measurement = m;
+                Models.Sample temp = Measurement.Sample; // To load the sample data before the scope of Database ends
+            }
         }
 
         private void _StartMeasurementCommand()
         {
-            List<int> selectedChannels = new List<int>();
-            List<CheckedListItem<int>> c = Channels.Where(i => i.IsChecked == true).ToList();
-            for (int i = 0; i < c.Count; i++)
-                selectedChannels.Add(c[i].Item);
-
-            List<int> newIDs = measureSpectra.StartMeasurements(selectedChannels);
-
             DialogResult = false;
             _DialogResult = null;
 
-            //spectrumList = dataSpectra.GetObservableCollection();
+            measureSpectra.MeasurementName = Measurement.MeasurementName;
+            measureSpectra.SampleID = Measurement.SampleID;
+            measureSpectra.SampleRemark = Measurement.SampleRemark;
+            measureSpectra.Orientation = Measurement.Orientation;
+            measureSpectra.IncomingIonNumber = Measurement.IncomingIonNumber;
+            measureSpectra.IncomingIonEnergy = Measurement.IncomingIonEnergy;
+            measureSpectra.IncomingIonAngle = Measurement.IncomingIonAngle;
+            measureSpectra.SolidAngle = Measurement.SolidAngle;
+            measureSpectra.StopType = Measurement.StopType;
+            measureSpectra.StopValue = Measurement.StopValue;
+
+            switch (SelectedTabIndex)
+            {
+                case 0: // -10° chamber
+                    {
+                        measureSpectra.Chamber = "-10°";
+                        List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
+                        measureSpectra.StartMeasurements(selectedChannels);
+                        break;
+                    }
+                case 1: // -30° chamber
+                    {
+                        measureSpectra.Chamber = "-30°";
+                        List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
+                        measureSpectra.StartMeasurements(selectedChannels);
+                        break;
+                    }
+            }
         }
 
         private void _CancelCommand()

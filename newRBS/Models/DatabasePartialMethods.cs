@@ -7,6 +7,9 @@ using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Data;
 using System.ComponentModel;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Ioc;
+using GalaSoft.MvvmLight.Command;
 
 namespace newRBS.Models
 {
@@ -14,7 +17,7 @@ namespace newRBS.Models
     {
         partial void OnCreated()
         {
-            Console.WriteLine("OnCreated");
+            //Console.WriteLine("OnCreated");
             var dlo = new DataLoadOptions();
             dlo.LoadWith<Measurement>(c => c.Sample);
             dlo.LoadWith<Material>(c => c.Layers);
@@ -35,6 +38,38 @@ namespace newRBS.Models
             if (SampleID == 2)
                 if ((this.NewSampleToAdd != null))
                     this.NewSampleToAdd(this, new PropertyChangedEventArgs("SampleID"));
+        }
+    }
+
+    public partial class DatabaseDataContext
+    {
+        partial void InsertMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+
+            ExecuteDynamicInsert(measurement);
+
+            int temp = measurement.Sample.SampleID;
+            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementNewEvent(measurement);
+        }
+
+        partial void UpdateMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+
+            ExecuteDynamicUpdate(measurement);
+
+            int temp = measurement.Sample.SampleID;
+            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementUpdateEvent(measurement);
+        }
+
+        partial void DeleteMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
+
+            ExecuteDynamicDelete(measurement);
+
+            SimpleIoc.Default.GetInstance<DatabaseUtils>().SendMeasurementRemoveEvent(measurement);
         }
     }
 }

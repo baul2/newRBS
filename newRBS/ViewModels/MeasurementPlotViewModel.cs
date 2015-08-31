@@ -29,7 +29,7 @@ namespace newRBS.ViewModels
     {
         private Models.DatabaseUtils dataSpectra { get; set; }
 
-        public List<int> MeasurementIDList;
+        private List<int> MeasurementIDList;
 
         public PlotModel plotModel { get; set; }
 
@@ -41,13 +41,13 @@ namespace newRBS.ViewModels
         {
             dataSpectra = SimpleIoc.Default.GetInstance<Models.DatabaseUtils>();
 
-            // Hooking up to events from DataSpectra 
+            // Hooking up to events from DatabaseUtils 
+            SimpleIoc.Default.GetInstance<Models.DatabaseUtils>().EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
             SimpleIoc.Default.GetInstance<Models.DatabaseUtils>().EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
-            SimpleIoc.Default.GetInstance<Models.DatabaseUtils>().EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurementID(MeasurementNotToPlot);
 
             // Hooking up to events from SpectraList
-            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementToPlot += new MeasurementListViewModel.EventHandlerMeasurementID(MeasurementToPlot);
-            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementNotToPlot += new MeasurementListViewModel.EventHandlerMeasurementID(MeasurementNotToPlot);
+            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementToPlot += new MeasurementListViewModel.EventHandlerMeasurement(MeasurementToPlot);
+            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementNotToPlot += new MeasurementListViewModel.EventHandlerMeasurement(MeasurementNotToPlot);
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ClearPlot);
@@ -88,27 +88,23 @@ namespace newRBS.ViewModels
             plotModel.Axes.Add(yAxis);
         }
 
-        private void MeasurementToPlot(int measurementID)
+        private void MeasurementToPlot(Models.Measurement measurement)
         {
             Console.WriteLine("MeasurementToPlot");
 
-            Models.Measurement measurement;
+            if (MeasurementIDList.Contains(measurement.MeasurementID))
+            { Console.WriteLine("Measurement is already in MeasurementIDList!"); return; }
 
-            using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))   
-                measurement = db.Measurements.SingleOrDefault(x => x.MeasurementID == measurementID);
-
-            if (measurement == null) { trace.TraceEvent(TraceEventType.Error, 0, "Failed to load data for SpectrumID: {0}", measurementID); return; }
-
-            MeasurementIDList.Add(measurementID);
+            MeasurementIDList.Add(measurement.MeasurementID);
 
             var areaSeries = new AreaSeries
             {
-                Tag = measurementID,
+                Tag = measurement.MeasurementID,
                 StrokeThickness = 2,
                 MarkerSize = 3,
-                Color = LineColors[measurementID % LineColors.Count],
+                Color = LineColors[measurement.MeasurementID % LineColors.Count],
                 CanTrackerInterpolatePoints = false,
-                Title = string.Format("SpectrumID {0}", measurementID),
+                Title = string.Format("SpectrumID {0}", measurement.MeasurementID),
                 Smooth = false,
             };
 
@@ -127,21 +123,21 @@ namespace newRBS.ViewModels
             Console.WriteLine("Series added");
         }
 
-        private void MeasurementUpdate(Models.Measurement spectrum)
+        private void MeasurementUpdate(Models.Measurement measurement)
         {
-            if (!MeasurementIDList.Contains(spectrum.MeasurementID))
+            if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
             Console.WriteLine("MeasurementUpdate");
 
-            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == spectrum.MeasurementID).FirstOrDefault();
+            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
                 int index = plotModel.Series.IndexOf(updateSerie);
 
                 (plotModel.Series[index] as AreaSeries).Points.Clear();
 
-                int[] spectrumY = ArrayConversion.ByteToInt(spectrum.SpectrumY.ToArray());
+                int[] spectrumY = ArrayConversion.ByteToInt(measurement.SpectrumY.ToArray());
                 for (int x = 0; x < spectrumY.Count(); x++)
                 {
                     (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(x, spectrumY[x]));
@@ -150,12 +146,12 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void MeasurementNotToPlot(int spectrumID)
+        private void MeasurementNotToPlot(Models.Measurement measurement)
         {
             Console.WriteLine("MeasurementNotToPlot");
-            MeasurementIDList.Remove(spectrumID);
+            MeasurementIDList.Remove(measurement.MeasurementID);
 
-            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == spectrumID).First();
+            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
                 plotModel.Series.Remove(delSerie);
@@ -164,7 +160,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void ClearPlot(FilterClass newFilter)
+        private void ClearPlot(List<int> dump)
         {
             Console.WriteLine("ClearPlot");
 

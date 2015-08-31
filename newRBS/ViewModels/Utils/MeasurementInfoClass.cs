@@ -49,7 +49,7 @@ namespace newRBS.ViewModels.Utils
 
         private ObservableCollection<Models.Sample> _Samples;
         public ObservableCollection<Models.Sample> Samples
-        { get { return _Samples; } set { _Samples = value; OnPropertyChanged("SampleList"); } }
+        { get { return _Samples; } set { _Samples = value; OnPropertyChanged("Samples"); } }
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }

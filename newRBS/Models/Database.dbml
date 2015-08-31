@@ -13,41 +13,6 @@
       <Association Name="Layer_Element" Member="Layer" ThisKey="LayerID" OtherKey="LayerID" Type="Layer" IsForeignKey="true" />
     </Type>
   </Table>
-  <Table Name="dbo.Measurements" Member="Measurements">
-    <Type Name="Measurement">
-      <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="Name" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
-      <Column Name="Channel" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="SampleID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="SampleRemark" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
-      <Column Name="RandomAligned" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StartTime" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="StopTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="Duration" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="Runs" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="Charge" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="SpectrumY" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
-      <Column Name="SpectrumYCalculated" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
-      <Column Name="StopType" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StopValue" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="EnergyCalOffset" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonMass" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonEnergy" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="OutcomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="SolidAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="X" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Column Name="Y" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Column Name="Phi" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
-      <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
-    </Type>
-  </Table>
   <Table Name="dbo.Materials" Member="Materials">
     <Type Name="Material">
       <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -76,6 +41,41 @@
       <Column Name="MaterialID" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Association Name="Sample_Measurement" Member="Measurements" ThisKey="SampleID" OtherKey="SampleID" Type="Measurement" />
       <Association Name="Material_Sample" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Measurements" Member="Measurements">
+    <Type Name="Measurement">
+      <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="MeasurementName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="Channel" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SampleID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="SampleRemark" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="Orientation" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="StartTime" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="StopTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="Duration" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="Runs" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="Charge" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="SpectrumY" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="SpectrumYCalculated" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="StopType" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="StopValue" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="EnergyCalOffset" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="IncomingIonNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="IncomingIonMass" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="IncomingIonEnergy" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="IncomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="OutcomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="SolidAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="X" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Y" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Phi" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>

@@ -28,7 +28,7 @@
             </Grid.ColumnDefinitions>
 
             <Label Content="Name:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="0"/>
-            <TextBox Text="{Binding Measurement.Name, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
+            <TextBox Text="{Binding Measurement.MeasurementName, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
 
             <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
             <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedValuePath="SampleID" SelectedValue="{Binding Measurement.SampleID, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="1" />
@@ -38,7 +38,7 @@
             <Label Content="Chamber:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="2"/>
             <ComboBox ItemsSource="{Binding Chambers}" SelectedItem="{Binding Measurement.Chamber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
             <Label Content="Orientation:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="2"/>
-            <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.RandomAligned, Mode=TwoWay}" Margin="3" Grid.Column="3" Grid.Row="2" />
+            <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="3" Grid.Row="2" />
 
             <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
             <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="Name" SelectedValuePath="AtomicNumber" SelectedValue="{Binding Measurement.IncomingIonNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
