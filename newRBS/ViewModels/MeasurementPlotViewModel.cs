@@ -124,8 +124,6 @@ namespace newRBS.ViewModels
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            Console.WriteLine("MeasurementUpdate");
-
             Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {

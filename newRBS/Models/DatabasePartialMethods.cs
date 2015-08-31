@@ -27,20 +27,6 @@ namespace newRBS.Models
         }
     }
 
-    public partial class Measurement
-    {
-        public event PropertyChangedEventHandler NewSampleToAdd;
-
-        partial void OnSampleIDChanged()
-        {
-            //Console.WriteLine("OnSampleIDChanged");
-
-            if (SampleID == 2)
-                if ((this.NewSampleToAdd != null))
-                    this.NewSampleToAdd(this, new PropertyChangedEventArgs("SampleID"));
-        }
-    }
-
     public partial class DatabaseDataContext
     {
         partial void InsertMeasurement(Measurement measurement)

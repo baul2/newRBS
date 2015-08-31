@@ -23,6 +23,9 @@ namespace newRBS.ViewModels
     public class NewMeasurementViewModel : ViewModelBase
     {
         private Models.MeasureSpectra measureSpectra;
+        private Models.DatabaseDataContext Database;
+
+        public ICommand NewSampleCommand { get; set; }
 
         public ICommand StartMeasurementCommand { get; set; }
         public ICommand CancelCommand { get; set; }
@@ -57,6 +60,9 @@ namespace newRBS.ViewModels
         public NewMeasurementViewModel()
         {
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+
+            NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
 
             StartMeasurementCommand = new RelayCommand(() => _StartMeasurementCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
@@ -72,12 +78,20 @@ namespace newRBS.ViewModels
             StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
             Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+
+            Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
+        }
+
+        private void _NewSampleCommand()
+        {
+            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+            if (newSampleID != null)
             {
-                Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
-                Models.Measurement m = Database.Measurements.OrderByDescending(x => x.StartTime).First();
-                Measurement = m;
-                Models.Sample temp = Measurement.Sample; // To load the sample data before the scope of Database ends
+                Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+                if (!Samples.Contains(newSample))
+                    Samples.Add(newSample);
+                Measurement.Sample = newSample;
             }
         }
 

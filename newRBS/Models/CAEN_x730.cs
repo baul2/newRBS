@@ -63,17 +63,6 @@ namespace newRBS.Models
             else { trace.TraceEvent(TraceEventType.Information, 0, "Board added"); }
 
             //Reset board to default parameters
-            Console.WriteLine("CAENDPP_DgtzParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_DgtzParams_t)));
-            //Console.WriteLine("CAENDPP_DgtzParams_t_old {0}", Marshal.SizeOf(typeof(CAENDPP_DgtzParams_t_old)));
-            Console.WriteLine("CAENDPP_ChannelExtraParameters {0}", Marshal.SizeOf(typeof(CAENDPP_ChannelExtraParameters)));
-            Console.WriteLine("CAENDPP_TRReset {0}", Marshal.SizeOf(typeof(CAENDPP_TRReset)));
-            Console.WriteLine("CAENDPP_PHA_Params_t {0}", Marshal.SizeOf(typeof(CAENDPP_PHA_Params_t)));
-            Console.WriteLine("CAENDPP_WaveformParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_WaveformParams_t)));
-            Console.WriteLine("CAENDPP_ListParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_ListParams_t)));
-            Console.WriteLine("CAENDPP_CoincParams_t {0}", Marshal.SizeOf(typeof(CAENDPP_CoincParams_t)));
-            Console.WriteLine("CAENDPP_SpectrumControl {0}", Marshal.SizeOf(typeof(CAENDPP_SpectrumControl)));
-            //Console.WriteLine("dgtzParams.ChannelExtraParameters[3].analogPath {0}", dgtzParams.ChannelExtraParameters[3].analogPath);
-
             SetDefaultConfig();
         }
 

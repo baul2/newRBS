@@ -49,9 +49,8 @@ namespace newRBS.ViewModels
             set
             {
                 if (value == null) return;
-                Models.Measurement oldMeasurement = _selectedMeasurement;
                 _selectedMeasurement = value;
-                NewSelectedMeasurement(oldMeasurement);
+                NewSelectedMeasurement();
                 RaisePropertyChanged("selectedMeasurement");
             }
         }
@@ -78,19 +77,13 @@ namespace newRBS.ViewModels
             newMeausurements = new ObservableCollection<Models.Measurement>();
 
             Database = new Models.DatabaseDataContext(MyGlobals.ConString);
-            Database.Log = Console.Out;
+            //Database.Log = Console.Out;
 
             MeasurementInfo = new MeasurementInfoClass(Database);
         }
 
-        private void NewSelectedMeasurement(Models.Measurement oldMeasurement)
+        private void NewSelectedMeasurement()
         {
-            // Unsubscribe to events from old selected Measurement
-            if (oldMeasurement != null) oldMeasurement.NewSampleToAdd -= new PropertyChangedEventHandler(AddNewSample);
-
-            // Hooking up to events from new selected Measurement
-            _selectedMeasurement.NewSampleToAdd += new PropertyChangedEventHandler(AddNewSample);
-
             // Updating the grid data
             MeasurementInfo.Measurement = selectedMeasurement;
 
@@ -101,49 +94,13 @@ namespace newRBS.ViewModels
                 areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
         }
 
-        private void AddNewSample(object sender, PropertyChangedEventArgs e)
-        {
-            Console.WriteLine("AddNewSample");
-
-            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
-            if (inputDialog.ShowDialog() == true)
-            {
-                Console.WriteLine(inputDialog.Answer);
-                if (inputDialog.Answer == "")
-                    return;
-
-                if (MeasurementInfo.Samples.FirstOrDefault(x => x.SampleName == inputDialog.Answer) != null)
-                {
-                    Console.WriteLine("Sample already exists!");
-
-                    MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    selectedMeasurement.Sample = MeasurementInfo.Samples.First(x => x.SampleName == inputDialog.Answer);
-                    Console.WriteLine(selectedMeasurement.Sample.SampleName);
-                    return;
-                }
-
-                // New sample
-                Console.WriteLine("new sample");
-
-                Models.Sample newSample = new Models.Sample();
-                newSample.SampleName = inputDialog.Answer;
-                newSample.MaterialID = 1;
-
-                Database.Samples.InsertOnSubmit(newSample);
-                Database.SubmitChanges();
-
-                MeasurementInfo.Samples.Add(newSample);
-                selectedMeasurement.SampleID = newSample.SampleID;
-            }
-        }
-
         public void _OpenFileCommand()
         {
             var dialog = new OpenFileDialog();
             dialog.ShowDialog();
 
             if ((SelectedPath = dialog.FileName) == null) return;
+            if (!File.Exists(dialog.FileName)) return;
 
             List<Models.Measurement> importedMeasurements = Models.DatabaseUtils.LoadMeasurementsFromFile(SelectedPath);
 

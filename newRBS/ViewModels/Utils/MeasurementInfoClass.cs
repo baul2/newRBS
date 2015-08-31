@@ -40,6 +40,8 @@ namespace newRBS.ViewModels.Utils
     {
         private Models.DatabaseDataContext Database;
 
+        public ICommand NewSampleCommand { get; set; }
+
         private Models.Measurement _Measurement;
         public Models.Measurement Measurement
         {
@@ -61,10 +63,24 @@ namespace newRBS.ViewModels.Utils
             Database = database;
             Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
 
+            NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
+
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
             Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
+        }
+
+        private void _NewSampleCommand()
+        {
+            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+            if (newSampleID != null)
+            {
+                Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+                if (!Samples.Contains(newSample))
+                    Samples.Add(newSample);
+                Measurement.Sample = newSample;
+            }
         }
 
         #region INotifyPropertyChanged

@@ -67,7 +67,6 @@ namespace newRBS.Models
         public void StartMeasurements(List<int> selectedChannels)
         {
             List<int> IDs = new List<int>();
-            Console.WriteLine("Measurement will start");
 
             cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
 
@@ -194,8 +193,6 @@ namespace newRBS.Models
                     Database.SubmitChanges();
                     StopMeasurements();
                 }
-
-                Sample temp = MeasurementToUpdate.Sample; // To load the sample before the scope of Database ends
             }
         }
     }

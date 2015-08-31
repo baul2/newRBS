@@ -119,7 +119,6 @@ namespace newRBS.ViewModels
         private void FillFilterList(string filterType)
         {
             Console.WriteLine("Update filter list with filterType: {0}", filterType);
-            //filterTree.Items.Clear();
             if (filterTree.Items.Count() > 0)
             {
                 foreach (FilterClass n in filterTree.Items)
@@ -129,7 +128,6 @@ namespace newRBS.ViewModels
                 foreach (FilterClass n in filterTree.Items)
                     Console.WriteLine(n.Name);
             }
-            Console.WriteLine("clear done");
 
             switch (filterType)
             {
@@ -142,7 +140,6 @@ namespace newRBS.ViewModels
 
                     using (Models.DatabaseDataContext db = new Models.DatabaseDataContext(MyGlobals.ConString))
                     {
-                        Console.WriteLine("test: {0}", db.Measurements.First(x => x.SampleID == 1).Runs);
                         Console.WriteLine("All count: {0}", db.Measurements.ToList().Count());
                         List<int> allYears = (from spec in db.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)

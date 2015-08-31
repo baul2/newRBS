@@ -7,6 +7,8 @@ using System.Linq;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Globalization;
+using Microsoft.Win32;
+using System.Windows;
 
 namespace newRBS.Models
 {
@@ -42,6 +44,46 @@ namespace newRBS.Models
             {
                 EventMeasurementRemove(measurement);
             }
+        }
+
+        public static int? AddNewSample()
+        {
+            Console.WriteLine("AddNewSample");
+
+            Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
+            if (inputDialog.ShowDialog() == true)
+            {
+                Console.WriteLine(inputDialog.Answer);
+                if (inputDialog.Answer == "")
+                    return null;
+
+                using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+                {
+                    Sample sample = Database.Samples.FirstOrDefault(x => x.SampleName == inputDialog.Answer);
+
+                    if (sample != null)
+                    {
+                        Console.WriteLine("Sample already exists!");
+
+                        MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        return sample.SampleID;
+                    }
+
+                    // New sample
+                    Console.WriteLine("new sample");
+
+                    Sample newSample = new Sample();
+                    newSample.SampleName = inputDialog.Answer;
+                    newSample.MaterialID = 1;
+
+                    Database.Samples.InsertOnSubmit(newSample);
+                    Database.SubmitChanges();
+
+                    return newSample.SampleID;
+                }
+            }
+            else return null;
         }
 
         /// <summary>
@@ -96,6 +138,8 @@ namespace newRBS.Models
 
         public static List<Measurement> LoadMeasurementsFromFile(string fileName)
         {
+            if (!File.Exists(fileName)) return null;
+
             List<Measurement> newMeasurements = new List<Measurement>();
             List<List<int>> spectraY = new List<List<int>>();
 
