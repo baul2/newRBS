@@ -94,7 +94,7 @@ namespace newRBS.ViewModels
             if (selectedMeasurements.Select(x => x.Channel).Distinct().ToList().Count > 1)
             { MessageBox.Show("Select only measurements from one channel!"); ValidSelectedMeasurements = false; return; }
 
-            if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonNumber).Distinct().ToList().Count > 1)
+            if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonAtomicNumber).Distinct().ToList().Count > 1)
             { MessageBox.Show("Select only measurements with identical irradiation parameters!"); ValidSelectedMeasurements = false; return; }
 
             Elements = new ObservableCollection<Utils.Element>();
@@ -203,7 +203,7 @@ namespace newRBS.ViewModels
             Models.Measurement m = selectedMeasurements[0];
 
             foreach (EnergyCalListItem e in EnergyCalList)
-                e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * KineFak(ElementData.AtomicMass[m.IncomingIonNumber-1], e.Element.AtomicMass, m.OutcomingIonAngle), 1);
+                e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * KineFak(ElementData.AtomicMass[m.IncomingIonAtomicNumber - 1], e.Element.AtomicMass, m.OutcomingIonAngle), 1);
 
             Tuple<double, double> result = Fit.Line(EnergyCalList.Select(x => (double)x.Channel).ToArray(), EnergyCalList.Select(x => (double)x.CalibratedEnergy).ToArray());
 

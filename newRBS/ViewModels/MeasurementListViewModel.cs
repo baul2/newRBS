@@ -188,21 +188,5 @@ namespace newRBS.ViewModels
                 MeasurementList[index].Measurement = measurement;
             }
         }
-
-        public void DeleteSelectedMeasurement()
-        {
-            List<int> selectedMeasurementIDs = MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
-
-            if (selectedMeasurementIDs.Count() == 0) return;
-
-            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected spectra?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-
-            if (rsltMessageBox == MessageBoxResult.Yes)
-                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
-                {
-                    Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x=>selectedMeasurementIDs.Contains(x.MeasurementID)));
-                    Database.SubmitChanges();
-                }
-        }
     }
 }

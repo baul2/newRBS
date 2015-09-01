@@ -17,6 +17,8 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using System.Diagnostics;
+using Microsoft.Win32;
+using System.IO;
 
 namespace newRBS.ViewModels
 {
@@ -89,7 +91,13 @@ namespace newRBS.ViewModels
 
         public void _ImportMeasurementCommand()
         {
-            MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel();
+            var dialog = new OpenFileDialog();
+            dialog.ShowDialog();
+
+            if (dialog.FileName == null) return;
+            if (!File.Exists(dialog.FileName)) return;
+
+            MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel(dialog.FileName);
             Views.MeasurementImportView importMeasurementsView = new Views.MeasurementImportView();
             importMeasurementsView.DataContext = importMeasurementsViewModel;
             importMeasurementsView.ShowDialog();
@@ -97,12 +105,15 @@ namespace newRBS.ViewModels
 
         public void _ExportMeasurementsCommand()
         {
-            Console.WriteLine("_ExportMeasurementsCommand not implemented yet");
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "xml file (*.xml)|*.xml|ASCII file (*.dat)|*.dat";
+            if (saveFileDialog.ShowDialog() == true)
+                Models.DatabaseUtils.ExportMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList(), saveFileDialog.FileName);
         }
 
         public void _DeleteMeasurementsCommand()
         {
-            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().DeleteSelectedMeasurement();
+            Models.DatabaseUtils.DeleteMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x=>x.Selected == true).Select(y=>y.Measurement.MeasurementID).ToList());
         }
 
         public void _ChannelConfigurationCommand()

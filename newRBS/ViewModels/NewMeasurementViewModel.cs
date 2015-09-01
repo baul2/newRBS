@@ -112,7 +112,7 @@ namespace newRBS.ViewModels
             measureSpectra.SampleID = Measurement.SampleID;
             measureSpectra.SampleRemark = Measurement.SampleRemark;
             measureSpectra.Orientation = Measurement.Orientation;
-            measureSpectra.IncomingIonNumber = Measurement.IncomingIonNumber;
+            measureSpectra.IncomingIonAtomicNumber = Measurement.IncomingIonAtomicNumber;
             measureSpectra.IncomingIonEnergy = Measurement.IncomingIonEnergy;
             measureSpectra.IncomingIonAngle = Measurement.IncomingIonAngle;
             measureSpectra.SolidAngle = Measurement.SolidAngle;

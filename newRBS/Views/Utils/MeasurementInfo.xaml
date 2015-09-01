@@ -32,7 +32,7 @@
 
             <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
             <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
-                <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding Measurement.Sample, Mode=TwoWay}" Margin="3" MinWidth="80"/>
+                <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding Measurement.Sample, Mode=TwoWay}" Margin="3" MinWidth="100"/>
                 <Button Content="New" Command="{Binding NewSampleCommand}" Margin="3"/>
             </StackPanel>
             <Label Content="Sample remark:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="1"/>
@@ -44,7 +44,7 @@
             <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="3" Grid.Row="2" />
 
             <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
-            <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="Name" SelectedValuePath="AtomicNumber" SelectedValue="{Binding Measurement.IncomingIonNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
+            <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="Name" SelectedValuePath="AtomicNumber" SelectedValue="{Binding Measurement.IncomingIonAtomicNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
             <Label Content="Ion energy (keV):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="3"/>
             <TextBox Text="{Binding Measurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
 

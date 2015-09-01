@@ -202,8 +202,6 @@ namespace newRBS.ViewModels
 
         private void _SaveWaveformCommand()
         {
-            Console.WriteLine("_SaveWaveformCommand");
-
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "ASCII file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)

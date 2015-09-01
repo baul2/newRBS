@@ -99,8 +99,8 @@ namespace newRBS.ViewModels
             Console.WriteLine("_StartSimulationCommand");
 
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
-            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonNumber;
-            simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonNumber-1];
+            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonAtomicNumber;
+            simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
             simpleMeasurement.IonEnergy = SelectedMeasurement.IncomingIonEnergy;
             simpleMeasurement.IonFluence = 6e13;
             simpleMeasurement.SolidAngle = SelectedMeasurement.SolidAngle;
@@ -139,8 +139,8 @@ namespace newRBS.ViewModels
                     newSimpleMaterial.QValue = 0.0;
                     newSimpleMaterial.AtomicNoRemainTarget = (int)element.AtomicNumber;
                     newSimpleMaterial.MassNoRemainTarget = (int)element.MassNumber;
-                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.IncomingIonNumber;
-                    newSimpleMaterial.MassNoDetIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonNumber-1];
+                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.IncomingIonAtomicNumber;
+                    newSimpleMaterial.MassNoDetIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
                     newSimpleMaterial.RbsActive = true;
                     newSimpleMaterial.NraActive = false;
 

@@ -9,6 +9,7 @@ using System.Data.Linq.Mapping;
 using System.Globalization;
 using Microsoft.Win32;
 using System.Windows;
+using System.Xml.Serialization;
 
 namespace newRBS.Models
 {
@@ -111,49 +112,71 @@ namespace newRBS.Models
         /// <summary>
         /// Function that saves spectra to a file
         /// </summary>
-        /// <param name="IDs">Array of IDs of the spectra to save.</param>
-        /// <param name="file">Filename of the file to save the spectra to.</param>
-        public static void ExportMeasurements(int[] measurementIDs, string file)
+        /// <param name="measurementIDs">Array of IDs of the spectra to save.</param>
+        /// <param name="FileName">Filename of the file to save the spectra to.</param>
+        public static void ExportMeasurements(List<int> measurementIDs, string FileName)
         {
-            using (DatabaseDataContext db = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                using (TextWriter tw = new StreamWriter(file))
+                Console.WriteLine(Path.GetExtension(FileName));
+                switch (Path.GetExtension(FileName))
                 {
+                    case ".xml":
+                        using (TextWriter WriteFileStream = new StreamWriter(FileName))
+                        {
+                            XmlAttributeOverrides xOver = new XmlAttributeOverrides();
 
-                    // Header
-                    string strChannel = "Channel";
-                    string strID = "ID";
-                    string strStart = "StartTime";
-                    string strStop = "StopTime";
-                    string strECalOffset = "EnergyCalOffset";
-                    string strECalSlope = "EnergyCalSlope";
-                    string strName = "Name";
+                            XmlAttributes attrs = new XmlAttributes();
+                            attrs.XmlIgnore = true;
 
-                    List<Measurement> MeasurementsToExport = db.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
+                            xOver.Add(typeof(Measurement), "Sample", attrs);
+                            xOver.Add(typeof(Measurement), "SampleID", attrs);
+                            xOver.Add(typeof(Measurement), "SampleRemark", attrs);
 
-                    if (!MeasurementsToExport.Any())
-                    { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
+                            XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
+                            SerializerObj.Serialize(WriteFileStream, Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList());
+                            break;
+                        }
+                    case ".dat":
+                        using (TextWriter tw = new StreamWriter(FileName))
+                        {
 
-                    foreach (var expSpectrum in MeasurementsToExport)
-                    {
-                        strChannel += String.Format("\t {0}", expSpectrum.Channel);
-                        strID += String.Format("\t {0}", expSpectrum.MeasurementID);
-                        strStart += String.Format("\t {0}", expSpectrum.StartTime);
-                        strStop += String.Format("\t {0}", expSpectrum.StopTime);
-                        //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
-                        //strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalSlope);
-                        strName += String.Format("\t {0}", expSpectrum.Sample);
-                    }
+                            // Header
+                            string strChannel = "Channel";
+                            string strID = "ID";
+                            string strStart = "StartTime";
+                            string strStop = "StopTime";
+                            string strECalOffset = "EnergyCalOffset";
+                            string strECalSlope = "EnergyCalSlope";
+                            string strName = "Name";
 
-                    tw.WriteLine(strChannel);
-                    tw.WriteLine(strID);
-                    tw.WriteLine(strStart);
-                    tw.WriteLine(strStop);
-                    tw.WriteLine(strECalOffset);
-                    tw.WriteLine(strECalSlope);
-                    tw.WriteLine(strName);
+                            List<Measurement> MeasurementsToExport = Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
 
-                    // TODO: Write data              
+                            if (!MeasurementsToExport.Any())
+                            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
+
+                            foreach (var expSpectrum in MeasurementsToExport)
+                            {
+                                strChannel += String.Format("\t {0}", expSpectrum.Channel);
+                                strID += String.Format("\t {0}", expSpectrum.MeasurementID);
+                                strStart += String.Format("\t {0}", expSpectrum.StartTime);
+                                strStop += String.Format("\t {0}", expSpectrum.StopTime);
+                                //strECalOffset += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalOffset);
+                                //strECalSlope += String.Format("\t {0:yyyy-MM-dd_HH:mm:ss}", expSpectrum.energyCalibration_.energyCalSlope);
+                                strName += String.Format("\t {0}", expSpectrum.Sample);
+                            }
+
+                            tw.WriteLine(strChannel);
+                            tw.WriteLine(strID);
+                            tw.WriteLine(strStart);
+                            tw.WriteLine(strStop);
+                            tw.WriteLine(strECalOffset);
+                            tw.WriteLine(strECalSlope);
+                            tw.WriteLine(strName);
+
+                            // TODO: Write data     
+                            break;
+                        }
                 }
             }
         }
@@ -194,7 +217,7 @@ namespace newRBS.Models
                             case "Remark":
                                 { newMeasurements[i].SampleRemark = lineParts[i + 1]; break; }
                             case "Projectile":
-                                { newMeasurements[i].IncomingIonNumber = Int32.Parse(lineParts[i + 1]); break; }
+                                { newMeasurements[i].IncomingIonAtomicNumber = Int32.Parse(lineParts[i + 1]); break; }
                             case "Energy":
                                 { newMeasurements[i].IncomingIonEnergy = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                             case "Scattering angle":
@@ -239,6 +262,20 @@ namespace newRBS.Models
 
                 return newMeasurements;
             }
+        }
+
+        public static void DeleteMeasurements(List<int> MeasurementIDs)
+        {
+            if (MeasurementIDs.Count() == 0) return;
+
+            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected measurements?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+            if (rsltMessageBox == MessageBoxResult.Yes)
+                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                {
+                    Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
+                    Database.SubmitChanges();
+                }
         }
     }
 }
