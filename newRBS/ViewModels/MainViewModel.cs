@@ -46,6 +46,7 @@ namespace newRBS.ViewModels
         public ICommand MaterialEditorCommand { get; set; }
         public ICommand SampleEditorCommand { get; set; }
 
+        public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
 
         TraceSource trace = new TraceSource("MainViewModel");
@@ -67,6 +68,7 @@ namespace newRBS.ViewModels
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
 
+            EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true); 
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
         }
 
@@ -139,6 +141,15 @@ namespace newRBS.ViewModels
             Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
             simulateSpectrumView.DataContext = simulateSpectrumViewModel;
             simulateSpectrumView.ShowDialog();
+        }
+
+        public void _EnergyCalCommand()
+        {
+            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel();
+            if (energyCalibrationViewModel.ValidSelectedMeasurements == false) return;
+            Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
+            energyCalibrationView.DataContext = energyCalibrationViewModel;
+            energyCalibrationView.ShowDialog();
         }
     }
 }

@@ -53,9 +53,15 @@ namespace newRBS.ViewModels
         public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<Ion> Ions { get; set; }
 
-        private int _SelectedTabIndex = 0;
-        public int SelectedTabIndex
-        { get { return _SelectedTabIndex; } set { _SelectedTabIndex = value; RaisePropertyChanged(); } }
+        private int _SelectedChamberTabIndex = 0;
+        public int SelectedChamberTabIndex
+        { get { return _SelectedChamberTabIndex; } set { _SelectedChamberTabIndex = value; RaisePropertyChanged(); } }
+
+        private int _SelectedVariablesTabIndex = 0;
+        public int SelectedVariablesTabIndex
+        { get { return _SelectedVariablesTabIndex; } set { _SelectedVariablesTabIndex = value; RaisePropertyChanged(); } }
+
+        public ObservableCollection<string> VariableParameters { get; set; }
 
         public NewMeasurementViewModel()
         {
@@ -81,6 +87,8 @@ namespace newRBS.ViewModels
             Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
 
             Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
+
+            VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
 
         private void _NewSampleCommand()
@@ -111,7 +119,7 @@ namespace newRBS.ViewModels
             measureSpectra.StopType = Measurement.StopType;
             measureSpectra.StopValue = Measurement.StopValue;
 
-            switch (SelectedTabIndex)
+            switch (SelectedChamberTabIndex)
             {
                 case 0: // -10° chamber
                     {

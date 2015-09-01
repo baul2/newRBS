@@ -65,7 +65,6 @@ namespace newRBS.ViewModels
             Measurements = new ObservableCollection<Models.Measurement>();
 
             Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
-            Samples.Remove(Samples.First(x => x.SampleName == "New..."));
             Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
             //SelectedSample = Samples.FirstOrDefault();
         }
@@ -87,9 +86,10 @@ namespace newRBS.ViewModels
         private void SelectedMeasurementChanged()
         {
             MeasuredSpectrumData.Clear();
-            int[] temp = ArrayConversion.ByteToInt(SelectedMeasurement.SpectrumY.ToArray());
-            for (int i = 0; i < temp.Count(); i++)
-                MeasuredSpectrumData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
+            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(SelectedMeasurement);
+            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(SelectedMeasurement);
+            for (int i = 0; i < spectrumY.Count(); i++)
+                MeasuredSpectrumData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
 
             //plotModel.InvalidatePlot(true);
         }
@@ -100,7 +100,7 @@ namespace newRBS.ViewModels
 
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
             simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonNumber;
-            simpleMeasurement.MassNoIncIon = SelectedMeasurement.IncomingIonMass;
+            simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonNumber-1];
             simpleMeasurement.IonEnergy = SelectedMeasurement.IncomingIonEnergy;
             simpleMeasurement.IonFluence = 6e13;
             simpleMeasurement.SolidAngle = SelectedMeasurement.SolidAngle;
@@ -140,7 +140,7 @@ namespace newRBS.ViewModels
                     newSimpleMaterial.AtomicNoRemainTarget = (int)element.AtomicNumber;
                     newSimpleMaterial.MassNoRemainTarget = (int)element.MassNumber;
                     newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.IncomingIonNumber;
-                    newSimpleMaterial.MassNoDetIon = SelectedMeasurement.IncomingIonMass;
+                    newSimpleMaterial.MassNoDetIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonNumber-1];
                     newSimpleMaterial.RbsActive = true;
                     newSimpleMaterial.NraActive = false;
 

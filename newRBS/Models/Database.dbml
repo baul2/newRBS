@@ -66,7 +66,6 @@
       <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="IncomingIonNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonMass" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="IncomingIonEnergy" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="IncomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="OutcomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />

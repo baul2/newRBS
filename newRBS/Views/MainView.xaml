@@ -32,15 +32,20 @@
                 </Button>
             </ToolBar>
             <ToolBar>
-                <Button Command="{Binding MaterialEditorCommand}" Content="Material Editor" />
-                <Button Command="{Binding SampleEditorCommand}" Content="Sample Editor" />
-            </ToolBar>
-            <ToolBar>
-                <Button Command="{Binding SimulateSpectrumCommand}" Content="Simulate Spectrum" />
+                <Menu VerticalAlignment="Center">
+                    <MenuItem Header="Analysis">
+                        <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
+                        <MenuItem Header="Simulata Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
+                    </MenuItem>
+                    <MenuItem Header="Editor">
+                        <MenuItem Header="Material Editor" Command="{Binding MaterialEditorCommand}"/>
+                        <MenuItem Header="Sample Editor" Command="{Binding SampleEditorCommand}"/>
+                    </MenuItem>
+                </Menu>
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">
-            <local:SpectraFilterView/>
+            <local:MeasurementFilterView/>
         </Border>
         <Border>
             <Grid>

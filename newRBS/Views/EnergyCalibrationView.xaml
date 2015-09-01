@@ -1,0 +1,106 @@
+﻿<Window  x:Class="newRBS.Views.EnergyCalibrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:newRBS.ViewModels"
+             xmlns:viewmodelutils="clr-namespace:newRBS.ViewModels.Utils"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             mc:Ignorable="d" 
+             Title="MeasurementInfoView" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="500" MinWidth="700"
+             viewmodelutils:DialogCloser.DialogResult="{Binding DialogResult}">
+    <DockPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+            <GroupBox>
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <Label Content="Channel:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                        <TextBox Text="{Binding Channel}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+
+                        <Label Content="Element:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                        <ComboBox ItemsSource="{Binding Elements}" DisplayMemberPath="DisplayName" SelectedItem="{Binding SelectedElement}" Grid.Column="1" Grid.Row="2" Margin="3" MinWidth="110"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Add to list" Command="{Binding AddToListCommand}" Margin="3" Padding="3"/>
+                        <Button Content="Clear list" Command="{Binding ClearListCommand}" Margin="3" Padding="3"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox>
+                <StackPanel Orientation="Vertical">
+                    <DataGrid ItemsSource="{Binding EnergyCalList}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              AlternationCount="2"
+                              HorizontalGridLinesBrush ="WhiteSmoke"
+                              VerticalGridLinesBrush="LightGray"
+                              Margin="3" MinWidth="100" MinHeight="79">
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Style.Triggers>
+                                    <Trigger Property="AlternationIndex" Value="0">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="AlternationIndex" Value="1">
+                                        <Setter Property="Background" Value="WhiteSmoke" />
+                                    </Trigger>
+                                    <DataTrigger Binding="{Binding Path=Selectable}" Value="False">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Background" Value="WhiteSmoke" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Channel" Binding="{Binding Channel}"/>
+                            <DataGridTextColumn Header="Element" Binding="{Binding Element.ShortName}"/>
+                            <DataGridTextColumn Header="Cal. Energy (keV)" Binding="{Binding CalibratedEnergy}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Calculate Energy Calibration" Command="{Binding CalculateEnergyCalCommand}" Margin="3" Padding="3"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox>
+                <StackPanel Orientation="Vertical">
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+
+                        <Label Content="Offset:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                        <TextBox Text="{Binding ECalOffset}" Grid.Column="1" Grid.Row="0" Margin="3" MinWidth="80"/>
+
+                        <Label Content="Slope:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                        <TextBox Text="{Binding ECalSlope}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Save Energy Calibration" Command="{Binding SaveEnergyCalCommand}" Margin="3" Padding="3"/>
+                        <Button Content="Cancel" Command="{Binding CancelCalCommand}" Margin="3" Padding="3"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <oxy:PlotView Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
+    </DockPanel>
+</Window>

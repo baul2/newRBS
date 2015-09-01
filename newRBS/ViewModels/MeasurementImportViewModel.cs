@@ -89,9 +89,10 @@ namespace newRBS.ViewModels
 
             // Updating the plot data
             areaData.Clear();
-            int[] temp = ArrayConversion.ByteToInt(selectedMeasurement.SpectrumY.ToArray());
-            for (int i = 0; i < temp.Count(); i++)
-                areaData.Add(new AreaData { x1 = i, y1 = temp[i], x2 = i, y2 = 0 });
+            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(selectedMeasurement);
+            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(selectedMeasurement);
+            for (int i = 0; i < spectrumY.Count(); i++)
+                areaData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
         }
 
         public void _OpenFileCommand()

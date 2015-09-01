@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace newRBS.Views
 {
     /// <summary>
-    /// Interaction logic for SpectraFilterView.xaml
+    /// Interaktionslogik für AnalysisView.xaml
     /// </summary>
-    public partial class MeasurementFilterView : UserControl
+    public partial class EnergyCalibrationView : Window
     {
-        public MeasurementFilterView()
+        public EnergyCalibrationView()
         {
             InitializeComponent();
         }

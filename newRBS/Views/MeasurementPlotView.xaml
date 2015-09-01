@@ -5,10 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.Views"
              xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             DataContext="{Binding spectraPlotViewModel, Source={StaticResource Locator}}">
+             DataContext="{Binding measurementPlotViewModel, Source={StaticResource Locator}}">
     <Grid>
-        <oxy:Plot x:Name="Plot1" Title="A Graph" Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
+        <oxy:PlotView Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
     </Grid>
 </UserControl>

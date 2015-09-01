@@ -21,44 +21,6 @@ using Microsoft.Win32;
 
 namespace newRBS.ViewModels
 {
-    public class MyMeasurement : INotifyPropertyChanged
-    {
-        private bool _Selected;
-        public bool Selected
-        {
-            get { return _Selected; }
-            set
-            {
-                if (_Selected != value)
-                {
-                    _Selected = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        private Models.Measurement _Measurement;
-        public Models.Measurement Measurement
-        {
-            get { return _Measurement; }
-            set
-            {
-                _Measurement = value;
-                OnPropertyChanged();
-            }
-        }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = "")
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(name));
-        }
-        #endregion
-    }
-
     public class MeasurementListViewModel : ViewModelBase
     {
         //public ICommand DataGridDoubleClick { get; set; }
@@ -77,8 +39,8 @@ namespace newRBS.ViewModels
         public delegate void EventHandlerMeasurement(Models.Measurement measurement);
         public event EventHandlerMeasurement EventMeasurementToPlot, EventMeasurementNotToPlot;
 
-        public List<MyMeasurement> ModifiedItems { get; set; }
-        public AsyncObservableCollection<MyMeasurement> MeasurementList { get; set; }
+        public List<SelectableMeasurement> ModifiedItems { get; set; }
+        public AsyncObservableCollection<SelectableMeasurement> MeasurementList { get; set; }
 
         public CollectionViewSource MeasurementListViewSource { get; set; }
 
@@ -99,8 +61,8 @@ namespace newRBS.ViewModels
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);
 
-            ModifiedItems = new List<MyMeasurement>();
-            MeasurementList = new AsyncObservableCollection<MyMeasurement>();
+            ModifiedItems = new List<SelectableMeasurement>();
+            MeasurementList = new AsyncObservableCollection<SelectableMeasurement>();
             MeasurementList.CollectionChanged += OnCollectionChanged;
 
             MeasurementListViewSource = new CollectionViewSource();
@@ -120,7 +82,7 @@ namespace newRBS.ViewModels
             // Update selected row
             using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
             {
-                MyMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
+                SelectableMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
                 myMeasurement.Measurement = Database.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
                 Models.Sample temp = myMeasurement.Measurement.Sample; // To load the sample bevor the scope of db ends
             }
@@ -131,7 +93,7 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Add)
                 if (e.NewItems != null)
                 {
-                    foreach (MyMeasurement newItem in e.NewItems)
+                    foreach (SelectableMeasurement newItem in e.NewItems)
                     {
                         ModifiedItems.Add(newItem);
                         newItem.PropertyChanged += this.OnItemPropertyChanged;
@@ -141,7 +103,7 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Remove)
                 if (e.OldItems != null)
                 {
-                    foreach (MyMeasurement oldItem in e.OldItems)
+                    foreach (SelectableMeasurement oldItem in e.OldItems)
                     {
                         oldItem.PropertyChanged -= this.OnItemPropertyChanged;
                         ModifiedItems.Remove(oldItem);
@@ -151,12 +113,12 @@ namespace newRBS.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Replace)
                 if (e.NewItems != null && e.OldItems != null)
                 {
-                    foreach (MyMeasurement newItem in e.NewItems)
+                    foreach (SelectableMeasurement newItem in e.NewItems)
                     {
                         ModifiedItems.Add(newItem);
                         newItem.PropertyChanged += this.OnItemPropertyChanged;
                     }
-                    foreach (MyMeasurement oldItem in e.OldItems)
+                    foreach (SelectableMeasurement oldItem in e.OldItems)
                     {
                         oldItem.PropertyChanged -= this.OnItemPropertyChanged;
                         ModifiedItems.Remove(oldItem);
@@ -166,7 +128,7 @@ namespace newRBS.ViewModels
 
         void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MyMeasurement myMeasurement = sender as MyMeasurement;
+            SelectableMeasurement myMeasurement = sender as SelectableMeasurement;
 
             if (e.PropertyName == "Measurement") return;
 
@@ -191,7 +153,7 @@ namespace newRBS.ViewModels
                 {
                     tempSample = measurement.Sample;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
-                    MeasurementList.Add(new MyMeasurement() { Selected = false, Measurement = measurement });
+                    MeasurementList.Add(new SelectableMeasurement() { Selected = false, Measurement = measurement });
                 }
             }
 
@@ -201,7 +163,7 @@ namespace newRBS.ViewModels
         private void AddNewMeasurementToList(Models.Measurement measurement)
         {
             Console.WriteLine("AddNewMeasurementToList");
-            MeasurementList.Add(new MyMeasurement() { Selected = true, Measurement = measurement });
+            MeasurementList.Add(new SelectableMeasurement() { Selected = true, Measurement = measurement });
 
             if (EventMeasurementToPlot != null) EventMeasurementToPlot(measurement);
         }
@@ -210,7 +172,7 @@ namespace newRBS.ViewModels
         private void DeleteRemovedMeasurementFromList(Models.Measurement measurement)
         {
             Console.WriteLine("DeleteRemovedMeasurementFromList");
-            MyMeasurement delMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
+            SelectableMeasurement delMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
 
             if (delMeasurement != null)
                 MeasurementList.Remove(delMeasurement);
@@ -218,7 +180,7 @@ namespace newRBS.ViewModels
 
         private void UpdateMeasurementInList(Models.Measurement measurement)
         {
-            MyMeasurement updateMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
+            SelectableMeasurement updateMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
 
             if (updateMeasurement != null)
             {

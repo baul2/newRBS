@@ -33,7 +33,7 @@
                 <oxy:LinearAxis Title="Counts" Position="Left"/>
             </oxy:Plot.Axes>
             <oxy:Plot.Series>
-                <oxy:AreaSeries  ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
+                <oxy:AreaSeries ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
             </oxy:Plot.Series>
         </oxy:Plot>
     </DockPanel>

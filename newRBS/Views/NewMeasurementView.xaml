@@ -59,22 +59,35 @@
                 <TextBox Text="{Binding Measurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7" />
             </Grid>
         </GroupBox>
-        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+        <TabControl SelectedIndex="{Binding SelectedChamberTabIndex}">
             <TabItem Header="-10° Chamber">
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Detectors:"/>
-                    <ItemsControl  ItemsSource="{Binding Channels_10}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Detectors:"/>
+                        <ItemsControl  ItemsSource="{Binding Channels_10}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <TabControl SelectedIndex="{Binding SelectedVariablesTabIndex}">
+                        <TabItem Header="0 variables">
+
+                        </TabItem>
+                        <TabItem Header="1 variable">
+                            <ComboBox ItemsSource="{Binding VariableParameters}" SelectedItem="{Binding SelectedVariableParameter}"/>
+                        </TabItem>
+                        <TabItem Header="2 variables">
+
+                        </TabItem>
+                    </TabControl>
                 </StackPanel>
             </TabItem>
             <TabItem Header="-30° Chamber">

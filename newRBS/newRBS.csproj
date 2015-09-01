@@ -58,6 +58,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\glib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.3.7.0\lib\net40\MathNet.Numerics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
       <Private>True</Private>
@@ -81,6 +85,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
@@ -154,6 +159,7 @@
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
+    <Compile Include="ViewModels\EnergyCalibrationViewModel.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModels\MeasurementImportViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
@@ -168,11 +174,16 @@
     <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
-    <Compile Include="Utils\ArrayConversion.cs" />
+    <Compile Include="ViewModels\Utils\Element.cs" />
+    <Compile Include="ViewModels\Utils\ElementData.cs" />
     <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
     <Compile Include="ViewModels\Utils\NameValueClass.cs" />
+    <Compile Include="ViewModels\Utils\SelectableMeasurement.cs" />
     <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
+    <Compile Include="Views\EnergyCalibrationView.xaml.cs">
+      <DependentUpon>EnergyCalibrationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ChannelConfigurationView.xaml.cs">
       <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
     </Compile>
@@ -213,6 +224,10 @@
     <Compile Include="Views\Utils\MeasurementInfo.xaml.cs">
       <DependentUpon>MeasurementInfo.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\EnergyCalibrationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ChannelConfigurationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -322,6 +337,9 @@
     <Resource Include="Images\193.png" />
     <Resource Include="Images\31.png" />
     <Resource Include="Images\89.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

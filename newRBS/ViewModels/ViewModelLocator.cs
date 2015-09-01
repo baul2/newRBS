@@ -47,6 +47,7 @@ namespace newRBS.ViewModels
             SimpleIoc.Default.Register<MeasurementFilterViewModel>();
             SimpleIoc.Default.Register<MeasurementListViewModel>();
             SimpleIoc.Default.Register<MeasurementPlotViewModel>();
+            SimpleIoc.Default.Register<EnergyCalibrationViewModel>(); 
 
             // The Models
             SimpleIoc.Default.Register<Models.CAEN_x730>();
@@ -58,15 +59,18 @@ namespace newRBS.ViewModels
         public MainViewModel mainViewModel
         { get { return ServiceLocator.Current.GetInstance<MainViewModel>(); } }
 
-        public MeasurementFilterViewModel spectraFilterViewModel
+        public MeasurementFilterViewModel measurementFilterViewModel
         { get { return ServiceLocator.Current.GetInstance<MeasurementFilterViewModel>(); } }
 
-        public MeasurementListViewModel spectraListViewModel
+        public MeasurementListViewModel measurementListViewModel
         { get { return ServiceLocator.Current.GetInstance<MeasurementListViewModel>(); } }
 
-        public MeasurementPlotViewModel spectraPlotViewModel
+        public MeasurementPlotViewModel measurementPlotViewModel
         { get { return ServiceLocator.Current.GetInstance<MeasurementPlotViewModel>(); } }
-        
+
+        public EnergyCalibrationViewModel analysisViewModel
+        { get { return ServiceLocator.Current.GetInstance<EnergyCalibrationViewModel>(); } }
+
 
         // The Models
         public Models.CAEN_x730 cAen_X730
