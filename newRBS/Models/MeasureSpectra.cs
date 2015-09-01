@@ -25,8 +25,7 @@ namespace newRBS.Models
         public string Chamber = "-10°";
         public string Orientation = "(undefined)";
         public int NumOfChannels = 16384;
-        public int IncomingIonNumber = 2;
-        public int IncomingIonMass = 4;
+        public int IncomingIonAtomicNumber = 2;
         public double IncomingIonEnergy = 1400;
         public double IncomingIonAngle = 180;
         public double OutcomingIonAngle = 170;
@@ -84,7 +83,7 @@ namespace newRBS.Models
                         Orientation = Orientation,
                         SampleRemark = SampleRemark,
                         Channel = channel,
-                        IncomingIonNumber = IncomingIonNumber,
+                        IncomingIonAtomicNumber = IncomingIonAtomicNumber,
                         IncomingIonEnergy = IncomingIonEnergy,
                         IncomingIonAngle = IncomingIonAngle,
                         OutcomingIonAngle = OutcomingIonAngle,

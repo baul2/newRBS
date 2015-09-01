@@ -13,11 +13,7 @@
         viewmodelutils:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
         <StackPanel DockPanel.Dock="top" Orientation="Vertical">
-            <DockPanel LastChildFill="True" >
-                <Button DockPanel.Dock="Right" Command="{Binding OpenFileCommand}" Margin="5" Padding="3" Width="100" Content="Open File"/>
-                <TextBox Text="{Binding SelectedPath}" Margin="5"/>
-            </DockPanel>
-            <ComboBox ItemsSource="{Binding newMeausurements}" DisplayMemberPath="Name" SelectedItem="{Binding selectedMeasurement}" Margin="5" Padding="3" />
+            <ComboBox ItemsSource="{Binding newMeausurements}" DisplayMemberPath="MeasurementName" SelectedItem="{Binding selectedMeasurement}" Margin="5" Padding="3" />
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical">
             <viewutils:MeasurementInfo DataContext="{Binding MeasurementInfo}"/>

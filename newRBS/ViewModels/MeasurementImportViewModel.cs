@@ -27,7 +27,6 @@ namespace newRBS.ViewModels
 {
     public class MeasurementImportViewModel : ViewModelBase
     {
-        public ICommand OpenFileCommand { get; set; }
         public ICommand AddCurrentMeasurementCommand { get; set; }
         public ICommand AddAllMeasurementsCommand { get; set; }
         public ICommand CancelCommand { get; set; }
@@ -55,21 +54,12 @@ namespace newRBS.ViewModels
             }
         }
 
-        private string _SelectedPath;
-        public string SelectedPath
-        { get { return _SelectedPath; } set { _SelectedPath = value; RaisePropertyChanged("SelectedPath"); } }
-
         private ObservableCollection<AreaData> _areaData = new ObservableCollection<AreaData>();
         public ObservableCollection<AreaData> areaData
         { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
 
-        private string _FileContent;
-        public string FileContent
-        { get { return _FileContent; } set { _FileContent = value; RaisePropertyChanged("FileContent"); } }
-
-        public MeasurementImportViewModel()
+        public MeasurementImportViewModel(string FileName)
         {
-            OpenFileCommand = new RelayCommand(() => _OpenFileCommand(), () => true);
             AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
             AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
@@ -80,6 +70,25 @@ namespace newRBS.ViewModels
             //Database.Log = Console.Out;
 
             MeasurementInfo = new MeasurementInfoClass(Database);
+
+            LoadMeasurements(FileName);
+        }
+
+        private void LoadMeasurements(string FileName)
+        {
+            List<Models.Measurement> importedMeasurements = Models.DatabaseUtils.LoadMeasurementsFromFile(FileName);
+
+            Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
+
+            newMeausurements.Clear();
+
+            for (int i = 0; i < importedMeasurements.Count(); i++)
+            {
+                importedMeasurements[i].SampleID = undefinedSample.SampleID;
+                newMeausurements.Add(importedMeasurements[i]);
+            }
+
+            selectedMeasurement = newMeausurements.First();
         }
 
         private void NewSelectedMeasurement()
@@ -95,28 +104,6 @@ namespace newRBS.ViewModels
                 areaData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
         }
 
-        public void _OpenFileCommand()
-        {
-            var dialog = new OpenFileDialog();
-            dialog.ShowDialog();
-
-            if ((SelectedPath = dialog.FileName) == null) return;
-            if (!File.Exists(dialog.FileName)) return;
-
-            List<Models.Measurement> importedMeasurements = Models.DatabaseUtils.LoadMeasurementsFromFile(SelectedPath);
-
-            Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
-
-            newMeausurements.Clear();
-
-            for (int i = 0; i < importedMeasurements.Count(); i++)
-            {
-                importedMeasurements[i].SampleID = undefinedSample.SampleID;
-                newMeausurements.Add(importedMeasurements[i]);
-            }
-
-            selectedMeasurement = newMeausurements.First();
-        }
 
         public void _AddCurrentMeasurementCommand()
         {
