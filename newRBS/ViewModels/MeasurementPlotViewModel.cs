@@ -78,7 +78,7 @@ namespace newRBS.ViewModels
             plotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
             plotModel.LegendBorder = OxyColors.Black;
 
-            var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, Minimum = 0 };
+            var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "Counts", TitleFontSize = 16, AxisTitleDistance = 12, Minimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
@@ -106,11 +106,12 @@ namespace newRBS.ViewModels
 
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
-            int[] spectrumY = ArrayConversion.ByteToInt(measurement.SpectrumY.ToArray());
-            for (int x = 0; x < spectrumY.Count(); x++)
+            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(measurement);
+            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(measurement);
+            for (int i = 0; i < spectrumY.Count(); i++)
             {
-                areaSeries.Points.Add(new DataPoint(x, spectrumY[x]));
-                areaSeries.Points2.Add(new DataPoint(x, 0));
+                areaSeries.Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
+                areaSeries.Points2.Add(new DataPoint(spectrumX[i], 0));
             }
             plotModel.Series.Add(areaSeries);
             plotModel.InvalidatePlot(true);
@@ -131,10 +132,11 @@ namespace newRBS.ViewModels
 
                 (plotModel.Series[index] as AreaSeries).Points.Clear();
 
-                int[] spectrumY = ArrayConversion.ByteToInt(measurement.SpectrumY.ToArray());
-                for (int x = 0; x < spectrumY.Count(); x++)
+                float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(measurement);
+                int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(measurement);
+                for (int i = 0; i < spectrumY.Count(); i++)
                 {
-                    (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(x, spectrumY[x]));
+                    (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
                 }
                 plotModel.InvalidatePlot(true);
             }

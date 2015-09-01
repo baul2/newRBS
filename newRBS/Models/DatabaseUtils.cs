@@ -46,6 +46,28 @@ namespace newRBS.Models
             }
         }
 
+        public static float[] GetCalibratedSpectrumX(Measurement measurement)
+        {
+            float[] SpectrumX = new float[measurement.NumOfChannels];
+            for (int i = 0; i < measurement.NumOfChannels; i++)
+                SpectrumX[i] = (float)measurement.EnergyCalOffset + i * (float)measurement.EnergyCalSlope;
+            return SpectrumX;
+        }
+
+        public static int[] GetIntSpectrumY(Measurement measurement)
+        {
+            int[] intArray = new int[measurement.SpectrumY.Length / sizeof(int)];
+            Buffer.BlockCopy(measurement.SpectrumY.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+            return intArray;
+        }
+
+        public static byte[] GetByteSpectrumY(int[] intArray)
+        {
+            byte[] byteArray = new byte[intArray.Length * sizeof(int)];
+            Buffer.BlockCopy(intArray, 0, byteArray, 0, byteArray.Length);
+            return byteArray;
+        }
+
         public static int? AddNewSample()
         {
             Console.WriteLine("AddNewSample");
@@ -207,7 +229,7 @@ namespace newRBS.Models
 
                 for (int i = 0; i < numSpectra; i++)
                 {
-                    newMeasurements[i].SpectrumY = ArrayConversion.IntToByte(spectraY[i].ToArray());
+                    newMeasurements[i].SpectrumY = GetByteSpectrumY(spectraY[i].ToArray());
                     newMeasurements[i].NumOfChannels = spectraY[i].Count();
                     newMeasurements[i].Orientation = "(undefined)";
                     newMeasurements[i].StopType = "(undefined)";

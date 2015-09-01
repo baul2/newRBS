@@ -25,20 +25,33 @@ namespace newRBS.ViewModels
         public AsyncObservableCollection<FilterClass> Items { get; set; }
     }
 
-    public class MeasurementFilterViewModel : INotifyPropertyChanged
+    public class MeasurementFilterViewModel : ViewModelBase
     {
         public delegate void EventHandlerFilter(List<int> MeasurementIDList);
         public event EventHandlerFilter EventNewFilter;
 
         public ICommand ExpandFilterList { get; set; }
-        public ICommand TestButtonClick { get; set; }
 
         private bool _measurementFilterPanelVis = true;
         public bool measurementFilterPanelVis
         {
             get { return _measurementFilterPanelVis; }
-            set { _measurementFilterPanelVis = value; OnPropertyChanged("measurementFilterPanelVis"); }
+            set
+            {
+                _measurementFilterPanelVis = value;
+                switch (value)
+                {
+                    case true:
+                        { VisButtonContent = "\u21D1 Filter Panel \u21D1"; break; }
+                    case false:
+                        { VisButtonContent = "\u21D3 Filter Panel \u21D3"; break; }
+                }
+                RaisePropertyChanged(); }
         }
+
+        private string _VisButtonContent = "\u21D1 Filter Panel \u21D1";
+        public string VisButtonContent
+        { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 
         public AsyncObservableCollection<string> filterTypeList { get; set; }
 
@@ -81,18 +94,9 @@ namespace newRBS.ViewModels
 
         public TreeViewModel filterTree { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            var handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         public MeasurementFilterViewModel()
         {
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
-            TestButtonClick = new RelayCommand(() => _TestButtonClick(), () => true);
 
             filterTypeList = new AsyncObservableCollection<string> { "Date", "Sample", "Channel" };
             filterTree = new TreeViewModel();
@@ -107,13 +111,7 @@ namespace newRBS.ViewModels
 
         private void _ExpandFilterList()
         {
-            Console.WriteLine("Expand");
             measurementFilterPanelVis = !measurementFilterPanelVis;
-        }
-
-        private void _TestButtonClick()
-        {
-            Console.WriteLine("TestButtionClick-measurementFilterViewModel");
         }
 
         private void FillFilterList(string filterType)

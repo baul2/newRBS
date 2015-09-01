@@ -58,8 +58,6 @@ namespace newRBS.Models
 
         public void StartAcquisition(int channel)
         {
-            Console.WriteLine("Waveform measurement will start");
-
             cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Waveform);
             cAEN_x730.StartAcquisition(channel);
             activeChannels.Add(channel);
@@ -84,7 +82,6 @@ namespace newRBS.Models
         private void WaveformMeasurementWorker(int channel)
         {
             waveform = cAEN_x730.GetWaveform(channel);
-            Console.WriteLine("Waveform length: {0}", waveform.NumSamples);
             if (EventWaveform != null) { EventWaveform(waveform); } else { Console.WriteLine("EventWaveform null"); }
         }
     }

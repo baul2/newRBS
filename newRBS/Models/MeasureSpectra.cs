@@ -85,7 +85,6 @@ namespace newRBS.Models
                         SampleRemark = SampleRemark,
                         Channel = channel,
                         IncomingIonNumber = IncomingIonNumber,
-                        IncomingIonMass = IncomingIonMass,
                         IncomingIonEnergy = IncomingIonEnergy,
                         IncomingIonAngle = IncomingIonAngle,
                         OutcomingIonAngle = OutcomingIonAngle,
@@ -170,7 +169,7 @@ namespace newRBS.Models
                 if (newSpectrumY.Length != 16384) // TODO!!!
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
-                MeasurementToUpdate.SpectrumY = ArrayConversion.IntToByte(newSpectrumY);
+                MeasurementToUpdate.SpectrumY = DatabaseUtils.GetByteSpectrumY(newSpectrumY);
 
                 MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
 
