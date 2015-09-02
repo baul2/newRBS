@@ -58,10 +58,10 @@
       <Column Name="Charge" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="SpectrumY" Type="System.Byte[]" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
-      <Column Name="SpectrumYCalculated" Type="System.Byte[]" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="SpectrumYByte" AccessModifier="Private" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="SpectrumYCalculatedByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
       <Column Name="StopType" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StopValue" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="StopValue" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalOffset" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />

@@ -58,6 +58,8 @@ namespace newRBS.ViewModels
         public ObservableCollection<AreaData> areaData
         { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
 
+        public ObservableCollection<int> UpdatePlot { get; set; }
+
         public MeasurementImportViewModel(string FileName)
         {
             AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
@@ -65,6 +67,8 @@ namespace newRBS.ViewModels
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
             newMeausurements = new ObservableCollection<Models.Measurement>();
+
+            UpdatePlot = new ObservableCollection<int>();
 
             Database = new Models.DatabaseDataContext(MyGlobals.ConString);
             //Database.Log = Console.Out;
@@ -98,10 +102,15 @@ namespace newRBS.ViewModels
 
             // Updating the plot data
             areaData.Clear();
-            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(selectedMeasurement);
-            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(selectedMeasurement);
+            float[] spectrumX = selectedMeasurement.SpectrumXCal;
+            int[] spectrumY = selectedMeasurement.SpectrumY;
+
             for (int i = 0; i < spectrumY.Count(); i++)
+            {
                 areaData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
+            }
+
+            UpdatePlot.Add(1);
         }
 
 

@@ -71,8 +71,6 @@ namespace newRBS.ViewModels
 
         private void SelectedSampleChanged()
         {
-            Console.WriteLine("SelectedSampleChanged");
-
             Measurements.Clear();
 
             List<Models.Measurement> measurementList = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID).ToList();
@@ -86,8 +84,8 @@ namespace newRBS.ViewModels
         private void SelectedMeasurementChanged()
         {
             MeasuredSpectrumData.Clear();
-            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(SelectedMeasurement);
-            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(SelectedMeasurement);
+            float[] spectrumX = SelectedMeasurement.SpectrumXCal;
+            int[] spectrumY = SelectedMeasurement.SpectrumY;
             for (int i = 0; i < spectrumY.Count(); i++)
                 MeasuredSpectrumData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
 
@@ -96,8 +94,6 @@ namespace newRBS.ViewModels
 
         private void _StartSimulationCommand()
         {
-            Console.WriteLine("_StartSimulationCommand");
-
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
             simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonAtomicNumber;
             simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];

@@ -165,7 +165,7 @@ namespace newRBS.ViewModels
                     Smooth = false,
                 };
 
-                int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(measurement);
+                int[] spectrumY = measurement.SpectrumY;
                 for (int i = 0; i < spectrumY.Count(); i++)
                 {
                     areaSeries.Points.Add(new DataPoint(i, spectrumY[i]));

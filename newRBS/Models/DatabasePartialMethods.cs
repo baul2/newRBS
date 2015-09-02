@@ -27,35 +27,67 @@ namespace newRBS.Models
         }
     }
 
-    public partial class DatabaseDataContext
+    public partial class Measurement
     {
-        partial void InsertMeasurement(Measurement measurement)
+        public int[] SpectrumY
         {
-            //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
-
-            ExecuteDynamicInsert(measurement);
-
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementNewEvent(measurement);
+            get
+            {
+                if (SpectrumYByte == null)
+                    Console.WriteLine("null");
+                int[] intArray = new int[SpectrumYByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                return intArray;
+            }
+            set
+            {
+                byte[] byteArray = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
+                SpectrumYByte = byteArray;
+            }
         }
 
-        partial void UpdateMeasurement(Measurement measurement)
+        public float[] SpectrumXCal
         {
-            //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
-
-            ExecuteDynamicUpdate(measurement);
-
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementUpdateEvent(measurement);
-        }
-
-        partial void DeleteMeasurement(Measurement measurement)
-        {
-            //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
-
-            ExecuteDynamicDelete(measurement);
-
-            DatabaseUtils.SendMeasurementRemoveEvent(measurement);
+            get
+            {
+                float[] spectrumXCal = new float[NumOfChannels];
+                for (int i = 0; i < NumOfChannels; i++)
+                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalSlope;
+                return spectrumXCal;
+            }
         }
     }
-}
+
+        public partial class DatabaseDataContext
+        {
+            partial void InsertMeasurement(Measurement measurement)
+            {
+                //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+
+                ExecuteDynamicInsert(measurement);
+
+                int temp = measurement.Sample.SampleID;
+                DatabaseUtils.SendMeasurementNewEvent(measurement);
+            }
+
+            partial void UpdateMeasurement(Measurement measurement)
+            {
+                //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+
+                ExecuteDynamicUpdate(measurement);
+
+                int temp = measurement.Sample.SampleID;
+                DatabaseUtils.SendMeasurementUpdateEvent(measurement);
+            }
+
+            partial void DeleteMeasurement(Measurement measurement)
+            {
+                //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
+
+                ExecuteDynamicDelete(measurement);
+
+                DatabaseUtils.SendMeasurementRemoveEvent(measurement);
+            }
+        }
+    }

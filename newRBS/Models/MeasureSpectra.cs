@@ -35,7 +35,7 @@ namespace newRBS.Models
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
 
         public string StopType = "Manual";
-        public int? StopValue = 0;
+        public double StopValue = 0;
 
         private Timer[] spectraMeasurementTimer = new Timer[8];
 
@@ -96,7 +96,7 @@ namespace newRBS.Models
                         StopValue = StopValue,
                         Runs = true,
                         NumOfChannels = NumOfChannels,
-                        SpectrumY = new byte[] { 0 }
+                        SpectrumY = new int[] { 0 }
                     };
 
                     newSpectrum.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
@@ -168,7 +168,7 @@ namespace newRBS.Models
                 if (newSpectrumY.Length != 16384) // TODO!!!
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
-                MeasurementToUpdate.SpectrumY = DatabaseUtils.GetByteSpectrumY(newSpectrumY);
+                MeasurementToUpdate.SpectrumY = newSpectrumY;
 
                 MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
 

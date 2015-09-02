@@ -106,8 +106,8 @@ namespace newRBS.ViewModels
 
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
-            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(measurement);
-            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(measurement);
+            float[] spectrumX = measurement.SpectrumXCal;
+            int[] spectrumY = measurement.SpectrumY;
             for (int i = 0; i < spectrumY.Count(); i++)
             {
                 areaSeries.Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
@@ -132,8 +132,8 @@ namespace newRBS.ViewModels
 
                 (plotModel.Series[index] as AreaSeries).Points.Clear();
 
-                float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(measurement);
-                int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(measurement);
+                float[] spectrumX = measurement.SpectrumXCal;
+                int[] spectrumY =measurement.SpectrumY;
                 for (int i = 0; i < spectrumY.Count(); i++)
                 {
                     (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));

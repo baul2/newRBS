@@ -54,7 +54,7 @@
             <TextBox Text="{Binding Measurement.SolidAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="4" />
 
             <Label Content="Start time:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="6"/>
-            <xctk:DateTimePicker Value="{Binding Measurement.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yy-MM-dd HH:mm" Margin="3" Grid.Column="1" Grid.Row="6" />
+            <xctk:DateTimePicker Value="{Binding Measurement.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Margin="3" Grid.Column="1" Grid.Row="6" />
             <Label Content="Duration:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="6"/>
             <xctk:TimePicker Value="{Binding Measurement.Duration, Mode=TwoWay}" Format="Custom" FormatString="HH:mm:ss" Margin="3" Grid.Column="3" Grid.Row="6"/>
 
