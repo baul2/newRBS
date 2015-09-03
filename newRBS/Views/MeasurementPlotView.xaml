@@ -10,7 +10,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              DataContext="{Binding measurementPlotViewModel, Source={StaticResource Locator}}">
-    <Grid>
-        <oxy:PlotView Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
-    </Grid>
+    <DockPanel>
+        <Border DockPanel.Dock="Top">
+            <TextBlock TextAlignment="Center" Text="Hint: Use left button to mark, middle button to zoom and right button to pan."/>
+        </Border>
+        <oxy:PlotView Model="{Binding plotModel}" Margin="10"/>
+    </DockPanel>
 </UserControl>

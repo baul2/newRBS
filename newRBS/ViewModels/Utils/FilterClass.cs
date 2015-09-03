@@ -1,9 +1,12 @@
 ﻿using GalaSoft.MvvmLight;
+using System;
 
 namespace newRBS.ViewModels.Utils
 {
     public class FilterClass : ViewModelBase
     {
+        private bool _IsSelected = false;
+        public bool IsSelected { get { return _IsSelected; } set { _IsSelected = value; RaisePropertyChanged(); } }
         public string Name { get; set; }
         public string Type { get; set; }
         public string SubType { get; set; }

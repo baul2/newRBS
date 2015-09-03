@@ -49,8 +49,6 @@ namespace newRBS.Models
 
         public static int? AddNewSample()
         {
-            Console.WriteLine("AddNewSample");
-
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
             if (inputDialog.ShowDialog() == true)
             {
