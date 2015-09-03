@@ -25,8 +25,32 @@ using System.Diagnostics;
 
 namespace newRBS.ViewModels
 {
-    public class MeasurementPlotViewModel
+    public class MeasurementPlotViewModel : ViewModelBase
     {
+        public ICommand ExpandConfigPanel { get; set; }
+
+        private bool _ConfigPanelVis = true;
+        public bool ConfigPanelVis
+        {
+            get { return _ConfigPanelVis; }
+            set
+            {
+                _ConfigPanelVis = value;
+                switch (value)
+                {
+                    case true:
+                        { VisButtonContent = "\u21D3 Plot Configuration \u21D3"; break; }
+                    case false:
+                        { VisButtonContent = "\u21D1 Plot Configuration \u21D1"; break; }
+                }
+                RaisePropertyChanged();
+            }
+        }
+
+        private string _VisButtonContent = "\u21D3 Plot Configuration \u21D3";
+        public string VisButtonContent
+        { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
+
         private List<int> MeasurementIDList;
 
         public PlotModel plotModel { get; set; }
@@ -35,11 +59,17 @@ namespace newRBS.ViewModels
 
         TraceSource trace = new TraceSource("MeasurementPlotViewModel");
 
+        public List<NameValueClass> DataBinding { get; set; }
+
+        private int _SelectedDataBinding = 0;
+        public int SelectedDataBinding
+        { get { return _SelectedDataBinding; } set { _SelectedDataBinding = value; UpdateAllPlots(); RaisePropertyChanged(); } }
+
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
             Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
-            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementUpdate);
+            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdatePlot);
 
             // Hooking up to events from SpectraList
             SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementToPlot += new MeasurementListViewModel.EventHandlerMeasurement(MeasurementToPlot);
@@ -47,6 +77,8 @@ namespace newRBS.ViewModels
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ClearPlot);
+
+            ExpandConfigPanel = new RelayCommand(() => _ExpandConfigPanel(), () => true);
 
             MeasurementIDList = new List<int>();
 
@@ -68,6 +100,13 @@ namespace newRBS.ViewModels
             plotModel = new PlotModel();
 
             SetUpModel();
+
+            DataBinding = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
+        }
+
+        private void _ExpandConfigPanel()
+        {
+            ConfigPanelVis = !ConfigPanelVis;
         }
 
         private void SetUpModel()
@@ -86,13 +125,35 @@ namespace newRBS.ViewModels
 
         private void MeasurementToPlot(Models.Measurement measurement)
         {
-            Console.WriteLine("MeasurementToPlot");
-
             if (MeasurementIDList.Contains(measurement.MeasurementID))
             { Console.WriteLine("Measurement is already in MeasurementIDList!"); return; }
 
             MeasurementIDList.Add(measurement.MeasurementID);
 
+            PlotMeasurement(measurement);
+        }
+
+        private void MeasurementNotToPlot(Models.Measurement measurement)
+        {
+            MeasurementIDList.Remove(measurement.MeasurementID);
+
+            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
+            if (delSerie != null)
+            {
+                plotModel.Series.Remove(delSerie);
+                plotModel.InvalidatePlot(true);
+            }
+        }
+
+        private void ClearPlot(List<int> dump)
+        {
+            plotModel.Series.Clear();
+            MeasurementIDList.Clear();
+            plotModel.InvalidatePlot(true);
+        }
+
+        private void PlotMeasurement(Models.Measurement measurement)
+        {
             var areaSeries = new AreaSeries
             {
                 Tag = measurement.MeasurementID,
@@ -104,23 +165,63 @@ namespace newRBS.ViewModels
                 Smooth = false,
             };
 
-            //Stopwatch stopWatch = new Stopwatch();
-            //stopWatch.Start();
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
-            for (int i = 0; i < spectrumY.Count(); i++)
+
+            // Remove "0 Count" data points from start/end of the spectra
+            int BorderOffset = 200;
+
+            int rightBorderIndex = spectrumY.Count();
+            while (spectrumY[rightBorderIndex - 1] < 3) rightBorderIndex--;
+
+            int leftBorderIndex = 0;
+            while (spectrumY[leftBorderIndex] < 3) leftBorderIndex++;
+
+            if (rightBorderIndex + BorderOffset < spectrumY.Count()) rightBorderIndex += BorderOffset; else rightBorderIndex = spectrumY.Count();
+            if (leftBorderIndex - BorderOffset > 0) leftBorderIndex -= BorderOffset; else leftBorderIndex = 0;
+
+            // Add points to plot
+            switch (SelectedDataBinding)
             {
-                areaSeries.Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
-                areaSeries.Points2.Add(new DataPoint(spectrumX[i], 0));
+                case 0: // All points in spectrumX/spectrumY
+                    {
+                        for (int i = leftBorderIndex; i < rightBorderIndex; i++)
+                        {
+                            areaSeries.Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
+                            areaSeries.Points2.Add(new DataPoint(spectrumX[i], 0));
+                        }
+                        break;
+                    }
+                default: // Bind points inside SelectedDataBinding intervall
+                    {
+                        if (spectrumX[1] - spectrumX[0] > SelectedDataBinding) { MessageBox.Show("Channel spacing is larger than data binding interval", "Error"); }
+                        float x, y = 0;
+                        float intervalStart = SelectedDataBinding * ((int)(spectrumX[leftBorderIndex] / SelectedDataBinding) + (float)0.5); ;
+                        int numOfPoints = 0;
+
+                        for (int i = leftBorderIndex; i < rightBorderIndex; i++)
+                        {
+                            if (spectrumX[i] - intervalStart > SelectedDataBinding)
+                            {
+                                x = intervalStart + (float)SelectedDataBinding / 2;
+                                areaSeries.Points.Add(new DataPoint(x, y / numOfPoints));
+                                areaSeries.Points2.Add(new DataPoint(x, 0));
+
+                                y = 0;
+                                numOfPoints = 0;
+                                intervalStart += SelectedDataBinding;
+                            }
+                            y += spectrumY[i];
+                            numOfPoints++;
+                        }
+                        break;
+                    }
             }
             plotModel.Series.Add(areaSeries);
             plotModel.InvalidatePlot(true);
-            //stopWatch.Stop();
-            //Console.WriteLine("Time for points: {0}", stopWatch.Elapsed.ToString());
-            Console.WriteLine("Series added");
         }
 
-        private void MeasurementUpdate(Models.Measurement measurement)
+        private void UpdatePlot(Models.Measurement measurement)
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
@@ -128,41 +229,23 @@ namespace newRBS.ViewModels
             Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
-                int index = plotModel.Series.IndexOf(updateSerie);
-
-                (plotModel.Series[index] as AreaSeries).Points.Clear();
-
-                float[] spectrumX = measurement.SpectrumXCal;
-                int[] spectrumY =measurement.SpectrumY;
-                for (int i = 0; i < spectrumY.Count(); i++)
-                {
-                    (plotModel.Series[index] as AreaSeries).Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
-                }
-                plotModel.InvalidatePlot(true);
+                plotModel.Series.Remove(updateSerie);
+                PlotMeasurement(measurement);
             }
         }
 
-        private void MeasurementNotToPlot(Models.Measurement measurement)
+        private void UpdateAllPlots()
         {
-            Console.WriteLine("MeasurementNotToPlot");
-            MeasurementIDList.Remove(measurement.MeasurementID);
-
-            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
-            if (delSerie != null)
-            {
-                plotModel.Series.Remove(delSerie);
-                plotModel.InvalidatePlot(true);
-                Console.WriteLine("Series removed");
-            }
-        }
-
-        private void ClearPlot(List<int> dump)
-        {
-            Console.WriteLine("ClearPlot");
-
             plotModel.Series.Clear();
-            MeasurementIDList.Clear();
-            plotModel.InvalidatePlot(true);
+
+            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            {
+                List<Models.Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
+                foreach (Models.Measurement measurement in measurements)
+                {
+                    PlotMeasurement(measurement);
+                }
+            }
         }
     }
 }
