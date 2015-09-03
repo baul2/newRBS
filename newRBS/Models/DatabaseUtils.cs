@@ -10,6 +10,14 @@ using System.Globalization;
 using Microsoft.Win32;
 using System.Windows;
 using System.Xml.Serialization;
+using OxyPlot.Wpf;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Ioc;
+using GalaSoft.MvvmLight.Command;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Annotations;
+using OxyPlot.Series;
 
 namespace newRBS.Models
 {
@@ -94,7 +102,6 @@ namespace newRBS.Models
         {
             using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                Console.WriteLine(Path.GetExtension(FileName));
                 switch (Path.GetExtension(FileName))
                 {
                     case ".xml":
@@ -319,14 +326,37 @@ namespace newRBS.Models
         {
             if (MeasurementIDs.Count() == 0) return;
 
-            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected measurements?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            {
+                Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
+                Database.SubmitChanges();
+            }
+        }
 
-            if (rsltMessageBox == MessageBoxResult.Yes)
-                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+        public static void SaveMeasurementImage(int MeasurementID, string FileName)
+        {
+            using (var stream = File.Create(FileName))
+            {
+                var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().plotModel;
+                switch (Path.GetExtension(FileName))
                 {
-                    Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
-                    Database.SubmitChanges();
+                    case ".png":
+                        {
+                            PngExporter.Export(plotModel, stream, 1000, 600, OxyColors.White);
+                            break;
+                        }
+                    case ".pdf":
+                        {
+                            PdfExporter.Export(plotModel, stream, 1000, 600);
+                            break;
+                        }
+                    case ".svg":
+                        {
+                            OxyPlot.SvgExporter.Export(plotModel, stream, 1000, 600,true);
+                            break;
+                        }
                 }
+            }
         }
     }
 }

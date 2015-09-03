@@ -45,6 +45,8 @@ namespace newRBS.ViewModels
         public ICommand ExportMeasurementsCommand { get; set; }
         public ICommand DeleteMeasurementsCommand { get; set; }
 
+        public ICommand SaveMeasurementImageCommand { get; set; }
+
         public ICommand MaterialEditorCommand { get; set; }
         public ICommand SampleEditorCommand { get; set; }
 
@@ -66,6 +68,8 @@ namespace newRBS.ViewModels
             ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementsCommand(), () => true);
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
             DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
+
+            SaveMeasurementImageCommand = new RelayCommand(() => _SaveMeasurementImageCommand(), () => true);
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
@@ -107,15 +111,36 @@ namespace newRBS.ViewModels
 
         public void _ExportMeasurementsCommand()
         {
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() == 0) return;
+
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "newRBS file (*.xml)|*.xml|Spektrenverwaltung file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
-                Models.DatabaseUtils.ExportMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList(), saveFileDialog.FileName);
+                Models.DatabaseUtils.ExportMeasurements(selectedMeasurementIDs, saveFileDialog.FileName);
         }
 
         public void _DeleteMeasurementsCommand()
         {
-            Models.DatabaseUtils.DeleteMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList());
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() == 0) return;
+
+            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected measurements?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+            if (rsltMessageBox == MessageBoxResult.Yes)
+                Models.DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
+        }
+
+        public void _SaveMeasurementImageCommand()
+        {
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 1)
+            { MessageBox.Show("Select exactly one Measurement", "Error"); return; }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg";
+            if (saveFileDialog.ShowDialog() == true)
+                Models.DatabaseUtils.SaveMeasurementImage(selectedMeasurementIDs[0], saveFileDialog.FileName);
         }
 
         public void _ChannelConfigurationCommand()

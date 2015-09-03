@@ -32,6 +32,11 @@
                 </Button>
             </ToolBar>
             <ToolBar>
+                <Button Command="{Binding SaveMeasurementImageCommand}" ToolTip="Save Measurement as Image">
+                    <Image Source="/Images/150.png" Height="24"/>
+                </Button>
+            </ToolBar>
+            <ToolBar>
                 <Menu VerticalAlignment="Center">
                     <MenuItem Header="Analysis">
                         <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
