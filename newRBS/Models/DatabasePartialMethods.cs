@@ -13,6 +13,12 @@ using GalaSoft.MvvmLight.Command;
 
 namespace newRBS.Models
 {
+    /// <summary>
+    /// Class that represents the MS SQL Server database. 
+    /// </summary>
+    /// <remarks>
+    /// It contains tables of types <see cref="Measurement"/>, <see cref="Sample"/>, <see cref="Material"/>, <see cref="Layer"/>, <see cref="Element"/>, <see cref="Project"/> and <see cref="Measurement_Project"/>.
+    /// </remarks>
     public partial class DatabaseDataContext
     {
         partial void OnCreated()
@@ -25,8 +31,43 @@ namespace newRBS.Models
             //this.LoadOptions = dlo;
             //this.Log = Console.Out;
         }
+
+        partial void InsertMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+
+            ExecuteDynamicInsert(measurement);
+
+            int temp = measurement.Sample.SampleID;
+            DatabaseUtils.SendMeasurementNewEvent(measurement);
+        }
+
+        partial void UpdateMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+
+            ExecuteDynamicUpdate(measurement);
+
+            int temp = measurement.Sample.SampleID;
+            DatabaseUtils.SendMeasurementUpdateEvent(measurement);
+        }
+
+        partial void DeleteMeasurement(Measurement measurement)
+        {
+            //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
+
+            ExecuteDynamicDelete(measurement);
+
+            DatabaseUtils.SendMeasurementRemoveEvent(measurement);
+        }
     }
 
+    /// <summary>
+    /// Class that stores a single measurement.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Measurement"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
     public partial class Measurement
     {
         public int[] SpectrumY
@@ -59,35 +100,51 @@ namespace newRBS.Models
         }
     }
 
-        public partial class DatabaseDataContext
-        {
-            partial void InsertMeasurement(Measurement measurement)
-            {
-                //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+    /// <summary>
+    /// Class that stores a element in <see cref="Layer"/> of a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Element"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Element{}
 
-                ExecuteDynamicInsert(measurement);
+    /// <summary>
+    /// Class that stores a layer of a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Layer"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Layer { }
 
-                int temp = measurement.Sample.SampleID;
-                DatabaseUtils.SendMeasurementNewEvent(measurement);
-            }
+    /// <summary>
+    /// Class that stores a material definition. <see cref="Sample"/>s can contain a reference to a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Material"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Material { }
 
-            partial void UpdateMeasurement(Measurement measurement)
-            {
-                //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+    /// <summary>
+    /// Class that stores a sample. Can contain a reference to a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Sample"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Sample { }
 
-                ExecuteDynamicUpdate(measurement);
+    /// <summary>
+    /// Class that stores a project containing several <see cref="Measurement"/>s as defined in <see cref="Measurement_Project"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Project"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Project { }
 
-                int temp = measurement.Sample.SampleID;
-                DatabaseUtils.SendMeasurementUpdateEvent(measurement);
-            }
-
-            partial void DeleteMeasurement(Measurement measurement)
-            {
-                //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
-
-                ExecuteDynamicDelete(measurement);
-
-                DatabaseUtils.SendMeasurementRemoveEvent(measurement);
-            }
-        }
-    }
+    /// <summary>
+    /// Class that stores the relationship between <see cref="Measurement"/>s and <see cref="Project"/>s.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Measurement_Project"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Measurement_Project { }
+}

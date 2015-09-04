@@ -133,12 +133,10 @@ namespace newRBS.ViewModels
 
         public void _SaveMeasurementPlotCommand()
         {
-            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
-
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg|Data file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
-                Models.DatabaseUtils.SaveMeasurementImage(selectedMeasurementIDs[0], saveFileDialog.FileName);
+                Models.DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
         public void _ChannelConfigurationCommand()

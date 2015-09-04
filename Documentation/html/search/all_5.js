@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['caen_5fx730',['CAEN_x730',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html',1,'newRBS']]],
-  ['newrbs',['newRBS',['../namespacenew_r_b_s.html',1,'']]],
-  ['newrbs_5fconsole',['newRBS_Console',['../classnew_r_b_s_1_1new_r_b_s___console.html',1,'newRBS']]],
-  ['newspectrum',['NewSpectrum',['../classnew_r_b_s_1_1_spectra_1_1_data_spectra.html#ac32ce38ae802326cac9ca7bd3696e180',1,'newRBS::Spectra::DataSpectra']]],
-  ['spectra',['Spectra',['../namespacenew_r_b_s_1_1_spectra.html',1,'newRBS']]]
+  ['initializearrays',['initializeArrays',['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html#afd81629052d556fc805bb581d5b7d674',1,'newRBS::Models::CAENDPP_DgtzParams_t']]],
+  ['initializecomponent',['InitializeComponent',['../classnew_r_b_s_1_1_view_1_1_utils_1_1_input_dialog.html#a2db3fe349c1524ce01a5d67583c500ad',1,'newRBS::View::Utils::InputDialog']]],
+  ['inputdialog',['InputDialog',['../classnew_r_b_s_1_1_view_1_1_utils_1_1_input_dialog.html',1,'newRBS::View::Utils']]]
 ];

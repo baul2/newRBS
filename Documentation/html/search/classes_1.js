@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['dataspectra',['DataSpectra',['../classnew_r_b_s_1_1_spectra_1_1_data_spectra.html',1,'newRBS::Spectra']]],
-  ['dataspectrum',['DataSpectrum',['../classnew_r_b_s_1_1_data_spectrum.html',1,'newRBS']]]
+  ['databasedatacontext',['DatabaseDataContext',['../classnew_r_b_s_1_1_models_1_1_database_data_context.html',1,'newRBS::Models']]],
+  ['databaseutils',['DatabaseUtils',['../classnew_r_b_s_1_1_models_1_1_database_utils.html',1,'newRBS::Models']]]
 ];

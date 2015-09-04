@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['measurespectra',['MeasureSpectra',['../classnew_r_b_s_1_1_spectra_1_1_measure_spectra.html',1,'newRBS::Spectra']]]
+  ['inputdialog',['InputDialog',['../classnew_r_b_s_1_1_view_1_1_utils_1_1_input_dialog.html',1,'newRBS::View::Utils']]]
 ];

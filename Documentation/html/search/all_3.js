@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['gethistogram',['GetHistogram',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#a4582c49f4b1fae598b3e3f4282aec200',1,'newRBS::CAEN_x730::CAEN_x730']]],
-  ['getwaveform',['GetWaveform',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#aa81086717754c4bd98575eb2453e910f',1,'newRBS::CAEN_x730::CAEN_x730']]]
+  ['element',['Element',['../classnew_r_b_s_1_1_models_1_1_element.html',1,'newRBS::Models']]],
+  ['epsara',['Epsara',['../namespace_epsara.html',1,'']]],
+  ['epsarasharp',['EpsaraSharp',['../namespace_epsara_sharp.html',1,'']]],
+  ['exportmeasurements',['ExportMeasurements',['../classnew_r_b_s_1_1_models_1_1_database_utils.html#aaccac22128e56334f35741fef3be5047',1,'newRBS::Models::DatabaseUtils']]]
 ];

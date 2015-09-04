@@ -9,7 +9,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="ImportSpectra" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
+        Title="MeasurementImportView" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
         viewmodelutils:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
         <StackPanel DockPanel.Dock="top" Orientation="Vertical">

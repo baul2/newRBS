@@ -22,15 +22,21 @@ using OxyPlot.Series;
 namespace newRBS.Models
 {
     /// <summary>
-    /// Class responsible for managing a spectrum dictionary (<see cref="spectra"/>) with items \<ID, <see cref="DataSpectrum"/>\>.
+    /// Class providing utilities to manage the <see cref="Measurement"/>s inside the MS SQL Server database (<see cref="DatabaseDataContext"/>).
     /// </summary>
     public static class DatabaseUtils
     {
         public delegate void EventHandlerMeasurement(Measurement measurement);
-        public static event EventHandlerMeasurement EventMeasurementNew, EventMeasurementUpdate, EventMeasurementFinished, EventMeasurementRemove;
+        public static event EventHandlerMeasurement EventMeasurementNew;
+        public static event EventHandlerMeasurement EventMeasurementUpdate;
+        public static event EventHandlerMeasurement EventMeasurementRemove;
 
         private static TraceSource trace = new TraceSource("DatabaseUtils");
 
+        /// <summary>
+        /// Function that sends an event (<see cref="EventMeasurementNew"/>) if new <see cref="Measurement"/> has been added to the database. The event argument is the new measurement.
+        /// </summary>
+        /// <param name="measurement">The measurement which has been added to the database.</param>
         public static void SendMeasurementNewEvent(Measurement measurement)
         {
             if (EventMeasurementNew != null)
@@ -39,6 +45,10 @@ namespace newRBS.Models
             }
         }
 
+        /// <summary>
+        /// Function that sends an event (<see cref="EventMeasurementUpdate"/>) if a <see cref="Measurement"/> in the database has been modified. The event argument is the modified measurement.
+        /// </summary>
+        /// <param name="measurement">The measurement which has been modified.</param>
         public static void SendMeasurementUpdateEvent(Measurement measurement)
         {
             if (EventMeasurementUpdate != null)
@@ -47,6 +57,10 @@ namespace newRBS.Models
             }
         }
 
+        /// <summary>
+        /// Function that sends an event (<see cref="EventMeasurementRemove"/>) if a <see cref="Measurement"/> in the database has been removed. The event argument is the removed measurement.
+        /// </summary>
+        /// <param name="measurement">The measurement which has been removed.</param>
         public static void SendMeasurementRemoveEvent(Measurement measurement)
         {
             if (EventMeasurementRemove != null)
@@ -55,49 +69,66 @@ namespace newRBS.Models
             }
         }
 
+        /// <summary>
+        /// Funtion that asks for a new sample name and adds it to the database.
+        /// </summary>
+        /// <returns>The SampleID of the sample added to the database.</returns>
         public static int? AddNewSample()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
             if (inputDialog.ShowDialog() == true)
             {
                 Console.WriteLine(inputDialog.Answer);
-                if (inputDialog.Answer == "")
-                    return null;
+                if (inputDialog.Answer == "") return null;
 
-                using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
-                {
-                    Sample sample = Database.Samples.FirstOrDefault(x => x.SampleName == inputDialog.Answer);
-
-                    if (sample != null)
-                    {
-                        Console.WriteLine("Sample already exists!");
-
-                        MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        return sample.SampleID;
-                    }
-
-                    // New sample
-                    Console.WriteLine("new sample");
-
-                    Sample newSample = new Sample();
-                    newSample.SampleName = inputDialog.Answer;
-                    newSample.MaterialID = 1;
-
-                    Database.Samples.InsertOnSubmit(newSample);
-                    Database.SubmitChanges();
-
-                    return newSample.SampleID;
-                }
+                return AddNewSample(inputDialog.Answer);
             }
-            else return null;
+            else
+                return null;
         }
 
         /// <summary>
-        /// Function that saves spectra to a file
+        /// Function that adds a new sample to the database.
         /// </summary>
-        /// <param name="measurementIDs">Array of IDs of the spectra to save.</param>
-        /// <param name="FileName">Filename of the file to save the spectra to.</param>
+        /// <param name="SampleName">The name of the new sample.</param>
+        /// <returns>The SampleID of the sample added to the database.</returns>
+        public static int? AddNewSample(string SampleName)
+        {
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            {
+                Sample sample = Database.Samples.FirstOrDefault(x => x.SampleName == SampleName);
+
+                if (sample != null)
+                {
+                    Console.WriteLine("Sample already exists!");
+
+                    MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    return sample.SampleID;
+                }
+
+                // New sample
+                Console.WriteLine("new sample");
+
+                Sample newSample = new Sample();
+                newSample.SampleName = SampleName;
+                newSample.MaterialID = 1;
+
+                Database.Samples.InsertOnSubmit(newSample);
+                Database.SubmitChanges();
+
+                return newSample.SampleID;
+            }
+        }
+
+        /// <summary>
+        /// Function that exports several <see cref="Measurement"/>s to a file.
+        /// </summary>
+        /// <remarks>
+        /// Can save files as ".xml" (newRBS file) or as ".dat" (Spektrenverwaltung file).
+        /// </remarks>
+        /// <param name="measurementIDs">IDs of the <see cref="Measurement"/>s to export.</param>
+        /// <param name="FileName">Filename to export to.</param>
         public static void ExportMeasurements(List<int> measurementIDs, string FileName)
         {
             using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
@@ -213,6 +244,14 @@ namespace newRBS.Models
             }
         }
 
+        /// <summary>
+        /// Loads <see cref="Measurement"/>s from a given file an returns them in a List.
+        /// </summary>
+        /// <remarks>
+        /// Can load ".xml" (newRBS file) or ".dat" (Spektrenverwaltung file) files.
+        /// </remarks>
+        /// <param name="FileName">Filename of the file to load the measurements from.</param>
+        /// <returns>A List of <see cref="Measurement"/>s containing the loaded measurements.</returns>
         public static List<Measurement> LoadMeasurementsFromFile(string FileName)
         {
             if (!File.Exists(FileName)) return null;
@@ -322,6 +361,10 @@ namespace newRBS.Models
             return newMeasurements;
         }
 
+        /// <summary>
+        /// Function that deletes <see cref="Measurement"/>s from the database.
+        /// </summary>
+        /// <param name="MeasurementIDs">IDs of the measurements to be deleted.</param>
         public static void DeleteMeasurements(List<int> MeasurementIDs)
         {
             if (MeasurementIDs.Count() == 0) return;
@@ -333,7 +376,14 @@ namespace newRBS.Models
             }
         }
 
-        public static void SaveMeasurementImage(int MeasurementID, string FileName)
+        /// <summary>
+        /// Function that saves the current content of the MeasurementPlot to a file.
+        /// </summary>
+        /// <remarks>
+        /// Can save a bitmap file (".png"), a vector file (".pdf" or ".svg") or data file (".dat").
+        /// </remarks>
+        /// <param name="FileName">File name of the file to save to.</param>
+        public static void SaveMeasurementImage(string FileName)
         {
             using (FileStream fileStream = File.Create(FileName))
             {

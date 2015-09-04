@@ -1,7 +1,7 @@
 /*
   In App.xaml:
   <Application.Resources>
-      <vm:ViewModelLocator xmlns:vm="clr-namespace:newRBS_GUI"
+      <vm:ViewModelLocator xmlns:vm="clr-namespace:newRBS"
                            x:Key="Locator" />
   </Application.Resources>
   

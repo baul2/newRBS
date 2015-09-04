@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['waveform',['Waveform',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_waveform.html',1,'newRBS::CAEN_x730']]]
+  ['project',['Project',['../classnew_r_b_s_1_1_models_1_1_project.html',1,'newRBS::Models']]]
 ];

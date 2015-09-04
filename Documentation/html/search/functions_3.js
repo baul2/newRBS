@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['measurespectra',['MeasureSpectra',['../classnew_r_b_s_1_1_spectra_1_1_measure_spectra.html#a13b473a7b59fe7d5c81e802754aa8e29',1,'newRBS::Spectra::MeasureSpectra']]]
+  ['exportmeasurements',['ExportMeasurements',['../classnew_r_b_s_1_1_models_1_1_database_utils.html#aaccac22128e56334f35741fef3be5047',1,'newRBS::Models::DatabaseUtils']]]
 ];
