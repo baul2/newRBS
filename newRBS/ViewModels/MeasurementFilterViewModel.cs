@@ -155,12 +155,8 @@ namespace newRBS.ViewModels
             Console.WriteLine("Update filter list with filterType: {0}", filterType);
             if (filterTree.Items.Count() > 0)
             {
-                foreach (FilterClass n in filterTree.Items)
-                    Console.WriteLine(n.Name);
                 while (filterTree.Items.Count > 0)
                     filterTree.Items.RemoveAt(0);
-                foreach (FilterClass n in filterTree.Items)
-                    Console.WriteLine(n.Name);
             }
 
             switch (filterType)
@@ -230,7 +226,7 @@ namespace newRBS.ViewModels
                     using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
                     {
                         //List<string> allSampleNames = (from sample in Database.Samples select sample.SampleName).Distinct().ToList();
-                        List<string> allSampleNames = Database.Samples.Where(x => x.SampleID > 2).Select(x => x.SampleName).ToList();
+                        List<string> allSampleNames = Database.Samples.Select(x => x.SampleName).ToList();
                         Console.WriteLine("NumSamples {0}", allSampleNames.Count());
 
                         foreach (string sampleName in allSampleNames)
@@ -245,6 +241,7 @@ namespace newRBS.ViewModels
                     Console.WriteLine("No action found for filterType: {0}", filterType);
                     break;
             }
+            if (EventNewFilter != null) EventNewFilter(new List<int>());
         }
 
         public void NewFilterSelected(FilterClass filter)
@@ -409,6 +406,8 @@ namespace newRBS.ViewModels
                 Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();
             }
+
+            SelectProject(SelectedProject);
         }
     }
 }

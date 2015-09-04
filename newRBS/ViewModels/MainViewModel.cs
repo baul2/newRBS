@@ -45,7 +45,7 @@ namespace newRBS.ViewModels
         public ICommand ExportMeasurementsCommand { get; set; }
         public ICommand DeleteMeasurementsCommand { get; set; }
 
-        public ICommand SaveMeasurementImageCommand { get; set; }
+        public ICommand SaveMeasurementPlotCommand { get; set; }
 
         public ICommand MaterialEditorCommand { get; set; }
         public ICommand SampleEditorCommand { get; set; }
@@ -69,7 +69,7 @@ namespace newRBS.ViewModels
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
             DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
 
-            SaveMeasurementImageCommand = new RelayCommand(() => _SaveMeasurementImageCommand(), () => true);
+            SaveMeasurementPlotCommand = new RelayCommand(() => _SaveMeasurementPlotCommand(), () => true);
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
@@ -131,14 +131,12 @@ namespace newRBS.ViewModels
                 Models.DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
         }
 
-        public void _SaveMeasurementImageCommand()
+        public void _SaveMeasurementPlotCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
-            if (selectedMeasurementIDs.Count() != 1)
-            { MessageBox.Show("Select exactly one Measurement", "Error"); return; }
 
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg";
+            saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg|Data file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
                 Models.DatabaseUtils.SaveMeasurementImage(selectedMeasurementIDs[0], saveFileDialog.FileName);
         }

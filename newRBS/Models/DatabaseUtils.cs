@@ -335,24 +335,80 @@ namespace newRBS.Models
 
         public static void SaveMeasurementImage(int MeasurementID, string FileName)
         {
-            using (var stream = File.Create(FileName))
+            using (FileStream fileStream = File.Create(FileName))
             {
                 var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().plotModel;
                 switch (Path.GetExtension(FileName))
                 {
                     case ".png":
                         {
-                            PngExporter.Export(plotModel, stream, 1000, 600, OxyColors.White);
+                            PngExporter.Export(plotModel, fileStream, 1000, 600, OxyColors.White);
                             break;
                         }
                     case ".pdf":
                         {
-                            PdfExporter.Export(plotModel, stream, 1000, 600);
+                            PdfExporter.Export(plotModel, fileStream, 1000, 600);
                             break;
                         }
                     case ".svg":
                         {
-                            OxyPlot.SvgExporter.Export(plotModel, stream, 1000, 600,true);
+                            OxyPlot.SvgExporter.Export(plotModel, fileStream, 1000, 600, true);
+                            break;
+                        }
+                    case ".dat":
+                        {
+                            if (!plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title.Contains("interval"))
+                            { MessageBox.Show("Only data sets with data binning cas be saved this way. Use export instead!", "Error"); return; }
+
+                            using (StreamWriter streamWriter = new StreamWriter(fileStream))
+                            {
+                                List<List<DataPoint>> pointsList = new List<List<DataPoint>>();
+
+                                // Header
+                                string LongName = "Energy";
+                                string Unit = "keV";
+                                string Comment = "";
+
+                                foreach (var s in plotModel.Series)
+                                {
+                                    LongName += "\t Counts";
+                                    Unit += "\t" + (plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title).Replace("Counts per ", "");
+                                    Comment += "\t" + s.Title;
+
+                                    pointsList.Add(((OxyPlot.Series.AreaSeries)s).Points);
+                                }
+                                streamWriter.WriteLine(LongName);
+                                streamWriter.WriteLine(Unit);
+                                streamWriter.WriteLine(Comment);
+
+                                // Data
+                                List<int> xAxis = new List<int>();
+
+                                foreach (List<DataPoint> dataPointList in pointsList)
+                                    foreach (DataPoint dataPoint in dataPointList)
+                                        xAxis.Add((int)dataPoint.X);
+
+                                xAxis = xAxis.Distinct().OrderBy(x => x).ToList();
+
+                                string dataString;
+                                NumberFormatInfo point = new NumberFormatInfo();
+                                point.NumberDecimalSeparator = ".";
+
+                                foreach (int x in xAxis)
+                                {
+                                    dataString = x.ToString();
+                                    foreach (List<DataPoint> dataPointList in pointsList)
+                                    {
+                                        DataPoint d = dataPointList.FirstOrDefault(i => i.X == x);
+                                        if (d.X != 0)
+                                            dataString += "\t" + d.Y.ToString(point);
+                                        else
+                                            dataString += "\t";
+                                    }
+                                    streamWriter.WriteLine(dataString);
+                                }
+                                streamWriter.Flush(); // Added
+                            }
                             break;
                         }
                 }

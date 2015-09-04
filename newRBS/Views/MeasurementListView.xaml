@@ -10,6 +10,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800"
              DataContext="{Binding measurementListViewModel, Source={StaticResource Locator}}">
+    <UserControl.Resources>
+        <local:AtomicNumberToShortNameConverter x:Key="converter" />
+    </UserControl.Resources>
     <DataGrid 
         ItemsSource="{Binding MeasurementListViewSource.View}" 
         SelectedValuePath="Measurement.MeasurementID"
@@ -84,7 +87,7 @@
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Ion" 
-                Binding="{Binding Measurement.IncomingIonNumber}"
+                Binding="{Binding Measurement.IncomingIonAtomicNumber, Converter={StaticResource converter}}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="IonEnergy" 

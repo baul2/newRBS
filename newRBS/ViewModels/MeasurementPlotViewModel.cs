@@ -59,11 +59,17 @@ namespace newRBS.ViewModels
 
         TraceSource trace = new TraceSource("MeasurementPlotViewModel");
 
-        public List<NameValueClass> DataBinding { get; set; }
+        public List<NameValueClass> DataBindingIntervals { get; set; }
 
-        private int _SelectedDataBinding = 0;
-        public int SelectedDataBinding
-        { get { return _SelectedDataBinding; } set { _SelectedDataBinding = value; UpdateAllPlots(); RaisePropertyChanged(); } }
+        private int _SelectedDataBindingInterval = 0;
+        public int SelectedDataBindingInterval
+        { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); }  }
+
+        public List<string> YAxisScale { get; set; }
+
+        private string _SelectedYAxisScale = "linear";
+        public string SelectedYAxisScale
+        { get { return _SelectedYAxisScale; } set { _SelectedYAxisScale = value; RaisePropertyChanged(); UpdateYAxisScale(); UpdateYAxisTitle(); } }
 
         public MeasurementPlotViewModel()
         {
@@ -101,7 +107,9 @@ namespace newRBS.ViewModels
 
             SetUpModel();
 
-            DataBinding = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
+            DataBindingIntervals = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
+
+            YAxisScale = new List<string> { "linear", "logarithmic" };
         }
 
         private void _ExpandConfigPanel()
@@ -118,9 +126,10 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "Counts", TitleFontSize = 16, AxisTitleDistance = 12, Minimum = 0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
+            UpdateYAxisTitle();
         }
 
         private void MeasurementToPlot(Models.Measurement measurement)
@@ -154,6 +163,9 @@ namespace newRBS.ViewModels
 
         private void PlotMeasurement(Models.Measurement measurement)
         {
+            if (SelectedDataBindingInterval>0 && measurement.EnergyCalSlope>SelectedDataBindingInterval)
+            { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
+            
             var areaSeries = new AreaSeries
             {
                 Tag = measurement.MeasurementID,
@@ -161,55 +173,60 @@ namespace newRBS.ViewModels
                 MarkerSize = 3,
                 Color = LineColors[measurement.MeasurementID % LineColors.Count],
                 CanTrackerInterpolatePoints = false,
-                Title = string.Format("SpectrumID {0}", measurement.MeasurementID),
+                Title = string.Format("MeasurementID {0}", measurement.MeasurementID),
                 Smooth = false,
             };
 
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
 
-            // Remove "0 Count" data points from start/end of the spectra
+            // Remove "Counts<3" data points from start/end of the spectra
             int BorderOffset = 200;
 
             int rightBorderIndex = spectrumY.Count();
-            while (spectrumY[rightBorderIndex - 1] < 3) rightBorderIndex--;
+            while (spectrumY[rightBorderIndex - 1] < 3 && rightBorderIndex > 2) rightBorderIndex--;
 
             int leftBorderIndex = 0;
-            while (spectrumY[leftBorderIndex] < 3) leftBorderIndex++;
+            while (spectrumY[leftBorderIndex] < 3 && leftBorderIndex < spectrumY.Count() - 2) leftBorderIndex++;
+
+            if (rightBorderIndex < 5) rightBorderIndex = spectrumY.Count();
+            if (leftBorderIndex > spectrumY.Count() - 5) leftBorderIndex = 0;
 
             if (rightBorderIndex + BorderOffset < spectrumY.Count()) rightBorderIndex += BorderOffset; else rightBorderIndex = spectrumY.Count();
             if (leftBorderIndex - BorderOffset > 0) leftBorderIndex -= BorderOffset; else leftBorderIndex = 0;
 
             // Add points to plot
-            switch (SelectedDataBinding)
+            switch (SelectedDataBindingInterval)
             {
                 case 0: // All points in spectrumX/spectrumY
                     {
+                        float y;
                         for (int i = leftBorderIndex; i < rightBorderIndex; i++)
                         {
-                            areaSeries.Points.Add(new DataPoint(spectrumX[i], spectrumY[i]));
-                            areaSeries.Points2.Add(new DataPoint(spectrumX[i], 0));
+                            if (spectrumY[i] == 0) y = (float)0.0001; else y = spectrumY[i];
+                            areaSeries.Points.Add(new DataPoint(spectrumX[i], y));
+                            areaSeries.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
                         }
                         break;
                     }
                 default: // Bind points inside SelectedDataBinding intervall
                     {
-                        if (spectrumX[1] - spectrumX[0] > SelectedDataBinding) { MessageBox.Show("Channel spacing is larger than data binding interval", "Error"); }
                         float x, y = 0;
-                        float intervalStart = SelectedDataBinding * ((int)(spectrumX[leftBorderIndex] / SelectedDataBinding) + (float)0.5); ;
+                        float intervalStart = SelectedDataBindingInterval * ((int)(spectrumX[leftBorderIndex] / SelectedDataBindingInterval) + (float)0.5); ;
                         int numOfPoints = 0;
 
                         for (int i = leftBorderIndex; i < rightBorderIndex; i++)
                         {
-                            if (spectrumX[i] - intervalStart > SelectedDataBinding)
+                            if (spectrumX[i] - intervalStart > SelectedDataBindingInterval)
                             {
-                                x = intervalStart + (float)SelectedDataBinding / 2;
-                                areaSeries.Points.Add(new DataPoint(x, y / numOfPoints));
-                                areaSeries.Points2.Add(new DataPoint(x, 0));
+                                x = intervalStart + (float)SelectedDataBindingInterval / 2;
+                                if (y == 0) y = (float)0.0001;
+                                areaSeries.Points.Add(new DataPoint(x, y / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
+                                areaSeries.Points2.Add(new DataPoint(x, (float)0.0001));
 
                                 y = 0;
                                 numOfPoints = 0;
-                                intervalStart += SelectedDataBinding;
+                                intervalStart += SelectedDataBindingInterval;
                             }
                             y += spectrumY[i];
                             numOfPoints++;
@@ -234,13 +251,54 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void UpdateAllPlots()
+        private void UpdateYAxisScale()
         {
-            plotModel.Series.Clear();
+            switch (SelectedYAxisScale)
+            {
+                case "linear":
+                    {
+                        plotModel.Axes.Remove(plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
+                        var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0 };
+                        plotModel.Axes.Add(yAxis);
+                        break;
+                    }
+                case "logarithmic":
+                    {
+                        plotModel.Axes.Remove(plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
+                        var yAxis = new LogarithmicAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 1 };
+                        plotModel.Axes.Add(yAxis);
+                        break;
+                    }
+            }
+        }
+
+        private void UpdateYAxisTitle()
+        {
+            switch (SelectedDataBindingInterval)
+            {
+                case 0:
+                    {
+                        plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = "Counts per channel";
+                        break;
+                    }
+                default:
+                    {
+                        plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = string.Format("Counts per {0}keV interval", SelectedDataBindingInterval);
+                        break;
+                    }
+            }
+        }
+
+        private void UpdateAllPlots( )
+        {
+            if (MeasurementIDList.Count() == 0) return;
 
             using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
             {
                 List<Models.Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
+
+                plotModel.Series.Clear();
+
                 foreach (Models.Measurement measurement in measurements)
                 {
                     PlotMeasurement(measurement);

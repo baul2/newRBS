@@ -16,19 +16,22 @@
     <DockPanel>
         <Border DockPanel.Dock="Right" Visibility="{Binding ConfigPanelVis, Converter={StaticResource BoolToVis}}" MinWidth="150">
             <StackPanel Orientation="Vertical">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Label Content="Data binding:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
-                <ComboBox ItemsSource="{Binding DataBinding}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SelectedDataBinding}" Margin="3" Grid.Column="1" Grid.Row="0"/>
-            </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Content="Data binding:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                    <ComboBox ItemsSource="{Binding DataBindingIntervals}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SelectedDataBindingInterval}" Margin="3" Grid.Column="1" Grid.Row="0"/>
+
+                    <Label Content="Counts axis:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                    <ComboBox ItemsSource="{Binding YAxisScale}" SelectedItem="{Binding SelectedYAxisScale}" Margin="3" Grid.Column="1" Grid.Row="1"/>
+                </Grid>
             </StackPanel>
         </Border>
         <Border DockPanel.Dock="Right">
