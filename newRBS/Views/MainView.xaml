@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
         mc:Ignorable="d"
-        Title="newRBS" Height="700" Width="1000" WindowStartupLocation="CenterScreen"
+        Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
         DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top">
@@ -29,6 +29,11 @@
                 </Button>
                 <Button Command="{Binding DeleteMeasurementsCommand}" ToolTip="Delete Measurements">
                     <Image Source="/Images/121.png" Height="24"/>
+                </Button>
+            </ToolBar>
+            <ToolBar>
+                <Button Command="{Binding SaveMeasurementPlotCommand}" ToolTip="Save Plot of selected Measurements">
+                    <Image Source="/Images/150.png" Height="24"/>
                 </Button>
             </ToolBar>
             <ToolBar>

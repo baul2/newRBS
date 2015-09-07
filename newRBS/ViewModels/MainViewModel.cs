@@ -19,6 +19,7 @@ using Microsoft.Practices.ServiceLocation;
 using System.Diagnostics;
 using Microsoft.Win32;
 using System.IO;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -45,6 +46,8 @@ namespace newRBS.ViewModels
         public ICommand ExportMeasurementsCommand { get; set; }
         public ICommand DeleteMeasurementsCommand { get; set; }
 
+        public ICommand SaveMeasurementPlotCommand { get; set; }
+
         public ICommand MaterialEditorCommand { get; set; }
         public ICommand SampleEditorCommand { get; set; }
 
@@ -63,14 +66,16 @@ namespace newRBS.ViewModels
 
             ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
 
-            ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementCommand(), () => true);
+            ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementsCommand(), () => true);
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
             DeleteMeasurementsCommand = new RelayCommand(() => _DeleteMeasurementsCommand(), () => true);
+
+            SaveMeasurementPlotCommand = new RelayCommand(() => _SaveMeasurementPlotCommand(), () => true);
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
 
-            EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true); 
+            EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
         }
 
@@ -86,34 +91,53 @@ namespace newRBS.ViewModels
         {
             Models.MeasureSpectra measureSpectra;
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-            measureSpectra.StopMeasurements();
+            measureSpectra.StopAcquisitions();
         }
 
-        public void _ImportMeasurementCommand()
+        public void _ImportMeasurementsCommand()
         {
-            var dialog = new OpenFileDialog();
-            dialog.ShowDialog();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "newRBS file (*.xml)|*.xml|Spektrenverwaltung file (*.dat)|*.dat";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                if (openFileDialog.FileName == null) return;
+                if (!File.Exists(openFileDialog.FileName)) return;
 
-            if (dialog.FileName == null) return;
-            if (!File.Exists(dialog.FileName)) return;
-
-            MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel(dialog.FileName);
-            Views.MeasurementImportView importMeasurementsView = new Views.MeasurementImportView();
-            importMeasurementsView.DataContext = importMeasurementsViewModel;
-            importMeasurementsView.ShowDialog();
+                MeasurementImportViewModel importMeasurementsViewModel = new MeasurementImportViewModel(openFileDialog.FileName);
+                Views.MeasurementImportView importMeasurementsView = new Views.MeasurementImportView();
+                importMeasurementsView.DataContext = importMeasurementsViewModel;
+                importMeasurementsView.ShowDialog();
+            }
         }
 
         public void _ExportMeasurementsCommand()
         {
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() == 0) return;
+
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "xml file (*.xml)|*.xml|ASCII file (*.dat)|*.dat";
+            saveFileDialog.Filter = "newRBS file (*.xml)|*.xml|Spektrenverwaltung file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
-                Models.DatabaseUtils.ExportMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList(), saveFileDialog.FileName);
+                DatabaseUtils.ExportMeasurements(selectedMeasurementIDs, saveFileDialog.FileName);
         }
 
         public void _DeleteMeasurementsCommand()
         {
-            Models.DatabaseUtils.DeleteMeasurements(SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x=>x.Selected == true).Select(y=>y.Measurement.MeasurementID).ToList());
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() == 0) return;
+
+            MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected measurements?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+            if (rsltMessageBox == MessageBoxResult.Yes)
+                DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
+        }
+
+        public void _SaveMeasurementPlotCommand()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg|Data file (*.dat)|*.dat";
+            if (saveFileDialog.ShowDialog() == true)
+                DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
         public void _ChannelConfigurationCommand()

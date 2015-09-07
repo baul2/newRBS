@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -33,19 +34,19 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
-        public ObservableCollection<Models.Sample> Samples { get; set; }
-        private Models.Sample _SelectedSample;
-        public Models.Sample SelectedSample
+        public ObservableCollection<Sample> Samples { get; set; }
+        private Sample _SelectedSample;
+        public Sample SelectedSample
         {
             get { return _SelectedSample; }
             set { _SelectedSample = value; SelectedSampleChanged(); RaisePropertyChanged(); }
         }
 
-        public ObservableCollection<Models.Material> Materials { get; set; }
-        private Models.Material _SelectedMaterials;
-        public Models.Material SelectedMaterial
+        public ObservableCollection<Material> Materials { get; set; }
+        private Material _SelectedMaterials;
+        public Material SelectedMaterial
         {
             get { return _SelectedMaterials; }
             set { _SelectedMaterials = value; SelectedMaterialChanged(); RaisePropertyChanged(); }
@@ -55,7 +56,7 @@ namespace newRBS.ViewModels
 
         public SampleEditorViewModel()
         {
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database = new DatabaseDataContext(MyGlobals.ConString);
 
             AddSampleCommand = new RelayCommand(() => _AddSampleCommand(), () => true);
             RemoveSampleCommand = new RelayCommand(() => _RemoveSampleCommand(), () => true);
@@ -66,10 +67,10 @@ namespace newRBS.ViewModels
 
             Layers = new ObservableCollection<string>();
 
-            Materials = new ObservableCollection<Models.Material>(Database.Materials.ToList());
-            SelectedMaterial = new Models.Material();
+            Materials = new ObservableCollection<Material>(Database.Materials.ToList());
+            SelectedMaterial = new Material();
 
-            Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
             Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
             SelectedSample = Samples.FirstOrDefault();
         }
@@ -88,10 +89,10 @@ namespace newRBS.ViewModels
 
             Layers.Clear();
 
-            foreach (Models.Layer layer in SelectedMaterial.Layers)
+            foreach (Layer layer in SelectedMaterial.Layers)
             {
                 string newLayerString = string.Format("{0} ({1}nm", layer.LayerName, layer.Thickness);
-                foreach (Models.Element element in layer.Elements)
+                foreach (Element element in layer.Elements)
                     newLayerString += string.Format(", {0}", element.ElementName);
                 newLayerString += ")";
                 Layers.Add(newLayerString);
@@ -100,11 +101,11 @@ namespace newRBS.ViewModels
 
         public void _AddSampleCommand()
         {
-            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+            int? newSampleID = DatabaseUtils.AddNewSample();
 
             if (newSampleID == null) return;
 
-            Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+            Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
             Samples.Add(newSample);
             SelectedSample = newSample;
         }
@@ -112,7 +113,7 @@ namespace newRBS.ViewModels
         public void _RemoveSampleCommand()
         {
             var measurements = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID);
-            foreach (Models.Measurement measurement in measurements)
+            foreach (Measurement measurement in measurements)
                 measurement.Sample = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)");
 
             Database.Samples.DeleteOnSubmit(SelectedSample);

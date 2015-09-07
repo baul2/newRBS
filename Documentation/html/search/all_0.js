@@ -1,22 +1,6 @@
 var searchData=
 [
-  ['caen_5fx730',['CAEN_x730',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html',1,'newRBS::CAEN_x730']]],
-  ['caen_5fx730',['CAEN_x730',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#a933d4efe456852158d0156bbc3f8a501',1,'newRBS::CAEN_x730::CAEN_x730']]],
-  ['caendpp_5facqmode_5ft',['CAENDPP_AcqMode_t',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html#a17c680ecca36d5f9032391aca26738e4',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fchannelextraparameters',['CAENDPP_ChannelExtraParameters',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___channel_extra_parameters.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fcoincparams_5ft',['CAENDPP_CoincParams_t',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___coinc_params__t.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fdgtzparams_5ft',['CAENDPP_DgtzParams_t',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___dgtz_params__t.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fextraparameters',['CAENDPP_ExtraParameters',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___extra_parameters.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5flistparams_5ft',['CAENDPP_ListParams_t',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___list_params__t.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fpha_5fanalogprobe1_5ft',['CAENDPP_PHA_AnalogProbe1_t',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html#ae0395cf45a28f53047978539a8065057',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fpha_5fanalogprobe2_5ft',['CAENDPP_PHA_AnalogProbe2_t',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html#a5556cf8f0ccec06da252a6acdd18a67a',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fpha_5fdigitalprobe1_5ft',['CAENDPP_PHA_DigitalProbe1_t',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html#a14885a50723756ab2f70fec48bed5a14',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fpha_5fdigitalprobe2_5ft',['CAENDPP_PHA_DigitalProbe2_t',['../namespacenew_r_b_s_1_1_c_a_e_n__x730.html#a1457d1b79f4547f94378a49ee2852ae3',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fpha_5fparams_5ft',['CAENDPP_PHA_Params_t',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___p_h_a___params__t.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fspectrumcontrol',['CAENDPP_SpectrumControl',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___spectrum_control.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5ftrreset',['CAENDPP_TRReset',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___t_r_reset.html',1,'newRBS::CAEN_x730']]],
-  ['caendpp_5fwaveformparams_5ft',['CAENDPP_WaveformParams_t',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n_d_p_p___waveform_params__t.html',1,'newRBS::CAEN_x730']]],
-  ['close',['Close',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#ad077b9d7096433b1ff820fac0ab66ad6',1,'newRBS::CAEN_x730::CAEN_x730']]],
-  ['connparam',['ConnParam',['../structnew_r_b_s_1_1_c_a_e_n__x730_1_1_conn_param.html',1,'newRBS::CAEN_x730']]],
-  ['controllerspectra',['ControllerSpectra',['../classnew_r_b_s_1_1_spectra_1_1_controller_spectra.html',1,'newRBS::Spectra']]]
+  ['addnewsample',['AddNewSample',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a98bceec8b676cd20756605c592dfa35a',1,'newRBS.Database.DatabaseUtils.AddNewSample()'],['../classnew_r_b_s_1_1_database_1_1_database_utils.html#ad55e1f6e832235dcb2ef176183b856f8',1,'newRBS.Database.DatabaseUtils.AddNewSample(string SampleName)']]],
+  ['areadata',['AreaData',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_area_data.html',1,'newRBS::ViewModels::Utils']]],
+  ['asyncobservablecollection',['AsyncObservableCollection',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_async_observable_collection.html',1,'newRBS::ViewModels::Utils']]]
 ];

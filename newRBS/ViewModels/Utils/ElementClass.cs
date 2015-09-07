@@ -3,7 +3,10 @@
 
 namespace newRBS.ViewModels.Utils
 {
-    public class Element : ViewModelBase
+    /// <summary>
+    /// Class that descripes the main properties an element from the periodec system.
+    /// </summary>
+    public class ElementClass : ViewModelBase
     {
         public string DisplayName
         { get { return (AtomicNumber.ToString() + " - " + ShortName + " - " + LongName); } }

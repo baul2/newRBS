@@ -7,6 +7,9 @@ using System.Runtime.CompilerServices;
 
 namespace newRBS.Models
 {
+    /// <summary>
+    /// Class that stores the configuration of a single channel.
+    /// </summary>
     [Serializable()]
     public class ChannelParams : INotifyPropertyChanged
     {
@@ -73,7 +76,7 @@ namespace newRBS.Models
     }
 
     /// <summary>
-    /// Struct that contains waveforms (AT1, AT2, DT1, DT2) and the number of samples
+    /// Struct that contains waveforms (AT1, AT2, DT1, DT2) and the number of samples.
     /// </summary>
     public struct Waveform
     {
@@ -87,6 +90,9 @@ namespace newRBS.Models
         public int AcquisitionChannel;
     }
 
+    /// <summary>
+    /// Struct that contains the connection parameters of the device.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct ConnParam
     {
@@ -230,6 +236,9 @@ namespace newRBS.Models
         public UInt32 TimeScale;          // Scale in time distribution
     }
 
+    /// <summary>
+    /// Struct that holds the complete configuration of the device.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public struct CAENDPP_DgtzParams_t
     {
@@ -269,6 +278,9 @@ namespace newRBS.Models
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 16)]
         public CAENDPP_SpectrumControl[] SpectrumControl;
 
+        /// <summary>
+        /// Function that initializes all properties of <see cref="CAENDPP_DgtzParams_t"/>.
+        /// </summary>
         public void initializeArrays()
         {
             GWaddr = new uint[1000];
@@ -306,6 +318,9 @@ namespace newRBS.Models
             SpectrumControl = new CAENDPP_SpectrumControl[16];
         }
 
+        /// <summary>
+        /// Function that fills all properties of <see cref="CAENDPP_DgtzParams_t"/> with default values.
+        /// </summary>
         public void setDefaultConfig()
         {
             ChannelMask = 0xFF;
@@ -358,21 +373,6 @@ namespace newRBS.Models
             WFParams.preTrigger = 1000; //1000
             WFParams.probeSelfTriggerVal = 1482; //150
             WFParams.probeTrigger = 0;
-        }
-    }
-
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public struct CAENDPP_DgtzParams_t_min
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12256)]//15256
-        public byte[] dump;
-
-        public void initializeArrays()
-        {
-            dump = new byte[15256];// 15256
-            for (int i = 0; i < 15256; i++)
-                dump[i] = 0;
         }
     }
 }

@@ -19,6 +19,13 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that provides an object, which combines a bool (<see cref="IsChecked"/>) and custom type.
+    /// </summary>
+    /// <remarks>
+    /// It is used for the channel checkboxes in <see cref="Views.NewMeasurementView"/>.
+    /// </remarks>
+    /// <typeparam name="T">Type of the custom object.</typeparam>
     public class CheckedListItem<T> : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

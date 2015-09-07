@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Data;
 
 namespace newRBS.Views
 {
@@ -23,6 +24,22 @@ namespace newRBS.Views
         public SpectraListView()
         {
             InitializeComponent();
+        }
+    }
+
+    [ValueConversion(typeof(object), typeof(string))]
+    public class AtomicNumberToShortNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter,
+                          System.Globalization.CultureInfo culture)
+        {
+            return ViewModels.Utils.ElementData.ShortName[(int)value-1].ToString();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter,
+                        System.Globalization.CultureInfo culture)
+        {
+            return null;
         }
     }
 }

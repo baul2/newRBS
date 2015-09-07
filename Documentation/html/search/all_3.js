@@ -1,5 +1,12 @@
 var searchData=
 [
-  ['gethistogram',['GetHistogram',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#a4582c49f4b1fae598b3e3f4282aec200',1,'newRBS::CAEN_x730::CAEN_x730']]],
-  ['getwaveform',['GetWaveform',['../classnew_r_b_s_1_1_c_a_e_n__x730_1_1_c_a_e_n__x730.html#aa81086717754c4bd98575eb2453e910f',1,'newRBS::CAEN_x730::CAEN_x730']]]
+  ['element',['Element',['../classnew_r_b_s_1_1_database_1_1_element.html',1,'newRBS::Database']]],
+  ['elementclass',['ElementClass',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_element_class.html',1,'newRBS::ViewModels::Utils']]],
+  ['elementdata',['ElementData',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_element_data.html',1,'newRBS::ViewModels::Utils']]],
+  ['energycalibrationviewmodel',['EnergyCalibrationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_energy_calibration_view_model.html',1,'newRBS::ViewModels']]],
+  ['energycalibrationviewmodel',['EnergyCalibrationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_energy_calibration_view_model.html#acd2cbe0b93324872e6ebdae86981ea8d',1,'newRBS::ViewModels::EnergyCalibrationViewModel']]],
+  ['energycallistitem',['EnergyCalListItem',['../classnew_r_b_s_1_1_view_models_1_1_energy_cal_list_item.html',1,'newRBS::ViewModels']]],
+  ['epsara',['Epsara',['../namespace_epsara.html',1,'']]],
+  ['epsarasharp',['EpsaraSharp',['../namespace_epsara_sharp.html',1,'']]],
+  ['exportmeasurements',['ExportMeasurements',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#aaa6b1acdb34c0d7323b75ad44b6a64f1',1,'newRBS::Database::DatabaseUtils']]]
 ];

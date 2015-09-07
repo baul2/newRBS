@@ -9,7 +9,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="ImportSpectra" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
+        Title="MeasurementImportView" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" MinHeight="600" MinWidth="450"
         viewmodelutils:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
         <StackPanel DockPanel.Dock="top" Orientation="Vertical">
@@ -23,14 +23,14 @@
                 <Button Command="{Binding CancelCommand}" MinWidth="100" Content="Cancel" Margin="5" Padding="5"/>
             </StackPanel>
         </StackPanel>
-        <oxy:Plot MinHeight="200" InvalidateFlag="{Binding areaData.Count, Delay=100}">
-            <oxy:Plot.Axes>
+        <oxy:PlotView MinHeight="200" InvalidateFlag="{Binding UpdatePlot.Count, Delay=100}">
+            <oxy:PlotView.Axes>
                 <oxy:LinearAxis Title="Energy (keV)" Position="Bottom"/>
                 <oxy:LinearAxis Title="Counts" Position="Left"/>
-            </oxy:Plot.Axes>
-            <oxy:Plot.Series>
+            </oxy:PlotView.Axes>
+            <oxy:PlotView.Series>
                 <oxy:AreaSeries ItemsSource="{Binding areaData}" DataFieldX="x1" DataFieldY="y1" DataFieldX2="x2" DataFieldY2="y2"/>
-            </oxy:Plot.Series>
-        </oxy:Plot>
+            </oxy:PlotView.Series>
+        </oxy:PlotView>
     </DockPanel>
 </Window>

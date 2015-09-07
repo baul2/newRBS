@@ -18,9 +18,16 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using Microsoft.Win32;
+using newRBS.Database;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that contains a bool (<see cref="Selected"/>) and a <see cref="Measurement"/>.
+    /// </summary>
+    /// <remarks>
+    /// It is usefull as a datagrid items, where individual <see cref="Measurement"/>s can be checked.
+    /// </remarks>
     public class SelectableMeasurement : INotifyPropertyChanged
     {
         private bool _Selected;
@@ -37,8 +44,8 @@ namespace newRBS.ViewModels.Utils
             }
         }
 
-        private Models.Measurement _Measurement;
-        public Models.Measurement Measurement
+        private Measurement _Measurement;
+        public Measurement Measurement
         {
             get { return _Measurement; }
             set

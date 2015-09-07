@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that contains the main properties of all elements in the periodic system.
+    /// </summary>
     public static class ElementData
     {
         public static int ElementCount = 109;

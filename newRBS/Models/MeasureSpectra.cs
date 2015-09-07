@@ -7,6 +7,7 @@ using System.Data.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using newRBS.Database;
 
 namespace newRBS.Models
 {
@@ -35,22 +36,24 @@ namespace newRBS.Models
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
 
         public string StopType = "Manual";
-        public int? StopValue = 0;
+        public double StopValue = 0;
 
-        private Timer[] spectraMeasurementTimer = new Timer[8];
+        private Timer[] MeasureSpectraTimer = new Timer[8];
 
         private Dictionary<int, int> activeChannels = new Dictionary<int, int>(); // <Channel,ID>
 
         /// <summary>
-        /// Initializes the class and stores the handled instances of <see cref="CAEN_x730"/> and <see cref="DatabaseUtils"/>
+        /// Constructor of the class. Gets a reference to the instance of <see cref="CAEN_x730"/> from <see cref="ViewModels.ViewModelLocator"/>.
         /// </summary>
-        /// <param name="cAEN_x730">Instance of the class responsible for the CAEN N6730</param>
-        /// <param name="dataSpectra">Instance of the class responsible for storing the measured spectra</param>
         public MeasureSpectra()
         {
-            cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
+            cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
         }
 
+        /// <summary>
+        /// Function that returns the acquisition status of the device.
+        /// </summary>
+        /// <returns>TRUE if the divice is acquiring, FALS if not.</returns>
         public bool IsAcquiring()
         {
             if (cAEN_x730.activeChannels.Count > 0)
@@ -60,10 +63,10 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Starts the measurement for the selected channels (<see cref="selectedChannels"/>).
+        /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Database.Measurement"/> in the database. 
         /// </summary>
-        /// <returns>A list containing the IDs of the started measurements</returns>
-        public void StartMeasurements(List<int> selectedChannels)
+        /// <param name="SelectedChannels">The channel numbers to start the acquisitions.</param>
+        public void StartAcquisitions(List<int> SelectedChannels)
         {
             List<int> IDs = new List<int>();
 
@@ -71,7 +74,7 @@ namespace newRBS.Models
 
             using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                foreach (int channel in selectedChannels)
+                foreach (int channel in SelectedChannels)
                 {
                     cAEN_x730.StartAcquisition(channel);
 
@@ -96,7 +99,7 @@ namespace newRBS.Models
                         StopValue = StopValue,
                         Runs = true,
                         NumOfChannels = NumOfChannels,
-                        SpectrumY = new byte[] { 0 }
+                        SpectrumY = new int[] { 0 }
                     };
 
                     newSpectrum.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
@@ -106,25 +109,25 @@ namespace newRBS.Models
                     Database.SubmitChanges();
                     activeChannels.Add(channel, newSpectrum.MeasurementID);
 
-                    Console.WriteLine("New measurementID: {0}",newSpectrum.MeasurementID);
-                    spectraMeasurementTimer[channel] = new Timer(500);
-                    spectraMeasurementTimer[channel].Elapsed += delegate { SpectraMeasurementWorker(newSpectrum.MeasurementID, channel); };
-                    spectraMeasurementTimer[channel].Start();
+                    Console.WriteLine("New measurementID: {0}", newSpectrum.MeasurementID);
+                    MeasureSpectraTimer[channel] = new Timer(500);
+                    MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(newSpectrum.MeasurementID, channel); };
+                    MeasureSpectraTimer[channel].Start();
                 }
             }
         }
 
         /// <summary>
-        /// Stops the measurement for the selected channels (<see cref="selectedChannels"/>).
+        /// Function that stops the acquisition for all active channels and finishes the corresponging instances of <see cref="Database.Measurement"/> in the database.
         /// </summary>
-        public void StopMeasurements()
+        public void StopAcquisitions()
         {
             foreach (int channel in activeChannels.Keys.ToList())
             {
                 int measurementID = activeChannels[channel];
                 cAEN_x730.StopAcquisition(channel);
 
-                spectraMeasurementTimer[channel].Stop();
+                MeasureSpectraTimer[channel].Stop();
                 Console.WriteLine("ID to stop: {0}", measurementID);
 
                 activeChannels.Remove(channel);
@@ -149,26 +152,26 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that is called by the spectraMeasurementTimer. It reads a spectrum sends it to the <see cref="DatabaseUtils"/> class.
+        /// Function that get the new SpectrumY from <see cref="CAEN_x730.GetHistogram(int)"/> and updates the corresponding <see cref="Measurement"/> instance.
         /// </summary>
-        /// <param name="measurementID">ID of the measurement where the spectra will be send to.</param>
-        /// <param name="channel">Channel to read the spectrum from.</param>
-        private void SpectraMeasurementWorker(int measurementID, int channel)
+        /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
+        /// <param name="Channel">Channel to read the spectrum from.</param>
+        private void MeasureSpectraWorker(int MeasurementID, int Channel)
         {
-            int[] newSpectrumY = cAEN_x730.GetHistogram(channel);
-            trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", measurementID, newSpectrumY.Sum());
+            int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
+            trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", MeasurementID, newSpectrumY.Sum());
 
             using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
+                Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
 
                 if (MeasurementToUpdate == null)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = {0} not found", measurementID); return; }
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = {0} not found", MeasurementID); return; }
 
                 if (newSpectrumY.Length != 16384) // TODO!!!
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
-                MeasurementToUpdate.SpectrumY = DatabaseUtils.GetByteSpectrumY(newSpectrumY);
+                MeasurementToUpdate.SpectrumY = newSpectrumY;
 
                 MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
 
@@ -189,7 +192,7 @@ namespace newRBS.Models
                 {
                     MeasurementToUpdate.Progress = 1;
                     Database.SubmitChanges();
-                    StopMeasurements();
+                    StopAcquisitions();
                 }
             }
         }

@@ -5,6 +5,9 @@ using System.Windows.Input;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that is an attached property of TreeView, providing access to the selected item and the selected item changed event.
+    /// </summary>
     public class TreeViewHelper
     {
         #region SelectedItem

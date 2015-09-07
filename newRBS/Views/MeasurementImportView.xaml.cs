@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 namespace newRBS.Views
 {
     /// <summary>
-    /// Interaction logic for ImportSpectra.xaml
+    /// Interaction logic for MeasurementImportView.xaml
     /// </summary>
     public partial class MeasurementImportView : Window
     {

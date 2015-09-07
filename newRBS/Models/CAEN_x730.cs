@@ -67,7 +67,7 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that sends the default configuration. 
+        /// Function that sets the default configuration and calls <see cref="SendConfig"/>. 
         /// </summary>
         public void SetDefaultConfig()
         {
@@ -79,6 +79,11 @@ namespace newRBS.Models
             SendConfig();
         }
 
+        /// <summary>
+        /// Function that sets the configuration of a single channel based on an instance of <see cref="ChannelParams"/> and calls <see cref="SendConfig"/>.
+        /// </summary>
+        /// <param name="channel">The number of the channel to configure.</param>
+        /// <param name="channelParams">The instance of <see cref="ChannelParams"/> holding the channel configuration.</param>
         public void SetChannelConfig(int channel, ChannelParams channelParams)
         {
             if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
@@ -102,6 +107,11 @@ namespace newRBS.Models
             SendConfig();
         }
 
+        /// <summary>
+        /// Function that returns the current configuration of a specific channel.
+        /// </summary>
+        /// <param name="channel">The number of the channel to get the configuration.</param>
+        /// <returns>An instance of <see cref="ChannelParams"/> holding the current channel configuration.</returns>
         public ChannelParams GetChannelConfig(int channel)
         {
             ChannelParams channelParams = new ChannelParams();
@@ -128,7 +138,7 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that sends the waveform configuration.
+        /// Function that sets the waveform configuration and calls <see cref="SendConfig"/>.
         /// </summary>
         /// <param name="AP1">Enum for analog probe 1.</param>
         /// <param name="AP2">Enum for analog probe 2.</param>
@@ -147,7 +157,7 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that sends the acquisition mode.
+        /// Function that sets the acquisition mode and calls <see cref="SendConfig"/>.
         /// </summary>
         /// <param name="acquisitionMode">Acquisition mode (Waveform/Histogram).</param>
         public void SetMeasurementMode(CAENDPP_AcqMode_t acquisitionMode)
@@ -158,10 +168,10 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that sends the configuration. 
+        /// Function that sends the configuration to the device. 
         /// </summary>
         /// <remarks>
-        /// The variables int acqMode and <see cref="CAENDPP_DgtzParams_t"/> dgtzParams of the class <see cref="CAEN_x730"/> are used.
+        /// The variables int acqMode (<see cref="CAENDPP_AcqMode_t"/>) and dgtzParams (<see cref="CAENDPP_DgtzParams_t"/>) of the class <see cref="CAEN_x730"/> are used.
         /// </remarks>
         public void SendConfig()
         {
@@ -175,9 +185,9 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that starts the measurement for the selected channel.
+        /// Function that starts the acquisition for the specified channel.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to start the measurement.</param>
+        /// <param name="channel">Channel number (0...7) to start the acquisition.</param>
         public void StartAcquisition(int channel)
         {
             if (activeChannels.Contains(channel)) // Checks if measurement is already running
@@ -195,9 +205,9 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that reads the current histogram from selected channel.
+        /// Function that reads the current histogram from the specified channel.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to read the histogram from.</param>
+        /// <param name="channel">Channel number (0...7) to read the histogram from.</param>
         /// <returns>Array of the obtained histogram. Type: UInt32[]. Length: 16384.</returns>
         public int[] GetHistogram(int channel)
         {
@@ -214,9 +224,9 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that reads the waveforms from selected channel.
+        /// Function that reads the waveforms (analog1/2 & digital1/2) from the specified channel.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to read the waveforms from.</param>
+        /// <param name="channel">Channel number (0...7) to read the waveforms from.</param>
         /// <returns>Structure <see cref="Waveform"/> that holds the waveforms and number of samples.</returns>
         public Waveform GetWaveform(int channel)
         {
@@ -249,9 +259,9 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that stops the measurement for the selected channel.
+        /// Function that stops the acquisition for the specified channel.
         /// </summary>
-        /// <param name="channel">Channel (0...7) to stop the measurement.</param>
+        /// <param name="channel">Channel number (0...7) to stop the acquisition.</param>
         public void StopAcquisition(int channel)
         {
             if (!activeChannels.Contains(channel)) // Checks if measurement is not running
@@ -279,10 +289,10 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that returns the error string.
+        /// Function that returns the error string of an error code.
         /// </summary>
-        /// <param name="ret">Return value of a library call.</param>
-        /// <returns>Error string corresponding to the return value.</returns>
+        /// <param name="ret">Error code of a library call.</param>
+        /// <returns>Error string corresponding to the error code.</returns>
         private string GetErrorText(int ret)
         {
             switch (ret)

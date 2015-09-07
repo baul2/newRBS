@@ -20,8 +20,7 @@ using Microsoft.Win32;
 using System.IO;
 using OxyPlot;
 using newRBS.ViewModels.Utils;
-
-
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -31,18 +30,18 @@ namespace newRBS.ViewModels
         public ICommand AddAllMeasurementsCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
         private bool? _DialogResult;
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<Models.Measurement> newMeausurements { get; set; }
+        public ObservableCollection<Measurement> newMeausurements { get; set; }
 
         public MeasurementInfoClass MeasurementInfo { get; set; }
 
-        private Models.Measurement _selectedMeasurement = new Models.Measurement();
-        public Models.Measurement selectedMeasurement
+        private Measurement _selectedMeasurement = new Measurement();
+        public Measurement selectedMeasurement
         {
             get { return _selectedMeasurement; }
             set
@@ -58,15 +57,19 @@ namespace newRBS.ViewModels
         public ObservableCollection<AreaData> areaData
         { get { return _areaData; } set { _areaData = value; RaisePropertyChanged(); } }
 
+        public ObservableCollection<int> UpdatePlot { get; set; }
+
         public MeasurementImportViewModel(string FileName)
         {
             AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
             AddAllMeasurementsCommand = new RelayCommand(() => _AddAllMeasurementsCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
-            newMeausurements = new ObservableCollection<Models.Measurement>();
+            newMeausurements = new ObservableCollection<Measurement>();
 
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            UpdatePlot = new ObservableCollection<int>();
+
+            Database = new DatabaseDataContext(MyGlobals.ConString);
             //Database.Log = Console.Out;
 
             MeasurementInfo = new MeasurementInfoClass(Database);
@@ -76,9 +79,9 @@ namespace newRBS.ViewModels
 
         private void LoadMeasurements(string FileName)
         {
-            List<Models.Measurement> importedMeasurements = Models.DatabaseUtils.LoadMeasurementsFromFile(FileName);
+            List<Measurement> importedMeasurements = DatabaseUtils.LoadMeasurementsFromFile(FileName);
 
-            Models.Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
+            Sample undefinedSample = Database.Samples.First(x => x.SampleName == "(undefined)");
 
             newMeausurements.Clear();
 
@@ -98,10 +101,15 @@ namespace newRBS.ViewModels
 
             // Updating the plot data
             areaData.Clear();
-            float[] spectrumX = Models.DatabaseUtils.GetCalibratedSpectrumX(selectedMeasurement);
-            int[] spectrumY = Models.DatabaseUtils.GetIntSpectrumY(selectedMeasurement);
+            float[] spectrumX = selectedMeasurement.SpectrumXCal;
+            int[] spectrumY = selectedMeasurement.SpectrumY;
+
             for (int i = 0; i < spectrumY.Count(); i++)
+            {
                 areaData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
+            }
+
+            UpdatePlot.Add(1);
         }
 
 

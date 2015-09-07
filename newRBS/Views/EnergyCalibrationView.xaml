@@ -101,6 +101,6 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <oxy:PlotView Model="{Binding plotModel}" Margin="10" Grid.Row="1"/>
+        <oxy:PlotView Model="{Binding SelectedMeasurementsPlot}" Margin="10" Grid.Row="1"/>
     </DockPanel>
 </Window>

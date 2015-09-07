@@ -133,14 +133,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Global.cs" />
-    <Compile Include="Models\Database.designer.cs">
+    <Compile Include="Database\Database.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Models\DatabasePartialMethods.cs" />
-    <Compile Include="Models\DataMaterial.cs" />
-    <Compile Include="Models\DataSimpleMaterial.cs" />
+    <Compile Include="Database\DatabasePartialMethods.cs" />
     <Compile Include="Models\EpsaraSharp\Data.cs" />
     <Compile Include="Models\EpsaraSharp\DataBeam.cs" />
     <Compile Include="Models\EpsaraSharp\DataDetector.cs" />
@@ -174,7 +172,7 @@
     <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
-    <Compile Include="ViewModels\Utils\Element.cs" />
+    <Compile Include="ViewModels\Utils\ElementClass.cs" />
     <Compile Include="ViewModels\Utils\ElementData.cs" />
     <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
@@ -208,7 +206,7 @@
     <Compile Include="Views\MeasurementListView.xaml.cs">
       <DependentUpon>MeasurementListView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\DatabaseUtils.cs" />
+    <Compile Include="Database\DatabaseUtils.cs" />
     <Compile Include="Models\MeasureSpectra.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
@@ -223,6 +221,9 @@
     </Compile>
     <Compile Include="Views\Utils\MeasurementInfo.xaml.cs">
       <DependentUpon>MeasurementInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Utils\ProjectSelector.xaml.cs">
+      <DependentUpon>ProjectSelector.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\EnergyCalibrationView.xaml">
       <SubType>Designer</SubType>
@@ -288,6 +289,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Utils\ProjectSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -303,14 +308,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Models\Database.dbml.layout">
+    <None Include="Database\Database.dbml.layout">
       <DependentUpon>Database.dbml</DependentUpon>
     </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Models\Database.dbml">
+    <None Include="Database\Database.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>Database.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
@@ -338,8 +343,9 @@
     <Resource Include="Images\31.png" />
     <Resource Include="Images\89.png" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Utils\" />
+    <Resource Include="Images\150.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

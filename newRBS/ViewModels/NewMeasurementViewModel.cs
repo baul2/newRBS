@@ -17,13 +17,14 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
     public class NewMeasurementViewModel : ViewModelBase
     {
         private Models.MeasureSpectra measureSpectra;
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
         public ICommand NewSampleCommand { get; set; }
 
@@ -37,21 +38,21 @@ namespace newRBS.ViewModels
         public ObservableCollection<CheckedListItem<int>> Channels_10 { get; set; }
         public ObservableCollection<CheckedListItem<int>> Channels_30 { get; set; }
 
-        private Models.Measurement _Measurement;
-        public Models.Measurement Measurement
+        private Measurement _Measurement;
+        public Measurement Measurement
         {
             get { return _Measurement; }
             set { _Measurement = value; RaisePropertyChanged(); }
         }
 
-        private ObservableCollection<Models.Sample> _Samples;
-        public ObservableCollection<Models.Sample> Samples
+        private ObservableCollection<Sample> _Samples;
+        public ObservableCollection<Sample> Samples
         { get { return _Samples; } set { _Samples = value; RaisePropertyChanged(); } }
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
         public ObservableCollection<string> StopTypeList { get; set; }
-        public ObservableCollection<Ion> Ions { get; set; }
+        public ObservableCollection<ElementClass> Ions { get; set; }
 
         private int _SelectedChamberTabIndex = 0;
         public int SelectedChamberTabIndex
@@ -66,7 +67,7 @@ namespace newRBS.ViewModels
         public NewMeasurementViewModel()
         {
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database = new DatabaseDataContext(MyGlobals.ConString);
 
             NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
 
@@ -82,9 +83,9 @@ namespace newRBS.ViewModels
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
+            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
 
-            Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
             Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
 
@@ -93,10 +94,10 @@ namespace newRBS.ViewModels
 
         private void _NewSampleCommand()
         {
-            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+            int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)
             {
-                Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+                Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
                 if (!Samples.Contains(newSample))
                     Samples.Add(newSample);
                 Measurement.Sample = newSample;
@@ -125,14 +126,14 @@ namespace newRBS.ViewModels
                     {
                         measureSpectra.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartMeasurements(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels);
                         break;
                     }
                 case 1: // -30° chamber
                     {
                         measureSpectra.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartMeasurements(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels);
                         break;
                     }
             }

@@ -43,6 +43,22 @@
       <Association Name="Material_Sample" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
     </Type>
   </Table>
+  <Table Name="dbo.Measurement_Project" Member="Measurement_Projects">
+    <Type Name="Measurement_Project">
+      <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ProjectID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Project_Measurement_Project" Member="Project" ThisKey="ProjectID" OtherKey="ProjectID" Type="Project" IsForeignKey="true" />
+      <Association Name="Measurement_Measurement_Project" Member="Measurement" ThisKey="MeasurementID" OtherKey="MeasurementID" Type="Measurement" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Projects" Member="Projects">
+    <Type Name="Project">
+      <Column Name="ProjectID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ProjectName" Type="System.String" DbType="NChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Project_Measurement_Project" Member="Measurement_Projects" ThisKey="ProjectID" OtherKey="ProjectID" Type="Measurement_Project" />
+    </Type>
+  </Table>
   <Table Name="dbo.Measurements" Member="Measurements">
     <Type Name="Measurement">
       <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -58,10 +74,10 @@
       <Column Name="Charge" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="SpectrumY" Type="System.Byte[]" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
-      <Column Name="SpectrumYCalculated" Type="System.Byte[]" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="SpectrumYByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="SpectrumYCalculatedByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
       <Column Name="StopType" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StopValue" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="StopValue" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalOffset" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
@@ -74,6 +90,7 @@
       <Column Name="Y" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Phi" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Association Name="Measurement_Measurement_Project" Member="Measurement_Projects" ThisKey="MeasurementID" OtherKey="MeasurementID" Type="Measurement_Project" />
       <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
     </Type>
   </Table>

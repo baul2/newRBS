@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class providing an attached property for windows, allowing the closing of the windows from the corresponging view models.
+    /// </summary>
     class DialogCloser
     {
         public static readonly DependencyProperty DialogResultProperty =

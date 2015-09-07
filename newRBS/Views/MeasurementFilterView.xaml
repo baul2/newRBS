@@ -18,8 +18,11 @@
                     <Expander Header="Measurement filter" IsExpanded="True">
                         <StackPanel>
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
-                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" viewmodelutils:TreeViewHelper.SelectedItem="{Binding CurrSelItem}"  viewmodelutils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
+                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" viewmodelutils:TreeViewHelper.SelectedItem="{Binding selectedFilter}" viewmodelutils:TreeViewHelper.SelectedItemChanged="{Binding SelectedItemChanged}">
                                 <TreeView.Resources>
+                                    <Style TargetType="TreeViewItem">
+                                        <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                                    </Style>
                                     <HierarchicalDataTemplate DataType="{x:Type viewmodelutils:FilterClass}" ItemsSource="{Binding Children}">
                                         <TextBlock Text="{Binding Name}"></TextBlock>
                                     </HierarchicalDataTemplate>
@@ -28,9 +31,24 @@
                         </StackPanel>
                     </Expander>
                     <Expander Header="Projects" IsExpanded="True">
-                        <ListView>
-                            <ListViewItem Content="TestProject"/>
-                        </ListView>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <GroupBox Header="Projects">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="New" Command="{Binding NewProjectCommand}" Margin="3,0"/>
+                                        <Button Content="Rename" Command="{Binding RenameProjectCommand}" Margin="3,0"/>
+                                        <Button Content="Delete" Command="{Binding DeleteProjectCommand}" Margin="3,0"/>
+                                    </StackPanel>
+                                </GroupBox>
+                                <GroupBox Header="Measurements">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Add" Command="{Binding AddMeasurementCommand}" Margin="3,0"/>
+                                        <Button Content="Remove" Command="{Binding RemoveMeasurementCommand}" Margin="3,0"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                            <ListView ItemsSource="{Binding Projects}" DisplayMemberPath="ProjectName" SelectedItem="{Binding SelectedProject}"/>
+                        </StackPanel>
                     </Expander>
                 </StackPanel>
             </Grid>
@@ -44,6 +62,6 @@
                 </Button>
             </StackPanel>
         </Border>
-            
+
     </DockPanel>
 </UserControl>
