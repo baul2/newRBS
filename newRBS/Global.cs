@@ -20,6 +20,7 @@ namespace newRBS
             get
             {
                 Database.DatabaseDataContext newConnection = new Database.DatabaseDataContext(ConString);
+                newConnection.CommandTimeout = 10;
 
                 if (ConString == "")
                 {
@@ -27,8 +28,11 @@ namespace newRBS
 
                     while (logInDialog.ShowDialog() == true)
                     {
-                        ConString = "Data Source = SVRH; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
+                        //ConString = "Data Source = SVRH; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
+                        ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         newConnection = new Database.DatabaseDataContext(ConString);
+                        newConnection.CommandTimeout = 10;
+
                         if (!newConnection.DatabaseExists())
                         {
                             MessageBox.Show("Please enter a valid username/password combination!", "Connection error!");

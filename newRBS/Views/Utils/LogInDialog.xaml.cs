@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Net;
 
 namespace newRBS.Views.Utils
 {
@@ -18,6 +19,8 @@ namespace newRBS.Views.Utils
     {
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string IPAdress { get; set; }
+        public string Port { get; set; }
     }
 
     public partial class LogInDialog : Window
@@ -32,9 +35,32 @@ namespace newRBS.Views.Utils
             this.DialogResult = true;
         }
 
+        private bool CheckIPValid(string strIP)
+        {
+            //  Split string by ".", check that array length is 4
+            string[] arrOctets = strIP.Split('.');
+            if (arrOctets.Length != 4)
+                return false;
+
+            //Check each substring checking that parses to byte
+            byte obyte = 0;
+            foreach (string strOctet in arrOctets)
+                if (!byte.TryParse(strOctet, out obyte))
+                    return false;
+
+            return true;
+        }
+
         public LogIn logIn
         {
-            get { return new LogIn { UserName = UserNameEdit.Text, Password = PassowrdEdit.Password }; } 
+            get
+            {
+                int dump;
+                if (CheckIPValid(IPAddressEdit.Text) && Int32.TryParse(PortEdit.Text, out dump))
+                    return new LogIn { UserName = UserNameEdit.Text, Password = PassowrdEdit.Password, IPAdress = IPAddressEdit.Text, Port = PortEdit.Text };
+                else
+                    return null;
+            } 
         }
     }
 }
