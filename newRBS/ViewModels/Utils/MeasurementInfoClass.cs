@@ -19,64 +19,61 @@ using Microsoft.Practices.ServiceLocation;
 using Microsoft.Win32;
 using System.IO;
 using OxyPlot;
+using newRBS.Database;
 
 namespace newRBS.ViewModels.Utils
 {
-    public class Ion
-    {
-        public string Name { get; set; }
-        public int AtomicNumber { get; set; }
-        public int AtomicMass { get; set; }
-
-        public Ion(string name, int atomicNumber, int atomicMass)
-        {
-            Name = name;
-            AtomicNumber = atomicNumber;
-            AtomicMass = atomicMass;
-        }
-    }
-
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.Utils.MeasurementInfo"/>. They display/edit the properties of a <see cref="Measurement"/>.
+    /// </summary>
     public class MeasurementInfoClass : INotifyPropertyChanged
     {
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
         public ICommand NewSampleCommand { get; set; }
 
-        private Models.Measurement _Measurement;
-        public Models.Measurement Measurement
+        private Measurement _Measurement;
+        public Measurement Measurement
         {
             get { return _Measurement; }
             set { if (value == null) return; _Measurement = value; OnPropertyChanged("Measurement"); }
         }
 
-        private ObservableCollection<Models.Sample> _Samples;
-        public ObservableCollection<Models.Sample> Samples
+        private ObservableCollection<Sample> _Samples;
+        public ObservableCollection<Sample> Samples
         { get { return _Samples; } set { _Samples = value; OnPropertyChanged("Samples"); } }
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
         public ObservableCollection<string> StopTypeList { get; set; }
-        public ObservableCollection<Ion> Ions { get; set; }
+        public ObservableCollection<ElementClass> Ions { get; set; }
 
-        public MeasurementInfoClass(Models.DatabaseDataContext database)
+        /// <summary>
+        /// Constructor of the class, storing the handled instance of <see cref="DatabaseDataContext"/> and initializing the collections for the Comboboxes.
+        /// </summary>
+        /// <param name="database"></param>
+        public MeasurementInfoClass(DatabaseDataContext database)
         {
             Database = database;
-            Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
             NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<Ion> { new Ion("H", 1, 1), new Ion("He", 2, 4), new Ion("Li", 3, 7) };
+            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
         }
 
+        /// <summary>
+        /// Function that creates a new <see cref="Sample"/> instance and attaches it the the current <see cref="Measurement"/>.
+        /// </summary>
         private void _NewSampleCommand()
         {
-            int? newSampleID = Models.DatabaseUtils.AddNewSample();
+            int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)
             {
-                Models.Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
+                Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
                 if (!Samples.Contains(newSample))
                     Samples.Add(newSample);
                 Measurement.Sample = newSample;

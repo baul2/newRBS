@@ -19,6 +19,13 @@ using Microsoft.Practices.ServiceLocation;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that is a thread save extension of <see cref="ObservableCollection{T}"/>.
+    /// </summary>
+    /// <remarks>
+    /// A thread save version is needed when, for example, a timer function - which is on another thread by default - wants to change the collection.
+    /// </remarks>
+    /// <typeparam name="T">Type of the items inside the collection.</typeparam>
     public class AsyncObservableCollection<T> : ObservableCollection<T>
     {
         private SynchronizationContext _synchronizationContext = SynchronizationContext.Current;

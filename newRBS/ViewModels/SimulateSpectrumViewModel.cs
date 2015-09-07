@@ -19,6 +19,7 @@ using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using GLib;
 using Epsara;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -30,7 +31,7 @@ namespace newRBS.ViewModels
 
         public ICommand StartSimulationCommand { get; set; }
 
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
         private ObservableCollection<AreaData> _MeasuredSpectrumData = new ObservableCollection<AreaData>();
         public ObservableCollection<AreaData> MeasuredSpectrumData
@@ -40,17 +41,17 @@ namespace newRBS.ViewModels
         public ObservableCollection<AreaData> SimulatedSpectrumData
         { get { return _SimulatedSpectrumData; } set { _SimulatedSpectrumData = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<Models.Sample> Samples { get; set; }
-        private Models.Sample _SelectedSample;
-        public Models.Sample SelectedSample
+        public ObservableCollection<Sample> Samples { get; set; }
+        private Sample _SelectedSample;
+        public Sample SelectedSample
         {
             get { return _SelectedSample; }
             set { _SelectedSample = value; SelectedSampleChanged(); RaisePropertyChanged(); }
         }
 
-        public ObservableCollection<Models.Measurement> Measurements { get; set; }
-        private Models.Measurement _SelectedMeasurement;
-        public Models.Measurement SelectedMeasurement
+        public ObservableCollection<Measurement> Measurements { get; set; }
+        private Measurement _SelectedMeasurement;
+        public Measurement SelectedMeasurement
         {
             get { return _SelectedMeasurement; }
             set { _SelectedMeasurement = value; SelectedMeasurementChanged(); RaisePropertyChanged(); }
@@ -60,11 +61,11 @@ namespace newRBS.ViewModels
         {
             StartSimulationCommand = new RelayCommand(() => _StartSimulationCommand(), () => true);
 
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database = new DatabaseDataContext(MyGlobals.ConString);
 
-            Measurements = new ObservableCollection<Models.Measurement>();
+            Measurements = new ObservableCollection<Measurement>();
 
-            Samples = new ObservableCollection<Models.Sample>(Database.Samples.ToList());
+            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
             Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
             //SelectedSample = Samples.FirstOrDefault();
         }
@@ -73,11 +74,11 @@ namespace newRBS.ViewModels
         {
             Measurements.Clear();
 
-            List<Models.Measurement> measurementList = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID).ToList();
+            List<Measurement> measurementList = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID).ToList();
 
             if (measurementList == null) return;
 
-            foreach (Models.Measurement measurement in measurementList)
+            foreach (Measurement measurement in measurementList)
                 Measurements.Add(measurement);
         }
 
@@ -121,9 +122,9 @@ namespace newRBS.ViewModels
             Console.WriteLine(SelectedSample.Material.Layers.Count);
             for (int i = 0; i < SelectedSample.Material.Layers.Count; i++)
             {
-                Models.Layer layer = SelectedSample.Material.Layers.FirstOrDefault(x => x.LayerIndex == i);
+                Layer layer = SelectedSample.Material.Layers.FirstOrDefault(x => x.LayerIndex == i);
                 Console.WriteLine("Try to add layer: {0}", layer.LayerName);
-                foreach (Models.Element element in layer.Elements)
+                foreach (Element element in layer.Elements)
                 {
                     Console.WriteLine("Try to add element: {0}", element.ElementName);
                     DataSimpleMaterial newSimpleMaterial = new DataSimpleMaterial();

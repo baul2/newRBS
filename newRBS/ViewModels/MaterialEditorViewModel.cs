@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -41,12 +42,12 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
-        public ObservableCollection<Models.Material> Materials { get; set; }
+        public ObservableCollection<Material> Materials { get; set; }
 
-        private Models.Material _SelectedMaterial;
-        public Models.Material SelectedMaterial
+        private Material _SelectedMaterial;
+        public Material SelectedMaterial
         {
             get { return _SelectedMaterial; }
             set
@@ -57,17 +58,17 @@ namespace newRBS.ViewModels
 
                 if (_SelectedMaterial != null)
                     if (_SelectedMaterial.Layers != null)
-                        foreach (Models.Layer layer in _SelectedMaterial.Layers)
+                        foreach (Layer layer in _SelectedMaterial.Layers)
                             Layers.Add(layer);
 
                 RaisePropertyChanged();
             }
         }
 
-        public ObservableCollection<Models.Layer> Layers { get; set; }
+        public ObservableCollection<Layer> Layers { get; set; }
 
-        private Models.Layer _SelectedLayer;
-        public Models.Layer SelectedLayer
+        private Layer _SelectedLayer;
+        public Layer SelectedLayer
         {
             get { return _SelectedLayer; }
             set
@@ -78,7 +79,7 @@ namespace newRBS.ViewModels
 
                 if (_SelectedLayer != null)
                     if (_SelectedLayer.Elements != null)
-                        foreach (Models.Element element in _SelectedLayer.Elements)
+                        foreach (Element element in _SelectedLayer.Elements)
                             Elements.Add(element);
 
                 RaisePropertyChanged();
@@ -87,19 +88,19 @@ namespace newRBS.ViewModels
 
         public CollectionViewSource LayersViewSource { get; set; }
 
-        public ObservableCollection<Models.Element> Elements { get; set; }
+        public ObservableCollection<Element> Elements { get; set; }
 
-        private Models.Element _SelectedElement;
-        public Models.Element SelectedElement
+        private Element _SelectedElement;
+        public Element SelectedElement
         { get { return _SelectedElement; } set { _SelectedElement = value; RaisePropertyChanged(); } }
 
         public MaterialEditorViewModel()
         {
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database = new DatabaseDataContext(MyGlobals.ConString);
 
-            Materials = new ObservableCollection<Models.Material>(Database.Materials.ToList());
-            Layers = new ObservableCollection<Models.Layer>();
-            Elements = new ObservableCollection<Models.Element>();
+            Materials = new ObservableCollection<Material>(Database.Materials.ToList());
+            Layers = new ObservableCollection<Layer>();
+            Elements = new ObservableCollection<Element>();
 
             AddMaterialCommand = new RelayCommand(() => _AddMaterialCommand(), () => true);
             RemoveMaterialCommand = new RelayCommand(() => _RemoveMaterialCommand(), () => true);
@@ -129,7 +130,7 @@ namespace newRBS.ViewModels
             if (inputDialog.ShowDialog() == true)
             {
   
-                Models.Material newMaterial = new Models.Material { MaterialName = inputDialog.Answer };
+                Material newMaterial = new Material { MaterialName = inputDialog.Answer };
 
                 Database.Materials.InsertOnSubmit(newMaterial);
                 Materials.Add(newMaterial);
@@ -165,7 +166,7 @@ namespace newRBS.ViewModels
 
             if (SelectedMaterial == null) return;
 
-            Models.Layer newLayer = new Models.Layer { LayerIndex = Layers.Count(), MaterialID = SelectedMaterial.MaterialID, Density = 1 };
+            Layer newLayer = new Layer { LayerIndex = Layers.Count(), MaterialID = SelectedMaterial.MaterialID, Density = 1 };
             
             Database.Layers.InsertOnSubmit(newLayer);
             Layers.Add(newLayer);
@@ -234,7 +235,7 @@ namespace newRBS.ViewModels
             if (SelectedLayer == null) return;
             //if (SelectedLayer.LayerID == 0) { MessageBox.Show("Save the new layer before adding elements!"); return; }
 
-            Models.Element newElement = new Models.Element { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID };
+            Element newElement = new Element { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID };
 
             Database.Elements.InsertOnSubmit(newElement);
             Elements.Add(newElement);

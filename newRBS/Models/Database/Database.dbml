@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="p4mist_db" Class="DatabaseDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=SVRH;Initial Catalog=p4mist_db;Persist Security Info=True;User ID=p4mist" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="p4mist_dbConnectionString2" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Elements" Member="Elements">
+    <Type Name="Element">
+      <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="LayerID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ElementName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="StoichiometricFactor" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="AtomicNumber" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="MassNumber" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+</Database>

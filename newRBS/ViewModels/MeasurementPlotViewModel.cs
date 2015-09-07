@@ -22,6 +22,7 @@ using OxyPlot.Axes;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
 using System.Diagnostics;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -74,8 +75,8 @@ namespace newRBS.ViewModels
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
-            Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
-            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdatePlot);
+            DatabaseUtils.EventMeasurementRemove += new DatabaseUtils.EventHandlerMeasurement(MeasurementNotToPlot);
+            DatabaseUtils.EventMeasurementUpdate += new DatabaseUtils.EventHandlerMeasurement(UpdatePlot);
 
             // Hooking up to events from SpectraList
             SimpleIoc.Default.GetInstance<MeasurementListViewModel>().EventMeasurementToPlot += new MeasurementListViewModel.EventHandlerMeasurement(MeasurementToPlot);
@@ -132,7 +133,7 @@ namespace newRBS.ViewModels
             UpdateYAxisTitle();
         }
 
-        private void MeasurementToPlot(Models.Measurement measurement)
+        private void MeasurementToPlot(Measurement measurement)
         {
             if (MeasurementIDList.Contains(measurement.MeasurementID))
             { Console.WriteLine("Measurement is already in MeasurementIDList!"); return; }
@@ -142,7 +143,7 @@ namespace newRBS.ViewModels
             PlotMeasurement(measurement);
         }
 
-        private void MeasurementNotToPlot(Models.Measurement measurement)
+        private void MeasurementNotToPlot(Measurement measurement)
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
@@ -161,7 +162,7 @@ namespace newRBS.ViewModels
             plotModel.InvalidatePlot(true);
         }
 
-        private void PlotMeasurement(Models.Measurement measurement)
+        private void PlotMeasurement(Measurement measurement)
         {
             if (SelectedDataBindingInterval>0 && measurement.EnergyCalSlope>SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
@@ -238,7 +239,7 @@ namespace newRBS.ViewModels
             plotModel.InvalidatePlot(true);
         }
 
-        private void UpdatePlot(Models.Measurement measurement)
+        private void UpdatePlot(Measurement measurement)
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
@@ -293,13 +294,13 @@ namespace newRBS.ViewModels
         {
             if (MeasurementIDList.Count() == 0) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                List<Models.Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
+                List<Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 
                 plotModel.Series.Clear();
 
-                foreach (Models.Measurement measurement in measurements)
+                foreach (Measurement measurement in measurements)
                 {
                     PlotMeasurement(measurement);
                 }

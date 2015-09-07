@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['sample',['Sample',['../classnew_r_b_s_1_1_models_1_1_sample.html',1,'newRBS::Models']]]
+  ['namevalueclass',['NameValueClass',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_name_value_class.html',1,'newRBS::ViewModels::Utils']]]
 ];

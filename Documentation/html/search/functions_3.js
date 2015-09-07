@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['exportmeasurements',['ExportMeasurements',['../classnew_r_b_s_1_1_models_1_1_database_utils.html#aaccac22128e56334f35741fef3be5047',1,'newRBS::Models::DatabaseUtils']]]
+  ['energycalibrationviewmodel',['EnergyCalibrationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_energy_calibration_view_model.html#acd2cbe0b93324872e6ebdae86981ea8d',1,'newRBS::ViewModels::EnergyCalibrationViewModel']]],
+  ['exportmeasurements',['ExportMeasurements',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#aaa6b1acdb34c0d7323b75ad44b6a64f1',1,'newRBS::Database::DatabaseUtils']]]
 ];

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class that defines a point in an OxyPlot plot.
+    /// </summary>
     public class AreaData
     {
         public double x1 { get; set; }

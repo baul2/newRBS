@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -29,7 +30,7 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        private Models.DatabaseDataContext Database;
+        private DatabaseDataContext Database;
 
         public MeasurementInfoClass MeasurementInfo { get; set; }
 
@@ -38,7 +39,7 @@ namespace newRBS.ViewModels
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
-            Database = new Models.DatabaseDataContext(MyGlobals.ConString);
+            Database = new DatabaseDataContext(MyGlobals.ConString);
             MeasurementInfo = new MeasurementInfoClass(Database);
             MeasurementInfo.Measurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
         }

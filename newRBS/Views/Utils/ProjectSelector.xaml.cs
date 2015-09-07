@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.Views.Utils
 {
@@ -25,15 +26,15 @@ namespace newRBS.Views.Utils
     /// </summary>
     public partial class ProjectSelector : Window
     {
-        public ObservableCollection<Models.Project> Projects { get; set; }
+        public ObservableCollection<Project> Projects { get; set; }
 
         public ProjectSelector()
         {
             InitializeComponent();
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                Projects = new ObservableCollection<Models.Project>(Database.Projects.ToList());
+                Projects = new ObservableCollection<Project>(Database.Projects.ToList());
             }
 
             if (Projects.Count() == 0) this.Close();
@@ -47,9 +48,9 @@ namespace newRBS.Views.Utils
             this.DialogResult = true;
         }
 
-        public Models.Project SelectedProject
+        public Project SelectedProject
         {
-            get { return (Models.Project)cBox.SelectedItem; }
+            get { return (Project)cBox.SelectedItem; }
         }
     }
 }

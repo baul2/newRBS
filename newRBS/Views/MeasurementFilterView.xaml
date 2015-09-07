@@ -18,7 +18,7 @@
                     <Expander Header="Measurement filter" IsExpanded="True">
                         <StackPanel>
                             <ComboBox Name="FilterType" ItemsSource="{Binding filterTypeList}" SelectedIndex="{Binding filterTypeIndex}" />
-                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" viewmodelutils:TreeViewHelper.SelectedItem="{Binding selectedFilter}" viewmodelutils:TreeViewHelper.SelectedItemChanged="{Binding MySelItemChgCmd}">
+                            <TreeView ItemsSource="{Binding Path=filterTree.Items}" viewmodelutils:TreeViewHelper.SelectedItem="{Binding selectedFilter}" viewmodelutils:TreeViewHelper.SelectedItemChanged="{Binding SelectedItemChanged}">
                                 <TreeView.Resources>
                                     <Style TargetType="TreeViewItem">
                                         <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />

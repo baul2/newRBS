@@ -14,9 +14,6 @@ using System.Windows.Shapes;
 
 namespace newRBS.Views.Utils
 {
-    /// <summary>
-    /// Interaction logic for InputDialog.xaml
-    /// </summary>
     public partial class InputDialog : Window
     {
         public InputDialog(string question, string defaultAnswer = "")

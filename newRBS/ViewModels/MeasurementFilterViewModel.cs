@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -69,7 +70,7 @@ namespace newRBS.ViewModels
 
         public FilterClass selectedFilter { get; set; }
 
-        public RelayCommand<TreeViewHelper.DependencyPropertyEventArgs> MySelItemChgCmd { get; set; }
+        public RelayCommand<TreeViewHelper.DependencyPropertyEventArgs> SelectedItemChanged { get; set; }
 
         private void TreeViewItemSelectedChangedCallBack(TreeViewHelper.DependencyPropertyEventArgs e)
         {
@@ -84,10 +85,10 @@ namespace newRBS.ViewModels
 
         public TreeViewModel filterTree { get; set; }
 
-        public ObservableCollection<Models.Project> Projects { get; set; }
+        public ObservableCollection<Project> Projects { get; set; }
 
-        private Models.Project _SelectedProject;
-        public Models.Project SelectedProject
+        private Project _SelectedProject;
+        public Project SelectedProject
         {
             get { return _SelectedProject; }
             set
@@ -135,13 +136,13 @@ namespace newRBS.ViewModels
             filterTree.Items = new AsyncObservableCollection<FilterClass>();
             selectedFilter = new FilterClass() { Name = "All", Type = "All" };
 
-            MySelItemChgCmd = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
+            SelectedItemChanged = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
 
             filterTypeIndex = 0;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
-                Projects = new ObservableCollection<Models.Project>(Database.Projects.ToList());
+                Projects = new ObservableCollection<Project>(Database.Projects.ToList());
             }
         }
 
@@ -168,7 +169,7 @@ namespace newRBS.ViewModels
                     filterTree.Items.Add(new FilterClass() { Name = "This Month", Type = "Date", SubType = "ThisMonth" });
                     filterTree.Items.Add(new FilterClass() { Name = "This Year", Type = "Date", SubType = "ThisYear" });
 
-                    using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                    using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                     {
                         Console.WriteLine("All count: {0}", Database.Measurements.ToList().Count());
                         List<int> allYears = (from spec in Database.Measurements select spec.StartTime.Year).Distinct().ToList();
@@ -206,7 +207,7 @@ namespace newRBS.ViewModels
                     Console.WriteLine("Channel");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
-                    using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                    using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                     {
                         List<int> allChannels = Database.Measurements.Select(x => x.Channel).Distinct().ToList();
                         Console.WriteLine("NumChannels {0}", allChannels.Count());
@@ -223,7 +224,7 @@ namespace newRBS.ViewModels
                     Console.WriteLine("Sample");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
-                    using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                    using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                     {
                         //List<string> allSampleNames = (from sample in Database.Samples select sample.SampleName).Distinct().ToList();
                         List<string> allSampleNames = Database.Samples.Select(x => x.SampleName).ToList();
@@ -248,7 +249,7 @@ namespace newRBS.ViewModels
         {
             if (selectedFilter == null) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 List<int> MeasurementIDList = new List<int>();
 
@@ -301,11 +302,11 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void SelectProject(Models.Project project)
+        private void SelectProject(Project project)
         {
             if (project == null) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 Console.WriteLine("Load project");
                 List<int> MeasurementIDList = Database.Measurement_Projects.Where(x => x.ProjectID == project.ProjectID).Select(x => x.MeasurementID).ToList();
@@ -319,9 +320,9 @@ namespace newRBS.ViewModels
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new project name:", "");
             if (inputDialog.ShowDialog() == true)
                 if (inputDialog.Answer != "")
-                    using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                    using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                     {
-                        Models.Project newProject = new Models.Project { ProjectName = inputDialog.Answer };
+                        Project newProject = new Project { ProjectName = inputDialog.Answer };
                         Database.Projects.InsertOnSubmit(newProject);
                         Database.SubmitChanges();
                         Projects.Add(newProject);
@@ -336,9 +337,9 @@ namespace newRBS.ViewModels
             if (inputDialog.ShowDialog() == true)
                 if (inputDialog.Answer != "")
                 {
-                    using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                    using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                     {
-                        Models.Project renamedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
+                        Project renamedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
                         renamedProject.ProjectName = inputDialog.Answer;
                         Database.SubmitChanges();
                     }
@@ -355,7 +356,7 @@ namespace newRBS.ViewModels
 
             if (messageBox == MessageBoxResult.Yes)
             {
-                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                 {
                     Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => x.ProjectID == SelectedProject.ProjectID));
                     Database.Projects.DeleteOnSubmit(Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
@@ -378,13 +379,13 @@ namespace newRBS.ViewModels
             {
                 Console.WriteLine(projectSelector.SelectedProject.ProjectName);
 
-                using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+                using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
                 {
-                    List<Models.Measurement_Project> newMeasurement_Projects = new List<Models.Measurement_Project>();
+                    List<Measurement_Project> newMeasurement_Projects = new List<Measurement_Project>();
 
                     foreach (int ID in selectedMeasurementIDs)
                     {
-                        newMeasurement_Projects.Add(new Models.Measurement_Project { MeasurementID = ID, ProjectID = projectSelector.SelectedProject.ProjectID });
+                        newMeasurement_Projects.Add(new Measurement_Project { MeasurementID = ID, ProjectID = projectSelector.SelectedProject.ProjectID });
                     }
 
                     Database.Measurement_Projects.InsertAllOnSubmit(newMeasurement_Projects);
@@ -401,7 +402,7 @@ namespace newRBS.ViewModels
 
             if (selectedMeasurementIDs.Count() == 0) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();

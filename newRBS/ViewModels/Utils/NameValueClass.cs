@@ -6,6 +6,9 @@ using System.Runtime.CompilerServices;
 
 namespace newRBS.ViewModels.Utils
 {
+    /// <summary>
+    /// Class providing an item for collections, that consists of a <see cref="Name"/> an integer <see cref="Value"/>.
+    /// </summary>
     public class NameValueClass : INotifyPropertyChanged
     {
         private string _Name;
@@ -22,10 +25,15 @@ namespace newRBS.ViewModels.Utils
             set { _Value = value; OnPropertyChanged(); }
         }
 
-        public NameValueClass(string name, int value)
+        /// <summary>
+        /// Constructor of the class, initializing both, the <see cref="Name"/> and <see cref="Value"/> of the class.
+        /// </summary>
+        /// <param name="Name">The name of the property.</param>
+        /// <param name="Value">The value (int) of the property.</param>
+        public NameValueClass(string Name, int Value)
         {
-            Name = name;
-            Value = value;
+            this.Name = Name;
+            this.Value = Value;
         }
 
         #region INotifyPropertyChanged

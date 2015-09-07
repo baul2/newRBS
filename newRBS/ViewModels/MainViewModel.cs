@@ -19,6 +19,7 @@ using Microsoft.Practices.ServiceLocation;
 using System.Diagnostics;
 using Microsoft.Win32;
 using System.IO;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -90,7 +91,7 @@ namespace newRBS.ViewModels
         {
             Models.MeasureSpectra measureSpectra;
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-            measureSpectra.StopMeasurements();
+            measureSpectra.StopAcquisitions();
         }
 
         public void _ImportMeasurementsCommand()
@@ -117,7 +118,7 @@ namespace newRBS.ViewModels
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "newRBS file (*.xml)|*.xml|Spektrenverwaltung file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
-                Models.DatabaseUtils.ExportMeasurements(selectedMeasurementIDs, saveFileDialog.FileName);
+                DatabaseUtils.ExportMeasurements(selectedMeasurementIDs, saveFileDialog.FileName);
         }
 
         public void _DeleteMeasurementsCommand()
@@ -128,7 +129,7 @@ namespace newRBS.ViewModels
             MessageBoxResult rsltMessageBox = MessageBox.Show("Are you shure to delete the selected measurements?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
 
             if (rsltMessageBox == MessageBoxResult.Yes)
-                Models.DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
+                DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
         }
 
         public void _SaveMeasurementPlotCommand()
@@ -136,7 +137,7 @@ namespace newRBS.ViewModels
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Bitmap file (*.png)|*.png|Vector file (*.pdf)|*.pdf|Vector file (*.svg)|*.svg|Data file (*.dat)|*.dat";
             if (saveFileDialog.ShowDialog() == true)
-                Models.DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
+                DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
         public void _ChannelConfigurationCommand()

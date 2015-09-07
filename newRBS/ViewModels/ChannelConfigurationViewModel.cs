@@ -28,6 +28,9 @@ using Microsoft.Win32;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.ChannelConfigurationView"/>. They set the channel configurations and display waveforms.
+    /// </summary>
     public class ChannelConfigurationViewModel : ViewModelBase
     {
         private Models.MeasureWaveform measureWaveform;
@@ -40,7 +43,10 @@ namespace newRBS.ViewModels
         public ICommand SaveToFileCommand { get; set; }
         public ICommand LoadFromFileCommand { get; set; }
 
-        public PlotModel plotModel { get; set; }
+        /// <summary>
+        /// Contains all the plot data and the plot style of the OxyPlot in <see cref="Views.ChannelConfigurationView"/>.
+        /// </summary>
+        public PlotModel WaveformPlot { get; set; }
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -69,12 +75,7 @@ namespace newRBS.ViewModels
         public int selectedChannel
         {
             get { return _selectedChannel; }
-            set
-            {
-                _selectedChannel = value;
-                channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
-                RaisePropertyChanged();
-            }
+            set { _selectedChannel = value; channelParams = measureWaveform.GetChannelConfig(_selectedChannel); RaisePropertyChanged(); }
         }
 
         public ObservableCollection<NameValueClass> InputRange { get; set; }
@@ -84,6 +85,9 @@ namespace newRBS.ViewModels
         public ObservableCollection<NameValueClass> BaselineMean { get; set; }
         public ObservableCollection<NameValueClass> PeakMean { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands, hooks up to events and sets the collections and selected items of the view.
+        /// </summary>
         public ChannelConfigurationViewModel()
         {
             StartCommand = new RelayCommand(() => _StartCommand(), () => true);
@@ -121,23 +125,26 @@ namespace newRBS.ViewModels
 
             channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
 
-            plotModel = new PlotModel();
+            WaveformPlot = new PlotModel();
             SetUpModel();
         }
 
+        /// <summary>
+        /// Function that configures the OxyPlot <see cref="PlotModel"/> <see cref="WaveformPlot"/>.
+        /// </summary>
         private void SetUpModel()
         {
-            plotModel.LegendOrientation = LegendOrientation.Vertical;
-            plotModel.LegendPlacement = LegendPlacement.Inside;
-            plotModel.LegendPosition = LegendPosition.TopRight;
-            plotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
-            plotModel.LegendBorder = OxyColors.Black;
+            WaveformPlot.LegendOrientation = LegendOrientation.Vertical;
+            WaveformPlot.LegendPlacement = LegendPlacement.Inside;
+            WaveformPlot.LegendPosition = LegendPosition.TopRight;
+            WaveformPlot.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
+            WaveformPlot.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Time (µs)", TitleFontSize = 16, AxisTitleDistance = 8, Minimum = 0 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "LSB", TitleFontSize = 16, AxisTitleDistance = 12 };
 
-            plotModel.Axes.Add(xAxis);
-            plotModel.Axes.Add(yAxis);
+            WaveformPlot.Axes.Add(xAxis);
+            WaveformPlot.Axes.Add(yAxis);
 
             var AP1Series = new LineSeries
             { Tag = "AP1Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
@@ -151,41 +158,48 @@ namespace newRBS.ViewModels
             var DP2Series = new LineSeries
             { Tag = "DP2Series", StrokeThickness = 2, MarkerSize = 3, CanTrackerInterpolatePoints = false, Smooth = false, };
 
-            plotModel.Series.Add(AP1Series);
-            plotModel.Series.Add(AP2Series);
-            plotModel.Series.Add(DP1Series);
-            plotModel.Series.Add(DP2Series);
+            WaveformPlot.Series.Add(AP1Series);
+            WaveformPlot.Series.Add(AP2Series);
+            WaveformPlot.Series.Add(DP1Series);
+            WaveformPlot.Series.Add(DP2Series);
         }
 
-        private void WaveformUpdate(Models.Waveform waveform)
+        /// <summary>
+        /// Updates the y-data of the four line plots in <see cref="WaveformPlot"/> with the data of in <see cref="Models.Waveform"/> instance.
+        /// </summary>
+        /// <param name="Waveform">A <see cref="Models.Waveform"/> containing the data for the four waveform plots.</param>
+        private void WaveformUpdate(Models.Waveform Waveform)
         {
             double x;
 
-            if (waveform.NumSamples == 0)
+            if (Waveform.NumSamples == 0)
                 return;
 
-            (plotModel.Series[0] as LineSeries).Points.Clear();
-            (plotModel.Series[1] as LineSeries).Points.Clear();
-            (plotModel.Series[2] as LineSeries).Points.Clear();
-            (plotModel.Series[3] as LineSeries).Points.Clear();
+            (WaveformPlot.Series[0] as LineSeries).Points.Clear();
+            (WaveformPlot.Series[1] as LineSeries).Points.Clear();
+            (WaveformPlot.Series[2] as LineSeries).Points.Clear();
+            (WaveformPlot.Series[3] as LineSeries).Points.Clear();
 
-            for (int i = 0; i < waveform.NumSamples; i++)
+            for (int i = 0; i < Waveform.NumSamples; i++)
             {
-                x = i * waveform.LenSample / 1000;
-                (plotModel.Series[0] as LineSeries).Points.Add(new DataPoint(x, waveform.AT1[i]));
-                (plotModel.Series[1] as LineSeries).Points.Add(new DataPoint(x, waveform.AT2[i]));
-                (plotModel.Series[2] as LineSeries).Points.Add(new DataPoint(x, 1000 * waveform.DT1[i]));
-                (plotModel.Series[3] as LineSeries).Points.Add(new DataPoint(x, 1000 * waveform.DT2[i]));
+                x = i * Waveform.LenSample / 1000;
+                (WaveformPlot.Series[0] as LineSeries).Points.Add(new DataPoint(x, Waveform.AT1[i]));
+                (WaveformPlot.Series[1] as LineSeries).Points.Add(new DataPoint(x, Waveform.AT2[i]));
+                (WaveformPlot.Series[2] as LineSeries).Points.Add(new DataPoint(x, 1000 * Waveform.DT1[i]));
+                (WaveformPlot.Series[3] as LineSeries).Points.Add(new DataPoint(x, 1000 * Waveform.DT2[i]));
             }
-            plotModel.InvalidatePlot(true);
+            WaveformPlot.InvalidatePlot(true);
         }
 
+        /// <summary>
+        /// Function that starts the waveform acquisition for the <see cref="selectedChannel"/>.
+        /// </summary>
         private void _StartCommand()
         {
-            plotModel.Series[0].Title = selectedAP1;
-            plotModel.Series[1].Title = selectedAP2;
-            plotModel.Series[2].Title = selectedDP1;
-            plotModel.Series[3].Title = selectedDP2;
+            WaveformPlot.Series[0].Title = selectedAP1;
+            WaveformPlot.Series[1].Title = selectedAP2;
+            WaveformPlot.Series[2].Title = selectedDP1;
+            WaveformPlot.Series[3].Title = selectedDP2;
 
             Models.CAENDPP_PHA_AnalogProbe1_t AP1 = (Models.CAENDPP_PHA_AnalogProbe1_t)Enum.Parse(typeof(Models.CAENDPP_PHA_AnalogProbe1_t), selectedAP1, true);
             Models.CAENDPP_PHA_AnalogProbe2_t AP2 = (Models.CAENDPP_PHA_AnalogProbe2_t)Enum.Parse(typeof(Models.CAENDPP_PHA_AnalogProbe2_t), selectedAP2, true);
@@ -195,11 +209,17 @@ namespace newRBS.ViewModels
             measureWaveform.StartAcquisition(selectedChannel);
         }
 
+        /// <summary>
+        /// Function that stops the waveform acquisition.
+        /// </summary>
         private void _StopCommand()
         {
             measureWaveform.StopAcquisition();
         }
 
+        /// <summary>
+        /// Function that opens a save file dialog and saves the current <see cref="Models.Waveform"/> as an ASCII file.
+        /// </summary>
         private void _SaveWaveformCommand()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -220,16 +240,22 @@ namespace newRBS.ViewModels
                 WriteFileStream.WriteLine("Sample number\t{0}\t{1}\t{2}\t{3}", selectedAP1, selectedAP2, selectedDP1, selectedDP2);
                 for (int i = 0; i < measureWaveform.waveform.AT1.Count(); i++)
                     WriteFileStream.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", i, measureWaveform.waveform.AT1[i], measureWaveform.waveform.AT2[i], measureWaveform.waveform.DT1[i], measureWaveform.waveform.DT2[i]);
-                
+
                 WriteFileStream.Close();
             }
         }
 
+        /// <summary>
+        /// Function that sends the <see cref="channelParams"/> and the <see cref="selectedChannel"/> to <see cref="MeasureWaveform.SetChannelConfig"/>
+        /// </summary>
         private void _SendToDeviceCommand()
         {
             measureWaveform.SetChannelConfig(_selectedChannel, channelParams);
         }
 
+        /// <summary>
+        /// Function that saves the current <see cref="channelParams"/> instance to an '.xml' file.
+        /// </summary>
         private void _SaveToFileCommand()
         {
             XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
@@ -244,6 +270,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that loads the current <see cref="channelParams"/> instance from an '.xml' file.
+        /// </summary>
         private void _LoadFromFileCommand()
         {
             Console.WriteLine("_LoadFromFileCommand");

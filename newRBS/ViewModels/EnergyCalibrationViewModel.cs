@@ -23,20 +23,27 @@ using OxyPlot.Axes;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
 using MathNet.Numerics;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is an item of a datagrid.
+    /// </summary>
     public class EnergyCalListItem : ViewModelBase
     {
         public string Name { get; set; }
         public int Channel { get; set; }
-        public Utils.Element Element { get; set; }
+        public ElementClass Element { get; set; }
 
         private double? _CalibratedEnergy;
         public double? CalibratedEnergy
         { get { return _CalibratedEnergy; } set { _CalibratedEnergy = value; RaisePropertyChanged(); } }
     }
 
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.EnergyCalibrationView"/>. They calculate the energy calibration for a given set of <see cref="Measurement"/>s.
+    /// </summary>
     public class EnergyCalibrationViewModel : ViewModelBase
     {
         public ICommand AddToListCommand { get; set; }
@@ -53,9 +60,9 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
-        private List<Models.Measurement> selectedMeasurements;
+        private List<Measurement> selectedMeasurements;
 
-        public PlotModel plotModel { get; set; }
+        public PlotModel SelectedMeasurementsPlot { get; set; }
 
         private List<OxyColor> LineColors { get; set; }
 
@@ -64,9 +71,9 @@ namespace newRBS.ViewModels
         private int _Channel;
         public int Channel { get { return _Channel; } set { _Channel = value; RaisePropertyChanged(); } }
 
-        public ObservableCollection<Utils.Element> Elements { get; set; }
+        public ObservableCollection<Utils.ElementClass> Elements { get; set; }
 
-        public Utils.Element SelectedElement { get; set; }
+        public Utils.ElementClass SelectedElement { get; set; }
 
         public ObservableCollection<EnergyCalListItem> EnergyCalList { get; set; }
 
@@ -76,6 +83,9 @@ namespace newRBS.ViewModels
         private double? _ECalSlope;
         public double? ECalSlope { get { return _ECalSlope; } set { _ECalSlope = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands, collections and selected items of the view.
+        /// </summary>
         public EnergyCalibrationViewModel()
         {
             AddToListCommand = new RelayCommand(() => _AddToListCommand(), () => true);
@@ -97,14 +107,14 @@ namespace newRBS.ViewModels
             if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonAtomicNumber).Distinct().ToList().Count > 1)
             { MessageBox.Show("Select only measurements with identical irradiation parameters!"); ValidSelectedMeasurements = false; return; }
 
-            Elements = new ObservableCollection<Utils.Element>();
+            Elements = new ObservableCollection<Utils.ElementClass>();
             for (int i = 0; i < ElementData.ElementCount; i++)
-                Elements.Add(new Utils.Element { AtomicNumber = ElementData.AtomicNumber[i], AtomicMass = ElementData.AtomicMass[i], ShortName = ElementData.ShortName[i], LongName = ElementData.LongName[i] });
+                Elements.Add(new Utils.ElementClass { AtomicNumber = ElementData.AtomicNumber[i], AtomicMass = ElementData.AtomicMass[i], ShortName = ElementData.ShortName[i], LongName = ElementData.LongName[i] });
 
             SelectedElement = Elements[0];
 
             SelectedMeasurements = new ObservableCollection<NameValueClass>();
-            foreach (Models.Measurement m in selectedMeasurements)
+            foreach (Measurement m in selectedMeasurements)
                 SelectedMeasurements.Add(new NameValueClass(m.MeasurementID + ", " + m.MeasurementName + ", " + m.Sample.SampleName, m.MeasurementID));
 
             EnergyCalList = new ObservableCollection<EnergyCalListItem>();
@@ -124,35 +134,41 @@ namespace newRBS.ViewModels
                 OxyColors.Violet
             };
 
-            plotModel = new PlotModel();
+            SelectedMeasurementsPlot = new PlotModel();
 
             SetUpModel();
 
             PlotMeasurements();
         }
 
+        /// <summary>
+        /// Function that configures the plot of the selected <see cref="Measurement"/>s.
+        /// </summary>
         private void SetUpModel()
         {
-            plotModel.LegendOrientation = LegendOrientation.Vertical;
-            plotModel.LegendPlacement = LegendPlacement.Inside;
-            plotModel.LegendPosition = LegendPosition.TopRight;
-            plotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
-            plotModel.LegendBorder = OxyColors.Black;
+            SelectedMeasurementsPlot.LegendOrientation = LegendOrientation.Vertical;
+            SelectedMeasurementsPlot.LegendPlacement = LegendPlacement.Inside;
+            SelectedMeasurementsPlot.LegendPosition = LegendPosition.TopRight;
+            SelectedMeasurementsPlot.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
+            SelectedMeasurementsPlot.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Channel", TitleFontSize = 16, AxisTitleDistance = 8, Minimum = 0 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "Counts", TitleFontSize = 16, AxisTitleDistance = 12, Minimum = 0 };
-            plotModel.Axes.Add(xAxis);
-            plotModel.Axes.Add(yAxis);
-            plotModel.MouseDown += (s, e) =>
+            SelectedMeasurementsPlot.Axes.Add(xAxis);
+            SelectedMeasurementsPlot.Axes.Add(yAxis);
+            SelectedMeasurementsPlot.MouseDown += (s, e) =>
             {
                 var XY = Axis.InverseTransform(e.Position, xAxis, yAxis);
-                AddXY(XY.X, XY.Y);
+                Channel = (int)Math.Round(XY.X);
             };
         }
 
+        /// <summary>
+        /// Function that plots all selected <see cref="Measurement"/>s over their channel number.
+        /// </summary>
         private void PlotMeasurements()
         {
-            foreach (Models.Measurement measurement in selectedMeasurements)
+            foreach (Measurement measurement in selectedMeasurements)
             {
                 var areaSeries = new AreaSeries
                 {
@@ -171,16 +187,14 @@ namespace newRBS.ViewModels
                     areaSeries.Points.Add(new DataPoint(i, spectrumY[i]));
                     areaSeries.Points2.Add(new DataPoint(i, 0));
                 }
-                plotModel.Series.Add(areaSeries);
+                SelectedMeasurementsPlot.Series.Add(areaSeries);
             }
-            plotModel.InvalidatePlot(true);
+            SelectedMeasurementsPlot.InvalidatePlot(true);
         }
 
-        private void AddXY(double X, double Y)
-        {
-            Channel = (int)Math.Round(X);
-        }
-
+        /// <summary>
+        /// Function that adds the selected channel and element to the <see cref="EnergyCalList"/>.
+        /// </summary>
         private void _AddToListCommand()
         {
             if (Channel == 0) return;
@@ -190,17 +204,23 @@ namespace newRBS.ViewModels
             EnergyCalList.Add(new EnergyCalListItem { Channel = Channel, Element = SelectedElement });
         }
 
+        /// <summary>
+        /// Function that clears the <see cref="EnergyCalList"/>.
+        /// </summary>
         private void _ClearListCommand()
         {
             EnergyCalList.Clear();
         }
 
+        /// <summary>
+        /// Function that calculates the energy calibration using the items in <see cref="EnergyCalList"/>. The results are displayed in the view.
+        /// </summary>
         private void _CalculateEnergyCalCommand()
         {
             if (EnergyCalList.Count() < 2)
             { MessageBox.Show("Add at least two points to the list!", "Error"); return; }
 
-            Models.Measurement m = selectedMeasurements[0];
+            Measurement m = selectedMeasurements[0];
 
             foreach (EnergyCalListItem e in EnergyCalList)
                 e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * KineFak(ElementData.AtomicMass[m.IncomingIonAtomicNumber - 1], e.Element.AtomicMass, m.OutcomingIonAngle), 1);
@@ -211,14 +231,17 @@ namespace newRBS.ViewModels
             ECalSlope = Math.Round(result.Item2,4);
         }
 
+        /// <summary>
+        /// Function that saves the values of <see cref="ECalOffset"/> and <see cref="ECalSlope"/> in the selected measurements and closes the dialog.
+        /// </summary>
         private void _SaveEnergyCalCommand()
         {
             if (ECalOffset == null || ECalSlope == null) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 var m = Database.Measurements.Where(x => selectedMeasurements.Select(y => y.MeasurementID).ToList().Contains(x.MeasurementID));
-                foreach (Models.Measurement measurement in m)
+                foreach (Measurement measurement in m)
                 {
                     measurement.EnergyCalOffset = (double)ECalOffset;
                     measurement.EnergyCalSlope = (double)ECalSlope;
@@ -228,11 +251,21 @@ namespace newRBS.ViewModels
             DialogResult = false;
         }
 
+        /// <summary>
+        /// Function that cancels the dialog.
+        /// </summary>
         private void _CancelCalCommand()
         {
             DialogResult = false;
         }
 
+        /// <summary>
+        /// Function that calculates the kinematic factor k.
+        /// </summary>
+        /// <param name="IncomingIonMass">Mass of the incoming ion in [u].</param>
+        /// <param name="TargetAtomMass">Mass of the target atom in [u].</param>
+        /// <param name="ThetaDegree">Angle of the scatterin process in [°].</param>
+        /// <returns></returns>
         private double KineFak(double IncomingIonMass, double TargetAtomMass, double ThetaDegree)
         {
             Console.WriteLine(IncomingIonMass);

@@ -1,10 +1,11 @@
 var indexSectionsWithContent =
 {
-  0: "acdegilmnpsvwx",
-  1: "cdeilmpsvw",
+  0: "acdefgilmnpstvwx",
+  1: "acdeflmnpstvw",
   2: "enx",
-  3: "acdegilmsv",
-  4: "c"
+  3: "acdegilmnsv",
+  4: "c",
+  5: "sw"
 };
 
 var indexSectionNames =
@@ -13,7 +14,8 @@ var indexSectionNames =
   1: "classes",
   2: "namespaces",
   3: "functions",
-  4: "enums"
+  4: "enums",
+  5: "properties"
 };
 
 var indexSectionLabels =
@@ -22,6 +24,7 @@ var indexSectionLabels =
   1: "Classes",
   2: "Namespaces",
   3: "Functions",
-  4: "Enumerations"
+  4: "Enumerations",
+  5: "Properties"
 };
 

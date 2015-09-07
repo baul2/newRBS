@@ -18,6 +18,7 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using Microsoft.Win32;
+using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
@@ -36,7 +37,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        public delegate void EventHandlerMeasurement(Models.Measurement measurement);
+        public delegate void EventHandlerMeasurement(Measurement measurement);
         public event EventHandlerMeasurement EventMeasurementToPlot, EventMeasurementNotToPlot;
 
         public List<SelectableMeasurement> ModifiedItems { get; set; }
@@ -54,9 +55,9 @@ namespace newRBS.ViewModels
         public MeasurementListViewModel()
         {
             // Hooking up to events from DatabaseUtils
-            Models.DatabaseUtils.EventMeasurementRemove += new Models.DatabaseUtils.EventHandlerMeasurement(DeleteRemovedMeasurementFromList);
-            Models.DatabaseUtils.EventMeasurementNew += new Models.DatabaseUtils.EventHandlerMeasurement(AddNewMeasurementToList);
-            Models.DatabaseUtils.EventMeasurementUpdate += new Models.DatabaseUtils.EventHandlerMeasurement(UpdateMeasurementInList);
+            DatabaseUtils.EventMeasurementRemove += new DatabaseUtils.EventHandlerMeasurement(DeleteRemovedMeasurementFromList);
+            DatabaseUtils.EventMeasurementNew += new DatabaseUtils.EventHandlerMeasurement(AddNewMeasurementToList);
+            DatabaseUtils.EventMeasurementUpdate += new DatabaseUtils.EventHandlerMeasurement(UpdateMeasurementInList);
 
             // Hooking up to events from SpectraFilter
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ChangeFilter);
@@ -80,11 +81,11 @@ namespace newRBS.ViewModels
             measurementInfoView.ShowDialog();
 
             // Update selected row
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 SelectableMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
                 myMeasurement.Measurement = Database.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
-                Models.Sample temp = myMeasurement.Measurement.Sample; // To load the sample bevor the scope of db ends
+                Sample temp = myMeasurement.Measurement.Sample; // To load the sample bevor the scope of db ends
             }
         }
 
@@ -142,14 +143,14 @@ namespace newRBS.ViewModels
         {
             MeasurementList.Clear();
 
-            List<Models.Measurement> newMeasurementList = new List<Models.Measurement>();
-            Models.Sample tempSample;
+            List<Measurement> newMeasurementList = new List<Measurement>();
+            Sample tempSample;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 newMeasurementList = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 
-                foreach (Models.Measurement measurement in newMeasurementList)
+                foreach (Measurement measurement in newMeasurementList)
                 {
                     tempSample = measurement.Sample;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
@@ -160,7 +161,7 @@ namespace newRBS.ViewModels
             MeasurementListViewSource.View.Refresh();
         }
 
-        private void AddNewMeasurementToList(Models.Measurement measurement)
+        private void AddNewMeasurementToList(Measurement measurement)
         {
             Console.WriteLine("AddNewMeasurementToList");
             MeasurementList.Add(new SelectableMeasurement() { Selected = true, Measurement = measurement });
@@ -169,7 +170,7 @@ namespace newRBS.ViewModels
         }
 
 
-        private void DeleteRemovedMeasurementFromList(Models.Measurement measurement)
+        private void DeleteRemovedMeasurementFromList(Measurement measurement)
         {
             Console.WriteLine("DeleteRemovedMeasurementFromList");
             SelectableMeasurement delMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
@@ -178,7 +179,7 @@ namespace newRBS.ViewModels
                 MeasurementList.Remove(delMeasurement);
         }
 
-        private void UpdateMeasurementInList(Models.Measurement measurement)
+        private void UpdateMeasurementInList(Measurement measurement)
         {
             SelectableMeasurement updateMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
 

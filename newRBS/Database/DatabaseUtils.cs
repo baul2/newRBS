@@ -19,7 +19,7 @@ using OxyPlot.Axes;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
 
-namespace newRBS.Models
+namespace newRBS.Database
 {
     /// <summary>
     /// Class providing utilities to manage the <see cref="Measurement"/>s inside the MS SQL Server database (<see cref="DatabaseDataContext"/>).
@@ -369,7 +369,7 @@ namespace newRBS.Models
         {
             if (MeasurementIDs.Count() == 0) return;
 
-            using (Models.DatabaseDataContext Database = new Models.DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
             {
                 Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();
