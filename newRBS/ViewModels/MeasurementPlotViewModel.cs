@@ -155,7 +155,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void ClearPlot(List<int> dump)
+        public void ClearPlot(List<int> dump)
         {
             plotModel.Series.Clear();
             MeasurementIDList.Clear();
@@ -294,7 +294,7 @@ namespace newRBS.ViewModels
         {
             if (MeasurementIDList.Count() == 0) return;
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 List<Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 

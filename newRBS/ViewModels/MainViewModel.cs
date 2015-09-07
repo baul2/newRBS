@@ -54,7 +54,13 @@ namespace newRBS.ViewModels
         public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
 
+        public ICommand LogOutCommand { get; set; }
+
         TraceSource trace = new TraceSource("MainViewModel");
+
+        private bool? _DialogResult;
+        public bool? DialogResult
+        { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -77,6 +83,8 @@ namespace newRBS.ViewModels
 
             EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
+
+            LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true); 
         }
 
         public void _NewMeasurementCommand()
@@ -185,6 +193,20 @@ namespace newRBS.ViewModels
             Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
             energyCalibrationView.DataContext = energyCalibrationViewModel;
             energyCalibrationView.ShowDialog();
+        }
+
+        public void _LogOutCommand()
+        {
+            MyGlobals.ConString = "";
+            SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().filterTree.Items.Clear();
+            SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Projects.Clear();
+            SimpleIoc.Default.GetInstance<MeasurementPlotViewModel>().ClearPlot(new List<int>());
+            SimpleIoc.Default.GetInstance<MeasurementListViewModel>().ChangeFilter(new List<int>());
+
+            DatabaseDataContext temp = MyGlobals.Database;
+
+            SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
+            //var adventurerWindowVM = SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>(System.Guid.NewGuid().ToString());
         }
     }
 }

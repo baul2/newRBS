@@ -69,7 +69,7 @@ namespace newRBS.ViewModels
 
             UpdatePlot = new ObservableCollection<int>();
 
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
             //Database.Log = Console.Out;
 
             MeasurementInfo = new MeasurementInfoClass(Database);
@@ -115,15 +115,12 @@ namespace newRBS.ViewModels
 
         public void _AddCurrentMeasurementCommand()
         {
-            Console.WriteLine("_AddCurrentMeasurementCommand");
-
             Database.Measurements.InsertOnSubmit(selectedMeasurement);
-
             Database.SubmitChanges();
 
-
-
             selectedMeasurement = null;
+
+            SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
 
             newMeausurements.Remove(selectedMeasurement);
             Console.WriteLine(newMeausurements.Count());
@@ -138,7 +135,6 @@ namespace newRBS.ViewModels
 
         public void _AddAllMeasurementsCommand()
         {
-            Console.WriteLine("_AddAllMeasurementsCommand");
             Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
             Database.SubmitChanges();
 
@@ -148,7 +144,6 @@ namespace newRBS.ViewModels
 
         public void _CancelCommand()
         {
-            Console.WriteLine("_CancelCommand");
             DialogResult = false;
             _DialogResult = null;
         }

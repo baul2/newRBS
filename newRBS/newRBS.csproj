@@ -219,6 +219,9 @@
     <Compile Include="Views\Utils\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Utils\LogInDialog.xaml.cs">
+      <DependentUpon>LogInDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Utils\MeasurementInfo.xaml.cs">
       <DependentUpon>MeasurementInfo.xaml</DependentUpon>
     </Compile>
@@ -282,6 +285,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Utils\InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Utils\LogInDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

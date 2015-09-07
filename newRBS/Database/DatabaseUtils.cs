@@ -94,7 +94,7 @@ namespace newRBS.Database
         /// <returns>The SampleID of the sample added to the database.</returns>
         public static int? AddNewSample(string SampleName)
         {
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 Sample sample = Database.Samples.FirstOrDefault(x => x.SampleName == SampleName);
 
@@ -131,7 +131,7 @@ namespace newRBS.Database
         /// <param name="FileName">Filename to export to.</param>
         public static void ExportMeasurements(List<int> measurementIDs, string FileName)
         {
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 switch (Path.GetExtension(FileName))
                 {
@@ -369,7 +369,7 @@ namespace newRBS.Database
         {
             if (MeasurementIDs.Count() == 0) return;
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();

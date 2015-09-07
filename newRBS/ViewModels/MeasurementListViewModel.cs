@@ -81,7 +81,7 @@ namespace newRBS.ViewModels
             measurementInfoView.ShowDialog();
 
             // Update selected row
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 SelectableMeasurement myMeasurement = MeasurementList.First(x => x.Measurement.MeasurementID == SelectedMeasurementID);
                 myMeasurement.Measurement = Database.Measurements.First(x => x.MeasurementID == SelectedMeasurementID);
@@ -146,7 +146,7 @@ namespace newRBS.ViewModels
             List<Measurement> newMeasurementList = new List<Measurement>();
             Sample tempSample;
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 newMeasurementList = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 

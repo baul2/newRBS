@@ -4,9 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
+        xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
         mc:Ignorable="d"
         Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
-        DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
+        DataContext="{Binding mainViewModel, Source={StaticResource Locator}}"
+        utils:DialogCloser.DialogResult="{Binding DialogResult}">
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
@@ -47,6 +49,9 @@
                         <MenuItem Header="Sample Editor" Command="{Binding SampleEditorCommand}"/>
                     </MenuItem>
                 </Menu>
+            </ToolBar>
+            <ToolBar>
+                <Button Content="Lock out" Command="{Binding LogOutCommand}"/>
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">

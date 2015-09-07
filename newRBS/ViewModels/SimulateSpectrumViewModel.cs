@@ -61,7 +61,7 @@ namespace newRBS.ViewModels
         {
             StartSimulationCommand = new RelayCommand(() => _StartSimulationCommand(), () => true);
 
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
 
             Measurements = new ObservableCollection<Measurement>();
 

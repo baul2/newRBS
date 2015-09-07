@@ -32,7 +32,7 @@ namespace newRBS.Views.Utils
         {
             InitializeComponent();
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 Projects = new ObservableCollection<Project>(Database.Projects.ToList());
             }

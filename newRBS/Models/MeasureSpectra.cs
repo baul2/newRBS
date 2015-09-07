@@ -72,7 +72,7 @@ namespace newRBS.Models
 
             cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 foreach (int channel in SelectedChannels)
                 {
@@ -132,7 +132,7 @@ namespace newRBS.Models
 
                 activeChannels.Remove(channel);
 
-                using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+                using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     Measurement MeasurementToStop = Database.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
 
@@ -161,7 +161,7 @@ namespace newRBS.Models
             int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
             trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", MeasurementID, newSpectrumY.Sum());
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
 

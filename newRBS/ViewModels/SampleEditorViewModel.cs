@@ -56,7 +56,7 @@ namespace newRBS.ViewModels
 
         public SampleEditorViewModel()
         {
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
 
             AddSampleCommand = new RelayCommand(() => _AddSampleCommand(), () => true);
             RemoveSampleCommand = new RelayCommand(() => _RemoveSampleCommand(), () => true);

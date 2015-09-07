@@ -238,7 +238,7 @@ namespace newRBS.ViewModels
         {
             if (ECalOffset == null || ECalSlope == null) return;
 
-            using (DatabaseDataContext Database = new DatabaseDataContext(MyGlobals.ConString))
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 var m = Database.Measurements.Where(x => selectedMeasurements.Select(y => y.MeasurementID).ToList().Contains(x.MeasurementID));
                 foreach (Measurement measurement in m)
