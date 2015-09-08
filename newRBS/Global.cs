@@ -24,7 +24,7 @@ namespace newRBS
 
                 if (ConString == "")
                 {
-                    Views.Utils.LogInDialog logInDialog = new Views.Utils.LogInDialog();
+                    Views.Utils.LogInDialog logInDialog = new Views.Utils.LogInDialog("Please enter your login data and the connection settings!");
 
                     while (logInDialog.ShowDialog() == true)
                     {
@@ -36,7 +36,7 @@ namespace newRBS
                         if (!newConnection.DatabaseExists())
                         {
                             MessageBox.Show("Please enter a valid username/password combination!", "Connection error!");
-                            logInDialog = new Views.Utils.LogInDialog();
+                            logInDialog = new Views.Utils.LogInDialog("Please enter your login data and the connection settings!");
                         }
                         else
                             break;

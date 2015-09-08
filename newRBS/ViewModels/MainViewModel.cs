@@ -53,7 +53,8 @@ namespace newRBS.ViewModels
 
         public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
-
+        public ICommand UserEditorCommand { get; set; }
+        
         public ICommand LogOutCommand { get; set; }
 
         TraceSource trace = new TraceSource("MainViewModel");
@@ -80,6 +81,7 @@ namespace newRBS.ViewModels
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
+            UserEditorCommand = new RelayCommand(() => _UserEditorCommand(), () => true); 
 
             EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
@@ -176,6 +178,28 @@ namespace newRBS.ViewModels
             Views.SampleEditorView materialEditorView = new Views.SampleEditorView();
             materialEditorView.DataContext = sampleEditorViewModel;
             materialEditorView.ShowDialog();
+        }
+
+        public void _UserEditorCommand()
+        {
+            Views.Utils.LogInDialog logInDialog = new Views.Utils.LogInDialog("Please enter the admin login data and the connection settings!");
+
+            if (logInDialog.ShowDialog() == true)
+            {
+                string ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
+                //var newConnection = new DatabaseDataContext(ConString);
+                //newConnection.CommandTimeout = 10;
+
+                //if (newConnection.DatabaseExists())
+                {
+                    UserEditorViewModel userEditorViewModel = new UserEditorViewModel(logInDialog.logIn);
+                    Views.UserEditorView userEditorView = new Views.UserEditorView();
+                    userEditorView.DataContext = userEditorViewModel;
+                    userEditorView.ShowDialog();
+                }
+                //else
+                    Console.WriteLine("Connection problem");
+            }
         }
 
         public void _SimulateSpectrumCommand()

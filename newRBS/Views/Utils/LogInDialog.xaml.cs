@@ -25,14 +25,28 @@ namespace newRBS.Views.Utils
 
     public partial class LogInDialog : Window
     {
-        public LogInDialog()
+        public LogInDialog(string text)
         {
             InitializeComponent();
+            textLabel.Content = text;
         }
 
         private void btnDialogOk_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+        {
+            UserNameEdit.Focus();
+        }
+
+        private void Window_Loaded(object sender, EventArgs e)
+        {
+            this.Activate();
+            this.Topmost = true;  // important
+            this.Topmost = false; // important
+            this.Focus();
         }
 
         private bool CheckIPValid(string strIP)
