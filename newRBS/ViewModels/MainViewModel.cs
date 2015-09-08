@@ -54,14 +54,11 @@ namespace newRBS.ViewModels
         public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
         public ICommand UserEditorCommand { get; set; }
-        
+
         public ICommand LogOutCommand { get; set; }
+        public ICommand CloseProgramCommand { get; set; }
 
         TraceSource trace = new TraceSource("MainViewModel");
-
-        private bool? _DialogResult;
-        public bool? DialogResult
-        { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -81,12 +78,13 @@ namespace newRBS.ViewModels
 
             MaterialEditorCommand = new RelayCommand(() => _MaterialEditorCommand(), () => true);
             SampleEditorCommand = new RelayCommand(() => _SampleEditorCommand(), () => true);
-            UserEditorCommand = new RelayCommand(() => _UserEditorCommand(), () => true); 
+            UserEditorCommand = new RelayCommand(() => _UserEditorCommand(), () => true);
 
             EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
 
-            LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true); 
+            LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
+            CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
         }
 
         public void _NewMeasurementCommand()
@@ -152,8 +150,7 @@ namespace newRBS.ViewModels
 
         public void _ChannelConfigurationCommand()
         {
-            Models.MeasureSpectra measureSpectra;
-            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
             if (measureSpectra.IsAcquiring() == true)
             { trace.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
@@ -187,17 +184,17 @@ namespace newRBS.ViewModels
             if (logInDialog.ShowDialog() == true)
             {
                 string ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
-                //var newConnection = new DatabaseDataContext(ConString);
-                //newConnection.CommandTimeout = 10;
+                var newConnection = new DatabaseDataContext(ConString);
+                newConnection.CommandTimeout = 10;
 
-                //if (newConnection.DatabaseExists())
+                if (newConnection.DatabaseExists())
                 {
                     UserEditorViewModel userEditorViewModel = new UserEditorViewModel(logInDialog.logIn);
                     Views.UserEditorView userEditorView = new Views.UserEditorView();
                     userEditorView.DataContext = userEditorViewModel;
                     userEditorView.ShowDialog();
                 }
-                //else
+                else
                     Console.WriteLine("Connection problem");
             }
         }
@@ -221,6 +218,11 @@ namespace newRBS.ViewModels
 
         public void _LogOutCommand()
         {
+            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+
+            if (measureSpectra.IsAcquiring() == true)
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
+
             MyGlobals.ConString = "";
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().filterTree.Items.Clear();
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Projects.Clear();
@@ -231,6 +233,16 @@ namespace newRBS.ViewModels
 
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
             //var adventurerWindowVM = SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>(System.Guid.NewGuid().ToString());
+        }
+
+        public void _CloseProgramCommand()
+        {
+            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+
+            if (measureSpectra.IsAcquiring() == true)
+            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't close program: Board is acquiring"); MessageBox.Show("Can't close program: Board is acquiring"); return; }
+
+            Environment.Exit(0);
         }
     }
 }

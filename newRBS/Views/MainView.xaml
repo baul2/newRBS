@@ -9,6 +9,30 @@
         Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
         DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
     <DockPanel>
+        <Menu DockPanel.Dock="top" VerticalAlignment="Center">
+            <MenuItem Header="File">
+                <MenuItem Header="Log Out" Command="{Binding LogOutCommand}"/>
+                <MenuItem Header="Close" Command="{Binding CloseProgramCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Measurement">
+                <MenuItem Header="Start Acquisition" Command="{Binding NMeasurementCommand}"/>
+                <MenuItem Header="Stop Acquisition" Command="{Binding StopMeasurementCommand}"/>
+                <MenuItem Header="Configure Channels" Command="{Binding ChannelConfigurationCommand}"/>
+                <Separator/>
+                <MenuItem Header="Import Measurements" Command="{Binding ImportMeasurementsCommand}"/>
+                <MenuItem Header="Export Measurements" Command="{Binding ExportMeasurementsCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Analysis">
+                <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
+                <MenuItem Header="Simulata Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Manage">
+                <MenuItem Header="Materials" Command="{Binding MaterialEditorCommand}"/>
+                <MenuItem Header="Samples" Command="{Binding SampleEditorCommand}"/>
+                <Separator/>
+                <MenuItem Header="Users" Command="{Binding UserEditorCommand}"/>
+            </MenuItem>
+        </Menu>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
                 <Button Command="{Binding NewMeasurementCommand}" ToolTip="Start Acquisition">
@@ -38,21 +62,12 @@
                 </Button>
             </ToolBar>
             <ToolBar>
-                <Menu VerticalAlignment="Center">
-                    <MenuItem Header="Analysis">
-                        <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
-                        <MenuItem Header="Simulata Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
-                    </MenuItem>
-                    <MenuItem Header="Manage">
-                        <MenuItem Header="Materials" Command="{Binding MaterialEditorCommand}"/>
-                        <MenuItem Header="Samples" Command="{Binding SampleEditorCommand}"/>
-                        <Separator/>
-                        <MenuItem Header="Users" Command="{Binding UserEditorCommand}"/>
-                    </MenuItem>
-                </Menu>
-            </ToolBar>
-            <ToolBar>
-                <Button Content="Lock out" Command="{Binding LogOutCommand}"/>
+                <Button Command="{Binding LogOutCommand}" ToolTip="Log out current user">
+                    <Image Source="/Images/46.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding CloseProgramCommand}" ToolTip="Close the prgram">
+                    <Image Source="/Images/5.png" Height="24"/>
+                </Button>
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">
