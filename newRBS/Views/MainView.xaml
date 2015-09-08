@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
+        xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
         mc:Ignorable="d"
         Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
         DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
@@ -42,11 +43,16 @@
                         <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
                         <MenuItem Header="Simulata Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
                     </MenuItem>
-                    <MenuItem Header="Editor">
-                        <MenuItem Header="Material Editor" Command="{Binding MaterialEditorCommand}"/>
-                        <MenuItem Header="Sample Editor" Command="{Binding SampleEditorCommand}"/>
+                    <MenuItem Header="Manage">
+                        <MenuItem Header="Materials" Command="{Binding MaterialEditorCommand}"/>
+                        <MenuItem Header="Samples" Command="{Binding SampleEditorCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="Users" Command="{Binding UserEditorCommand}"/>
                     </MenuItem>
                 </Menu>
+            </ToolBar>
+            <ToolBar>
+                <Button Content="Lock out" Command="{Binding LogOutCommand}"/>
             </ToolBar>
         </ToolBarTray>
         <Border DockPanel.Dock="Left">

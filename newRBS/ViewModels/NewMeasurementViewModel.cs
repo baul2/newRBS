@@ -67,7 +67,7 @@ namespace newRBS.ViewModels
         public NewMeasurementViewModel()
         {
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
 
             NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
 

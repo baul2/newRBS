@@ -96,7 +96,7 @@ namespace newRBS.ViewModels
 
         public MaterialEditorViewModel()
         {
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
 
             Materials = new ObservableCollection<Material>(Database.Materials.ToList());
             Layers = new ObservableCollection<Layer>();

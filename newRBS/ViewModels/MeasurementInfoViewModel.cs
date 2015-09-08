@@ -39,7 +39,7 @@ namespace newRBS.ViewModels
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
 
-            Database = new DatabaseDataContext(MyGlobals.ConString);
+            Database = MyGlobals.Database;
             MeasurementInfo = new MeasurementInfoClass(Database);
             MeasurementInfo.Measurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
         }
