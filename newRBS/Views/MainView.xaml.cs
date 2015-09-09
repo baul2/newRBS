@@ -18,9 +18,6 @@ using GalaSoft.MvvmLight.Ioc;
 
 namespace newRBS.Views
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainView : Window
     {
         private Models.CAEN_x730 cAEN_x730;
@@ -28,16 +25,6 @@ namespace newRBS.Views
         public MainView()
         {
             InitializeComponent();
-            Closing += MainView_Closing;
-        }
-
-        private void MainView_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
-            {
-                cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
-                cAEN_x730.Close();
-            }
         }
     }
 }

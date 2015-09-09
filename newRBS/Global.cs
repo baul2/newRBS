@@ -44,7 +44,7 @@ namespace newRBS
                     if (!newConnection.DatabaseExists())
                     {
                         Console.WriteLine("close");
-                        Environment.Exit(0);
+                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand();
                         return null;
                     }
                 }

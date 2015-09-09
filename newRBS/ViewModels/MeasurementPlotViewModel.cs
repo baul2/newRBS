@@ -72,6 +72,12 @@ namespace newRBS.ViewModels
         public string SelectedYAxisScale
         { get { return _SelectedYAxisScale; } set { _SelectedYAxisScale = value; RaisePropertyChanged(); UpdateYAxisScale(); UpdateYAxisTitle(); } }
 
+        public List<string> LegendCaptions { get; set; }
+
+        private string _SelectedLegendCaption = "Measurement IDs";
+        public string SelectedLegendCaption
+        { get { return _SelectedLegendCaption; } set { _SelectedLegendCaption = value; RaisePropertyChanged(); UpdateLegend(); } }
+
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
@@ -86,6 +92,8 @@ namespace newRBS.ViewModels
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ClearPlot);
 
             ExpandConfigPanel = new RelayCommand(() => _ExpandConfigPanel(), () => true);
+
+            //SetYOriginTo0Command = new RelayCommand(() => _SetYOriginTo0Command(), () => true); 
 
             MeasurementIDList = new List<int>();
 
@@ -111,6 +119,8 @@ namespace newRBS.ViewModels
             DataBindingIntervals = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
 
             YAxisScale = new List<string> { "linear", "logarithmic" };
+
+            LegendCaptions = new List<string> { "Measurement IDs","Measurement names","Sample names", "Sample remarks", "Sample names + remarks" };
         }
 
         private void _ExpandConfigPanel()
@@ -127,7 +137,7 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0,AbsoluteMinimum=0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
@@ -174,7 +184,7 @@ namespace newRBS.ViewModels
                 MarkerSize = 3,
                 Color = LineColors[measurement.MeasurementID % LineColors.Count],
                 CanTrackerInterpolatePoints = false,
-                Title = string.Format("MeasurementID {0}", measurement.MeasurementID),
+                Title = GetMeasurementTitle(measurement.MeasurementID),
                 Smooth = false,
             };
 
@@ -287,6 +297,40 @@ namespace newRBS.ViewModels
                         plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = string.Format("Counts per {0}keV interval", SelectedDataBindingInterval);
                         break;
                     }
+            }
+        }
+
+        private string GetMeasurementTitle(int MeasurementID)
+        {
+            using (DatabaseDataContext Database = MyGlobals.Database)
+            {
+                Measurement measurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
+                if (measurement == null) return "";
+
+                switch (SelectedLegendCaption)
+                {
+                    case "Measurement IDs":
+                        return "MeasurementID " + measurement.MeasurementID;
+                    case "Measurement names":
+                        return measurement.MeasurementName;
+                    case "Sample names":
+                        return measurement.Sample.SampleName;
+                    case "Sample remarks":
+                        return measurement.SampleRemark;
+                    case "Sample names + remarks":
+                        return measurement.Sample.SampleName+ " " + measurement.SampleRemark;
+                    default:
+                        return "MeasurementID " + measurement.MeasurementID;
+                }
+            }
+        }
+
+        private void UpdateLegend()
+        {
+            Console.WriteLine("asd");
+            foreach (var plot in plotModel.Series)
+            {
+                plot.Title = GetMeasurementTitle((int)plot.Tag);
             }
         }
 

@@ -24,16 +24,7 @@ using newRBS.Database;
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// This class contains properties that the main View can data bind to.
-    /// <para>
-    /// Use the <strong>mvvminpc</strong> snippet to add bindable properties to this ViewModel.
-    /// </para>
-    /// <para>
-    /// You can also use Blend to data bind with the tool's support.
-    /// </para>
-    /// <para>
-    /// See http://www.galasoft.ch/mvvm
-    /// </para>
+    /// Class that is the view model of <see cref="Views.MainView"/>. They provide the main window and contain the commands to start other program parts.
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
@@ -61,7 +52,7 @@ namespace newRBS.ViewModels
         TraceSource trace = new TraceSource("MainViewModel");
 
         /// <summary>
-        /// Initializes a new instance of the MainViewModel class.
+        /// Constructor of the class. It sets up all the commands.
         /// </summary>
         public MainViewModel()
         {
@@ -87,6 +78,9 @@ namespace newRBS.ViewModels
             CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="NewMeasurementViewModel"/> instance and binds it to a <see cref="Views.NewMeasurementView"/> instance.
+        /// </summary>
         public void _NewMeasurementCommand()
         {
             NewMeasurementViewModel newMeasurementViewModel = new NewMeasurementViewModel();
@@ -95,13 +89,18 @@ namespace newRBS.ViewModels
             newMeasurementView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that stops the current acquisition.
+        /// </summary>
         public void _StopMeasurementCommand()
         {
-            Models.MeasureSpectra measureSpectra;
-            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
             measureSpectra.StopAcquisitions();
         }
 
+        /// <summary>
+        /// Function that gets a filename and starts a new <see cref="MeasurementImportViewModel"/> instance and binds it to a <see cref="Views.MeasurementImportView"/> instance.
+        /// </summary>
         public void _ImportMeasurementsCommand()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -118,6 +117,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that gets a filename and sends the selected measurements to <see cref="DatabaseUtils.ExportMeasurements(List{int}, string)"/> in order to export them.
+        /// </summary>
         public void _ExportMeasurementsCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
@@ -129,6 +131,9 @@ namespace newRBS.ViewModels
                 DatabaseUtils.ExportMeasurements(selectedMeasurementIDs, saveFileDialog.FileName);
         }
 
+        /// <summary>
+        /// Function that sends the selected measurements to <see cref="DatabaseUtils.DeleteMeasurements(List{int})"/> in order to delete them.
+        /// </summary>
         public void _DeleteMeasurementsCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
@@ -140,6 +145,9 @@ namespace newRBS.ViewModels
                 DatabaseUtils.DeleteMeasurements(selectedMeasurementIDs);
         }
 
+        /// <summary>
+        /// Function that gets a filename and calls <see cref="DatabaseUtils.SaveMeasurementImage(string)"/> in order to save the measurement plot.
+        /// </summary>
         public void _SaveMeasurementPlotCommand()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -148,6 +156,9 @@ namespace newRBS.ViewModels
                 DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="ChannelConfigurationViewModel"/> instance and binds it to a <see cref="Views.ChannelConfigurationView"/> instance.
+        /// </summary>
         public void _ChannelConfigurationCommand()
         {
             Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
@@ -161,6 +172,9 @@ namespace newRBS.ViewModels
             channelConfiguration.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="MaterialEditorViewModel"/> instance and binds it to a <see cref="Views.MaterialEditorView"/> instance.
+        /// </summary>
         public void _MaterialEditorCommand()
         {
             MaterialEditorViewModel materialEditorViewModel = new MaterialEditorViewModel();
@@ -169,6 +183,9 @@ namespace newRBS.ViewModels
             materialEditorView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="SampleEditorViewModel"/> instance and binds it to a <see cref="Views.SampleEditorView"/> instance.
+        /// </summary>
         public void _SampleEditorCommand()
         {
             SampleEditorViewModel sampleEditorViewModel = new SampleEditorViewModel();
@@ -177,6 +194,9 @@ namespace newRBS.ViewModels
             materialEditorView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that gets an database admin login and starts a new <see cref="UserEditorViewModel"/> instance and binds it to a <see cref="Views.UserEditorView"/> instance.
+        /// </summary>
         public void _UserEditorCommand()
         {
             Views.Utils.LogInDialog logInDialog = new Views.Utils.LogInDialog("Please enter the admin login data and the connection settings!");
@@ -199,6 +219,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="SimulateSpectrumViewModel"/> instance and binds it to a <see cref="Views.SimulateSpectrumView"/> instance.
+        /// </summary>
         public void _SimulateSpectrumCommand()
         {
             SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
@@ -207,6 +230,9 @@ namespace newRBS.ViewModels
             simulateSpectrumView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="EnergyCalibrationViewModel"/> instance and binds it to a <see cref="Views.EnergyCalibrationView"/> instance.
+        /// </summary>
         public void _EnergyCalCommand()
         {
             EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel();
@@ -216,6 +242,9 @@ namespace newRBS.ViewModels
             energyCalibrationView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that logs out the current user and resets everything.
+        /// </summary>
         public void _LogOutCommand()
         {
             Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
@@ -235,13 +264,23 @@ namespace newRBS.ViewModels
             //var adventurerWindowVM = SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>(System.Guid.NewGuid().ToString());
         }
 
+        /// <summary>
+        /// Function that closes the board and exits the program.
+        /// </summary>
         public void _CloseProgramCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
+            {
+                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
-            if (measureSpectra.IsAcquiring() == true)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't close program: Board is acquiring"); MessageBox.Show("Can't close program: Board is acquiring"); return; }
+                if (measureSpectra.IsAcquiring() == true)
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't close program: Board is acquiring"); MessageBox.Show("Can't close program: Board is acquiring"); return; }
+            }
 
+            if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
+            {
+                SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
+            }
             Environment.Exit(0);
         }
     }
