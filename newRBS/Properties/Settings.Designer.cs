@@ -53,5 +53,16 @@ namespace newRBS.Properties {
                 return ((string)(this["p4mist_dbConnectionString2"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=141.35.49.196,35877;Initial Catalog=newRBSadmin_db;User ID=newRBSadmi" +
+            "n")]
+        public string newRBSadmin_dbConnectionString {
+            get {
+                return ((string)(this["newRBSadmin_dbConnectionString"]));
+            }
+        }
     }
 }

@@ -12,7 +12,6 @@ namespace newRBS
 {
     static class MyGlobals
     {
-        //public static string ConString = "Data Source = SVRH; User ID = p4mist; Password = testtesttesttest; Initial Catalog = p4mist_db";
         public static string ConString = "";
 
         public static Database.DatabaseDataContext Database
@@ -28,7 +27,6 @@ namespace newRBS
 
                     while (logInDialog.ShowDialog() == true)
                     {
-                        //ConString = "Data Source = SVRH; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         newConnection = new Database.DatabaseDataContext(ConString);
                         newConnection.CommandTimeout = 10;

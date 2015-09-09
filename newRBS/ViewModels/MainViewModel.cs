@@ -94,8 +94,11 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StopMeasurementCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-            measureSpectra.StopAcquisitions();
+            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
+            {
+                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+                measureSpectra.StopAcquisitions();
+            }
         }
 
         /// <summary>
@@ -247,10 +250,13 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _LogOutCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
+            {
+                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
-            if (measureSpectra.IsAcquiring() == true)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
+                if (measureSpectra.IsAcquiring() == true)
+                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
+            }
 
             MyGlobals.ConString = "";
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().filterTree.Items.Clear();

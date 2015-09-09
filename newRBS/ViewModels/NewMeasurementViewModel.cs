@@ -51,9 +51,18 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<ElementClass> Ions { get; set; }
 
+        public ObservableCollection<string> StopTypes { get; set; }
+        private string _SelectedStopType = "Manual";
+        public string SelectedStopType
+        { get { return _SelectedStopType; } set { _SelectedStopType = value; SelectedStopTypeChanged(); RaisePropertyChanged(); } }
+
+        private string _StopValueLabel= "";
+        public string StopValueLabel
+        { get { return _StopValueLabel; } set { _StopValueLabel = value; RaisePropertyChanged(); } }
+        public string StopValue { get; set; }
+        
         private int _SelectedChamberTabIndex = 0;
         public int SelectedChamberTabIndex
         { get { return _SelectedChamberTabIndex; } set { _SelectedChamberTabIndex = value; RaisePropertyChanged(); } }
@@ -82,7 +91,7 @@ namespace newRBS.ViewModels
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
+            StopTypes = new ObservableCollection<string> { "Manual", "Duration", "Charge", "Counts", "ChopperCounts" };
             Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
@@ -90,6 +99,19 @@ namespace newRBS.ViewModels
             Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
+        }
+
+        private void SelectedStopTypeChanged()
+        {
+            Console.WriteLine(Measurement.IncomingIonAtomicNumber);
+            switch (SelectedStopType)
+            {
+                case "Manual": StopValueLabel = ""; break;
+                case "Duration": StopValueLabel = "Duration (min):";break;
+                case "Charge": StopValueLabel = "Charge (µC):";  break;
+                case "Counts": StopValueLabel = "Counts:"; break;
+                case "ChopperCounts": StopValueLabel = "ChopperCounts:"; break;
+            }
         }
 
         private void _NewSampleCommand()
@@ -118,7 +140,14 @@ namespace newRBS.ViewModels
             measureSpectra.IncomingIonAngle = Measurement.IncomingIonAngle;
             measureSpectra.SolidAngle = Measurement.SolidAngle;
             measureSpectra.StopType = Measurement.StopType;
-            measureSpectra.StopValue = Measurement.StopValue;
+            switch (SelectedStopType)
+            {
+                case "Manual": break;
+                case "Duration": measureSpectra.FinalDuration = new DateTime(2000,01,01)+TimeSpan.FromMinutes(Convert.ToDouble(StopValue)); break;
+                case "Charge": measureSpectra.FinalCharge = Convert.ToDouble(StopValue); break;
+                case "Counts": measureSpectra.FinalCounts = Convert.ToInt64(StopValue); break;
+                case "ChopperCounts": measureSpectra.FinalChopperCounts = Convert.ToInt64(StopValue); break;
+            }
 
             switch (SelectedChamberTabIndex)
             {

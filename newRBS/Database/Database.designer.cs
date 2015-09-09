@@ -22,7 +22,7 @@ namespace newRBS.Database
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="p4mist_db")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="newRBSadmin_db")]
 	public partial class DatabaseDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -54,7 +54,7 @@ namespace newRBS.Database
     #endregion
 		
 		public DatabaseDataContext() : 
-				base(global::newRBS.Properties.Settings.Default.p4mist_dbConnectionString2, mappingSource)
+				base(global::newRBS.Properties.Settings.Default.newRBSadmin_dbConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -1354,13 +1354,7 @@ namespace newRBS.Database
 		
 		private System.DateTime _StartTime;
 		
-		private System.Nullable<System.DateTime> _StopTime;
-		
-		private System.DateTime _Duration;
-		
 		private bool _Runs;
-		
-		private System.Nullable<double> _Charge;
 		
 		private double _Progress;
 		
@@ -1372,7 +1366,21 @@ namespace newRBS.Database
 		
 		private string _StopType;
 		
-		private double _StopValue;
+		private System.DateTime _CurrentDuration;
+		
+		private double _CurrentCharge;
+		
+		private long _CurrentCounts;
+		
+		private long _CurrentChopperCounts;
+		
+		private System.Nullable<System.DateTime> _FinalDuration;
+		
+		private System.Nullable<double> _FinalCharge;
+		
+		private System.Nullable<long> _FinalCounts;
+		
+		private System.Nullable<long> _FinalChopperCounts;
 		
 		private double _EnergyCalOffset;
 		
@@ -1420,14 +1428,8 @@ namespace newRBS.Database
     partial void OnOrientationChanged();
     partial void OnStartTimeChanging(System.DateTime value);
     partial void OnStartTimeChanged();
-    partial void OnStopTimeChanging(System.Nullable<System.DateTime> value);
-    partial void OnStopTimeChanged();
-    partial void OnDurationChanging(System.DateTime value);
-    partial void OnDurationChanged();
     partial void OnRunsChanging(bool value);
     partial void OnRunsChanged();
-    partial void OnChargeChanging(System.Nullable<double> value);
-    partial void OnChargeChanged();
     partial void OnProgressChanging(double value);
     partial void OnProgressChanged();
     partial void OnNumOfChannelsChanging(int value);
@@ -1438,8 +1440,22 @@ namespace newRBS.Database
     partial void OnSpectrumYCalculatedByteChanged();
     partial void OnStopTypeChanging(string value);
     partial void OnStopTypeChanged();
-    partial void OnStopValueChanging(double value);
-    partial void OnStopValueChanged();
+    partial void OnCurrentDurationChanging(System.DateTime value);
+    partial void OnCurrentDurationChanged();
+    partial void OnCurrentChargeChanging(double value);
+    partial void OnCurrentChargeChanged();
+    partial void OnCurrentCountsChanging(long value);
+    partial void OnCurrentCountsChanged();
+    partial void OnCurrentChopperCountsChanging(long value);
+    partial void OnCurrentChopperCountsChanged();
+    partial void OnFinalDurationChanging(System.Nullable<System.DateTime> value);
+    partial void OnFinalDurationChanged();
+    partial void OnFinalChargeChanging(System.Nullable<double> value);
+    partial void OnFinalChargeChanged();
+    partial void OnFinalCountsChanging(System.Nullable<long> value);
+    partial void OnFinalCountsChanged();
+    partial void OnFinalChopperCountsChanging(System.Nullable<long> value);
+    partial void OnFinalChopperCountsChanged();
     partial void OnEnergyCalOffsetChanging(double value);
     partial void OnEnergyCalOffsetChanged();
     partial void OnEnergyCalSlopeChanging(double value);
@@ -1617,46 +1633,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StopTime", DbType="DateTime")]
-		public System.Nullable<System.DateTime> StopTime
-		{
-			get
-			{
-				return this._StopTime;
-			}
-			set
-			{
-				if ((this._StopTime != value))
-				{
-					this.OnStopTimeChanging(value);
-					this.SendPropertyChanging();
-					this._StopTime = value;
-					this.SendPropertyChanged("StopTime");
-					this.OnStopTimeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Duration", DbType="DateTime NOT NULL")]
-		public System.DateTime Duration
-		{
-			get
-			{
-				return this._Duration;
-			}
-			set
-			{
-				if ((this._Duration != value))
-				{
-					this.OnDurationChanging(value);
-					this.SendPropertyChanging();
-					this._Duration = value;
-					this.SendPropertyChanged("Duration");
-					this.OnDurationChanged();
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Runs", DbType="Bit NOT NULL")]
 		public bool Runs
 		{
@@ -1673,26 +1649,6 @@ namespace newRBS.Database
 					this._Runs = value;
 					this.SendPropertyChanged("Runs");
 					this.OnRunsChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Charge", DbType="Float")]
-		public System.Nullable<double> Charge
-		{
-			get
-			{
-				return this._Charge;
-			}
-			set
-			{
-				if ((this._Charge != value))
-				{
-					this.OnChargeChanging(value);
-					this.SendPropertyChanging();
-					this._Charge = value;
-					this.SendPropertyChanged("Charge");
-					this.OnChargeChanged();
 				}
 			}
 		}
@@ -1797,22 +1753,162 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StopValue", DbType="Float NOT NULL")]
-		public double StopValue
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentDuration", DbType="DateTime NOT NULL")]
+		public System.DateTime CurrentDuration
 		{
 			get
 			{
-				return this._StopValue;
+				return this._CurrentDuration;
 			}
 			set
 			{
-				if ((this._StopValue != value))
+				if ((this._CurrentDuration != value))
 				{
-					this.OnStopValueChanging(value);
+					this.OnCurrentDurationChanging(value);
 					this.SendPropertyChanging();
-					this._StopValue = value;
-					this.SendPropertyChanged("StopValue");
-					this.OnStopValueChanged();
+					this._CurrentDuration = value;
+					this.SendPropertyChanged("CurrentDuration");
+					this.OnCurrentDurationChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentCharge", DbType="Float NOT NULL")]
+		public double CurrentCharge
+		{
+			get
+			{
+				return this._CurrentCharge;
+			}
+			set
+			{
+				if ((this._CurrentCharge != value))
+				{
+					this.OnCurrentChargeChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentCharge = value;
+					this.SendPropertyChanged("CurrentCharge");
+					this.OnCurrentChargeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentCounts", DbType="BigInt NOT NULL")]
+		public long CurrentCounts
+		{
+			get
+			{
+				return this._CurrentCounts;
+			}
+			set
+			{
+				if ((this._CurrentCounts != value))
+				{
+					this.OnCurrentCountsChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentCounts = value;
+					this.SendPropertyChanged("CurrentCounts");
+					this.OnCurrentCountsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentChopperCounts", DbType="BigInt NOT NULL")]
+		public long CurrentChopperCounts
+		{
+			get
+			{
+				return this._CurrentChopperCounts;
+			}
+			set
+			{
+				if ((this._CurrentChopperCounts != value))
+				{
+					this.OnCurrentChopperCountsChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentChopperCounts = value;
+					this.SendPropertyChanged("CurrentChopperCounts");
+					this.OnCurrentChopperCountsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FinalDuration", DbType="DateTime")]
+		public System.Nullable<System.DateTime> FinalDuration
+		{
+			get
+			{
+				return this._FinalDuration;
+			}
+			set
+			{
+				if ((this._FinalDuration != value))
+				{
+					this.OnFinalDurationChanging(value);
+					this.SendPropertyChanging();
+					this._FinalDuration = value;
+					this.SendPropertyChanged("FinalDuration");
+					this.OnFinalDurationChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FinalCharge", DbType="Float")]
+		public System.Nullable<double> FinalCharge
+		{
+			get
+			{
+				return this._FinalCharge;
+			}
+			set
+			{
+				if ((this._FinalCharge != value))
+				{
+					this.OnFinalChargeChanging(value);
+					this.SendPropertyChanging();
+					this._FinalCharge = value;
+					this.SendPropertyChanged("FinalCharge");
+					this.OnFinalChargeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FinalCounts", DbType="BigInt")]
+		public System.Nullable<long> FinalCounts
+		{
+			get
+			{
+				return this._FinalCounts;
+			}
+			set
+			{
+				if ((this._FinalCounts != value))
+				{
+					this.OnFinalCountsChanging(value);
+					this.SendPropertyChanging();
+					this._FinalCounts = value;
+					this.SendPropertyChanged("FinalCounts");
+					this.OnFinalCountsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FinalChopperCounts", DbType="BigInt")]
+		public System.Nullable<long> FinalChopperCounts
+		{
+			get
+			{
+				return this._FinalChopperCounts;
+			}
+			set
+			{
+				if ((this._FinalChopperCounts != value))
+				{
+					this.OnFinalChopperCountsChanging(value);
+					this.SendPropertyChanging();
+					this._FinalChopperCounts = value;
+					this.SendPropertyChanged("FinalChopperCounts");
+					this.OnFinalChopperCountsChanged();
 				}
 			}
 		}

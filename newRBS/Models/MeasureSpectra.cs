@@ -36,7 +36,10 @@ namespace newRBS.Models
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
 
         public string StopType = "Manual";
-        public double StopValue = 0;
+        public DateTime FinalDuration;
+        public double FinalCharge;
+        public long FinalCounts;
+        public long FinalChopperCounts;
 
         private Timer[] MeasureSpectraTimer = new Timer[8];
 
@@ -94,9 +97,10 @@ namespace newRBS.Models
                         EnergyCalOffset = EnergyCalOffset[channel],
                         EnergyCalSlope = EnergyCalSlope[channel],
                         StartTime = DateTime.Now,
-                        Duration = new DateTime(2000, 01, 01),
                         StopType = StopType,
-                        StopValue = StopValue,
+                        CurrentDuration = new DateTime(2000, 01, 01),
+                        CurrentCharge = 0,
+                        CurrentCounts = 0,
                         Runs = true,
                         NumOfChannels = NumOfChannels,
                         SpectrumY = new int[] { 0 }
@@ -139,7 +143,6 @@ namespace newRBS.Models
                     if (MeasurementToStop == null)
                     { trace.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = {0} not found", measurementID); return; }
 
-                    MeasurementToStop.StopTime = DateTime.Now;
                     MeasurementToStop.Runs = false;
 
                     Database.SubmitChanges();
@@ -173,17 +176,23 @@ namespace newRBS.Models
 
                 MeasurementToUpdate.SpectrumY = newSpectrumY;
 
-                MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+                MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+                MeasurementToUpdate.CurrentCounts = newSpectrumY.Sum();
+                //MeasurementToUpdate.CurrentCharge = GetCharge();                  //TODO
+                //MeasurementToUpdate.CurrentChopperCounts = GetChopperCounts();    //TODO
 
                 switch (MeasurementToUpdate.StopType)
                 {
-                    case "Manual": MeasurementToUpdate.Progress = 0; break;
+                    case "Manual":
+                        MeasurementToUpdate.Progress = 0; break;
+                    case "Duration":
+                        MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / ((DateTime)MeasurementToUpdate.FinalDuration - new DateTime(2000, 01, 01)).TotalMinutes; break;
+                    case "Charge":
+                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / (double)MeasurementToUpdate.FinalCharge; break;
                     case "Counts":
-                        MeasurementToUpdate.Progress = newSpectrumY.Sum() / (int)MeasurementToUpdate.StopValue;
-                        break;
-                    case "Time":
-                        MeasurementToUpdate.Progress = (MeasurementToUpdate.Duration - DateTime.MinValue).TotalMinutes / (int)MeasurementToUpdate.StopValue; break;
-                        // TODO: Chopper
+                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCounts / (long)MeasurementToUpdate.FinalCounts; break;
+                    case "ChopperCounts":
+                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentChopperCounts / (long)MeasurementToUpdate.FinalChopperCounts; break;
                 }
 
                 Database.SubmitChanges();

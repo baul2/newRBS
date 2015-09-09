@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="p4mist_db" Class="DatabaseDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=SVRH;Initial Catalog=p4mist_db;Persist Security Info=True;User ID=p4mist" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="p4mist_dbConnectionString2" Provider="System.Data.SqlClient" />
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="newRBSadmin_db" Class="DatabaseDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=141.35.49.196,35877;Initial Catalog=newRBSadmin_db;User ID=newRBSadmin" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="newRBSadmin_dbConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Elements" Member="Elements">
     <Type Name="Element">
       <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -68,16 +68,20 @@
       <Column Name="SampleRemark" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
       <Column Name="Orientation" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Column Name="StartTime" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
-      <Column Name="StopTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="Duration" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="Runs" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
-      <Column Name="Charge" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="SpectrumYByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
       <Column Name="SpectrumYCalculatedByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
       <Column Name="StopType" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StopValue" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentDuration" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentCharge" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentCounts" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentChopperCounts" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="FinalDuration" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="FinalCharge" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="FinalCounts" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
+      <Column Name="FinalChopperCounts" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
       <Column Name="EnergyCalOffset" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalSlope" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />

@@ -64,7 +64,7 @@ namespace newRBS.ViewModels
 
         private int _SelectedDataBindingInterval = 0;
         public int SelectedDataBindingInterval
-        { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); }  }
+        { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); } }
 
         public List<string> YAxisScale { get; set; }
 
@@ -120,7 +120,7 @@ namespace newRBS.ViewModels
 
             YAxisScale = new List<string> { "linear", "logarithmic" };
 
-            LegendCaptions = new List<string> { "Measurement IDs","Measurement names","Sample names", "Sample remarks", "Sample names + remarks" };
+            LegendCaptions = new List<string> { "Measurement IDs", "Measurement names", "Sample names", "Sample remarks", "Sample names + remarks" };
         }
 
         private void _ExpandConfigPanel()
@@ -137,7 +137,7 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0,AbsoluteMinimum=0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
@@ -174,17 +174,17 @@ namespace newRBS.ViewModels
 
         private void PlotMeasurement(Measurement measurement)
         {
-            if (SelectedDataBindingInterval>0 && measurement.EnergyCalSlope>SelectedDataBindingInterval)
+            if (SelectedDataBindingInterval > 0 && measurement.EnergyCalSlope > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
-            
+
             var areaSeries = new AreaSeries
             {
-                Tag = measurement.MeasurementID,
+                Tag = measurement,
                 StrokeThickness = 2,
                 MarkerSize = 3,
                 Color = LineColors[measurement.MeasurementID % LineColors.Count],
                 CanTrackerInterpolatePoints = false,
-                Title = GetMeasurementTitle(measurement.MeasurementID),
+                Title = GetMeasurementTitle(measurement),
                 Smooth = false,
             };
 
@@ -254,7 +254,7 @@ namespace newRBS.ViewModels
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
+            Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
                 plotModel.Series.Remove(updateSerie);
@@ -300,41 +300,36 @@ namespace newRBS.ViewModels
             }
         }
 
-        private string GetMeasurementTitle(int MeasurementID)
+        private string GetMeasurementTitle(Measurement measurement)
         {
-            using (DatabaseDataContext Database = MyGlobals.Database)
-            {
-                Measurement measurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
-                if (measurement == null) return "";
+            if (measurement == null) return "";
 
-                switch (SelectedLegendCaption)
-                {
-                    case "Measurement IDs":
-                        return "MeasurementID " + measurement.MeasurementID;
-                    case "Measurement names":
-                        return measurement.MeasurementName;
-                    case "Sample names":
-                        return measurement.Sample.SampleName;
-                    case "Sample remarks":
-                        return measurement.SampleRemark;
-                    case "Sample names + remarks":
-                        return measurement.Sample.SampleName+ " " + measurement.SampleRemark;
-                    default:
-                        return "MeasurementID " + measurement.MeasurementID;
-                }
+            switch (SelectedLegendCaption)
+            {
+                case "Measurement IDs":
+                    return "MeasurementID " + measurement.MeasurementID;
+                case "Measurement names":
+                    return measurement.MeasurementName;
+                case "Sample names":
+                    return measurement.Sample.SampleName;
+                case "Sample remarks":
+                    return measurement.SampleRemark;
+                case "Sample names + remarks":
+                    return measurement.Sample.SampleName + " " + measurement.SampleRemark;
+                default:
+                    return "MeasurementID " + measurement.MeasurementID;
             }
         }
 
         private void UpdateLegend()
         {
-            Console.WriteLine("asd");
             foreach (var plot in plotModel.Series)
             {
-                plot.Title = GetMeasurementTitle((int)plot.Tag);
+                plot.Title = GetMeasurementTitle((Measurement)plot.Tag);
             }
         }
 
-        private void UpdateAllPlots( )
+        private void UpdateAllPlots()
         {
             if (MeasurementIDList.Count() == 0) return;
 

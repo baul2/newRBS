@@ -137,19 +137,19 @@ namespace newRBS.ViewModels
                 databasePermissionSet.Add(DatabasePermission.Insert);
                 databasePermissionSet.Add(DatabasePermission.Update);
                 databasePermissionSet.Add(DatabasePermission.Select);
+                databasePermissionSet.Add(DatabasePermission.Delete);
 
                 // Granting Database Permission Sets to Roles
-                db.Grant(databasePermissionSet, "dbo");
+                db.Grant(databasePermissionSet, newLogInDialog.logIn.UserName);
 
                 // Copy database
                 Console.WriteLine(AdminLogIn.UserName + "_db");
                 Microsoft.SqlServer.Management.Smo.Database adminDB = server.Databases[AdminLogIn.UserName + "_db"];
-                Transfer transfer;
-                transfer = new Transfer(adminDB);
+                Transfer transfer = new Transfer(adminDB);
 
                 transfer.CopyAllTables = true;
                 transfer.Options.WithDependencies = true;
-                //transfer.Options.ContinueScriptingOnError = true;
+                transfer.Options.DriAll = true;
                 transfer.DestinationDatabase = newLogInDialog.logIn.UserName + "_db";
                 transfer.DestinationServer = server.Name;
                 transfer.DestinationLoginSecure = false;
