@@ -21,6 +21,8 @@
                 <Separator/>
                 <MenuItem Header="Import Measurements" Command="{Binding ImportMeasurementsCommand}"/>
                 <MenuItem Header="Export Measurements" Command="{Binding ExportMeasurementsCommand}"/>
+                <Separator/>
+                <MenuItem Header="Save Plot" Command="{Binding SaveMeasurementPlotCommand}"/>
             </MenuItem>
             <MenuItem Header="Analysis">
                 <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
