@@ -154,14 +154,14 @@ namespace newRBS.Models
                 {
                     case "Manual":
                         MeasurementToUpdate.Progress = 0; break;
-                    case "Duration":
-                        MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / ((DateTime)MeasurementToUpdate.FinalDuration - new DateTime(2000, 01, 01)).TotalMinutes; break;
-                    case "Charge":
-                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / (double)MeasurementToUpdate.FinalCharge; break;
+                    case "Duration (min)":
+                        MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / MeasurementToUpdate.StopValue; break;
+                    case "Charge (µC)":
+                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / MeasurementToUpdate.StopValue; break;
                     case "Counts":
-                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / (long)MeasurementToUpdate.FinalCounts; Console.WriteLine(MeasurementToUpdate.Progress); break;
+                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; Console.WriteLine(MeasurementToUpdate.Progress); break;
                     case "ChopperCounts":
-                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / (long)MeasurementToUpdate.FinalChopperCounts; break;
+                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
 
                 MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01)+TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));

@@ -69,9 +69,9 @@
             <TextBox Text="{Binding Measurement.CurrentChopperCounts, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="8"/>
 
             <Label Content="Stop Type:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="9"/>
-            <ComboBox ItemsSource="{Binding StopTypes}" SelectedItem="{Binding SelectedStopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="9" />
-            <Label Content="{Binding StopValueLabel}" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="9"/>
-            <TextBox Text="{Binding StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="9" />
+            <ComboBox ItemsSource="{Binding StopTypes}" SelectedItem="{Binding Measurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="9" />
+            <Label Content="Stop Value:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="9"/>
+            <TextBox Text="{Binding Measurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="9" />
 
             <Label Content="ECal Offset:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="10"/>
             <TextBox Text="{Binding Measurement.EnergyCalOffset, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="10" />

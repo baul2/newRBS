@@ -328,9 +328,9 @@ namespace newRBS.Database
                                         case "Solid angle":
                                             { newMeasurements[i].SolidAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Charge":
-                                            { newMeasurements[i].CurrentCharge = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); newMeasurements[i].FinalCharge = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].CurrentCharge = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); newMeasurements[i].StopValue = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Real time":
-                                            { newMeasurements[i].CurrentDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); newMeasurements[i].FinalDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); break; }
+                                            { newMeasurements[i].CurrentDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); newMeasurements[i].CurrentDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); break; }
                                         case "Live time":
                                             { break; }
                                         case "FWHM":
@@ -350,7 +350,7 @@ namespace newRBS.Database
                                 newMeasurements[i].SpectrumY = spectraY[i].ToArray();
                                 newMeasurements[i].NumOfChannels = spectraY[i].Count();
                                 newMeasurements[i].Orientation = "(undefined)";
-                                newMeasurements[i].StopType = "Charge";
+                                newMeasurements[i].StopType = "Charge (µC)";
                                 newMeasurements[i].Chamber = "(undefined)";
                             }
                         }

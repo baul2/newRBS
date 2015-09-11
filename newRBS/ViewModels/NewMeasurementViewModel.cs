@@ -54,14 +54,6 @@ namespace newRBS.ViewModels
         public ObservableCollection<ElementClass> Ions { get; set; }
 
         public ObservableCollection<string> StopTypes { get; set; }
-        private string _SelectedStopType;
-        public string SelectedStopType
-        { get { return _SelectedStopType; } set { _SelectedStopType = value; SelectedStopTypeChanged(); RaisePropertyChanged(); } }
-
-        private string _StopValueLabel = "";
-        public string StopValueLabel
-        { get { return _StopValueLabel; } set { _StopValueLabel = value; RaisePropertyChanged(); } }
-        public string StopValue { get; set; }
 
         private int _SelectedChamberTabIndex = 0;
         public int SelectedChamberTabIndex
@@ -91,37 +83,16 @@ namespace newRBS.ViewModels
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypes = new ObservableCollection<string> { "Manual", "Duration", "Charge", "Counts", "ChopperCounts" };
+            StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
             Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
             Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
 
-            SelectedStopType = Measurement.StopType;
-            switch (SelectedStopType)
-            {
-                case "Manual": StopValue = ""; break;
-                case "Duration": StopValue = (new DateTime(2000, 01, 01) - (DateTime)Measurement.FinalDuration).TotalMinutes.ToString(); break;
-                case "Charge": StopValue = Measurement.FinalCharge.ToString(); break;
-                case "Counts": StopValue = Measurement.FinalCounts.ToString(); break;
-                case "ChopperCounts": StopValue = Measurement.FinalChopperCounts.ToString(); break;
-            }
-
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
 
-        private void SelectedStopTypeChanged()
-        {
-            switch (SelectedStopType)
-            {
-                case "Manual": StopValueLabel = ""; break;
-                case "Duration": StopValueLabel = "Duration (min):"; break;
-                case "Charge": StopValueLabel = "Charge (µC):"; break;
-                case "Counts": StopValueLabel = "Counts:"; break;
-                case "ChopperCounts": StopValueLabel = "ChopperCounts:"; break;
-            }
-        }
 
         private void _NewSampleCommand()
         {
@@ -139,19 +110,8 @@ namespace newRBS.ViewModels
         {
             DialogResult = false;
 
-            Measurement.StopType = SelectedStopType;
             int SampleID = Measurement.SampleID;
             MyGlobals.GenericDetach<Measurement>(Measurement);
-            Measurement.FinalDuration = null; Measurement.FinalCharge = null; Measurement.FinalCounts = null; Measurement.FinalChopperCounts = null;
-
-            switch (SelectedStopType)
-            {
-                case "Manual":  break;
-                case "Duration": Measurement.FinalDuration = new DateTime(2000, 01, 01) + TimeSpan.FromMinutes(Convert.ToDouble(StopValue)); break;
-                case "Charge": Measurement.FinalCharge = Convert.ToDouble(StopValue); break;
-                case "Counts": Measurement.FinalCounts = Convert.ToInt64(StopValue); break;
-                case "ChopperCounts": Measurement.FinalChopperCounts = Convert.ToInt64(StopValue); break;
-            }
 
             switch (SelectedChamberTabIndex)
             {
