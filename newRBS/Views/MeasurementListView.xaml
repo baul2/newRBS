@@ -21,7 +21,8 @@
         CanUserAddRows="False"
         AlternationCount="2"
         HorizontalGridLinesBrush ="WhiteSmoke"
-        VerticalGridLinesBrush="LightGray">
+        VerticalGridLinesBrush="LightGray"
+        ColumnHeaderHeight="25">
         <i:Interaction.Triggers>
             <i:EventTrigger EventName="MouseDoubleClick">
                 <cmd:EventToCommand Command="{Binding DataGridDoubleClickCommand}" PassEventArgsToCommand="True" />
@@ -46,7 +47,10 @@
         </DataGrid.RowStyle>
 
         <DataGrid.Columns>
-            <DataGridTemplateColumn Header="Selected">
+            <DataGridTemplateColumn>
+                <DataGridTemplateColumn.Header>
+                    <CheckBox Content="Selected" IsChecked="{Binding measurementListViewModel.SelectAll, Source={StaticResource Locator},Mode=TwoWay}"/>
+                </DataGridTemplateColumn.Header>
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
