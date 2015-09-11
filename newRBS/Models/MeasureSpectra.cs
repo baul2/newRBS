@@ -17,6 +17,7 @@ namespace newRBS.Models
     public class MeasureSpectra
     {
         private CAEN_x730 cAEN_x730;
+        private Coulombo coulombo;
 
         TraceSource trace = new TraceSource("MeasureSpectra");
 
@@ -33,6 +34,7 @@ namespace newRBS.Models
         public MeasureSpectra()
         {
             cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
+            coulombo = SimpleIoc.Default.GetInstance<Coulombo>();
         }
 
         /// <summary>
@@ -76,6 +78,17 @@ namespace newRBS.Models
                     NewMeasurement.NumOfChannels = cAEN_x730.NumberOfChanels;
                     NewMeasurement.SpectrumY = new int[] { 0 };
                     NewMeasurement.Runs = true;
+
+                    if (NewMeasurement.StopType == "Charge (µC)")
+                    {
+                        coulombo.SetLadung(NewMeasurement.StopValue);
+                        
+                    }
+                    else
+                    {
+                        coulombo.SetLadung(9999);
+                    }
+                    coulombo.Start();
 
                     Database.Measurements.InsertOnSubmit(NewMeasurement);
 
@@ -147,7 +160,7 @@ namespace newRBS.Models
 
                 MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
                 MeasurementToUpdate.CurrentCounts = newSpectrumY.Sum();
-                //MeasurementToUpdate.CurrentCharge = GetCharge();                  //TODO
+                MeasurementToUpdate.CurrentCharge = coulombo.GetLadung();               
                 //MeasurementToUpdate.CurrentChopperCounts = GetChopperCounts();    //TODO
 
                 switch (MeasurementToUpdate.StopType)
@@ -164,7 +177,7 @@ namespace newRBS.Models
                         MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
 
-                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01)+TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
 
                 Database.SubmitChanges();
 
