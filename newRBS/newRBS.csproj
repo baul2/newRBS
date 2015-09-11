@@ -159,6 +159,7 @@
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabasePartialMethods.cs" />
+    <Compile Include="Models\Coulombo.cs" />
     <Compile Include="Models\EpsaraSharp\Data.cs" />
     <Compile Include="Models\EpsaraSharp\DataBeam.cs" />
     <Compile Include="Models\EpsaraSharp\DataDetector.cs" />
