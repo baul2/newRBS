@@ -64,13 +64,19 @@ namespace newRBS.ViewModels
 
         private int _SelectedDataBindingInterval = 0;
         public int SelectedDataBindingInterval
-        { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); }  }
+        { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); } }
 
         public List<string> YAxisScale { get; set; }
 
         private string _SelectedYAxisScale = "linear";
         public string SelectedYAxisScale
         { get { return _SelectedYAxisScale; } set { _SelectedYAxisScale = value; RaisePropertyChanged(); UpdateYAxisScale(); UpdateYAxisTitle(); } }
+
+        public List<string> LegendCaptions { get; set; }
+
+        private string _SelectedLegendCaption = "Measurement IDs";
+        public string SelectedLegendCaption
+        { get { return _SelectedLegendCaption; } set { _SelectedLegendCaption = value; RaisePropertyChanged(); UpdateLegend(); } }
 
         public MeasurementPlotViewModel()
         {
@@ -86,6 +92,8 @@ namespace newRBS.ViewModels
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().EventNewFilter += new MeasurementFilterViewModel.EventHandlerFilter(ClearPlot);
 
             ExpandConfigPanel = new RelayCommand(() => _ExpandConfigPanel(), () => true);
+
+            //SetYOriginTo0Command = new RelayCommand(() => _SetYOriginTo0Command(), () => true); 
 
             MeasurementIDList = new List<int>();
 
@@ -111,6 +119,8 @@ namespace newRBS.ViewModels
             DataBindingIntervals = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
 
             YAxisScale = new List<string> { "linear", "logarithmic" };
+
+            LegendCaptions = new List<string> { "Measurement IDs", "Measurement names", "Sample names", "Sample remarks", "Sample names + remarks" };
         }
 
         private void _ExpandConfigPanel()
@@ -127,7 +137,7 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
@@ -147,7 +157,7 @@ namespace newRBS.ViewModels
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
-            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
+            Series delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
                 plotModel.Series.Remove(delSerie);
@@ -164,17 +174,17 @@ namespace newRBS.ViewModels
 
         private void PlotMeasurement(Measurement measurement)
         {
-            if (SelectedDataBindingInterval>0 && measurement.EnergyCalSlope>SelectedDataBindingInterval)
+            if (SelectedDataBindingInterval > 0 && measurement.EnergyCalSlope > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
-            
+
             var areaSeries = new AreaSeries
             {
-                Tag = measurement.MeasurementID,
+                Tag = measurement,
                 StrokeThickness = 2,
                 MarkerSize = 3,
                 Color = LineColors[measurement.MeasurementID % LineColors.Count],
                 CanTrackerInterpolatePoints = false,
-                Title = string.Format("MeasurementID {0}", measurement.MeasurementID),
+                Title = GetMeasurementTitle(measurement),
                 Smooth = false,
             };
 
@@ -244,7 +254,7 @@ namespace newRBS.ViewModels
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            Series updateSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
+            Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
                 plotModel.Series.Remove(updateSerie);
@@ -290,7 +300,36 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void UpdateAllPlots( )
+        private string GetMeasurementTitle(Measurement measurement)
+        {
+            if (measurement == null) return "";
+
+            switch (SelectedLegendCaption)
+            {
+                case "Measurement IDs":
+                    return "MeasurementID " + measurement.MeasurementID;
+                case "Measurement names":
+                    return measurement.MeasurementName;
+                case "Sample names":
+                    return measurement.Sample.SampleName;
+                case "Sample remarks":
+                    return measurement.SampleRemark;
+                case "Sample names + remarks":
+                    return measurement.Sample.SampleName + " " + measurement.SampleRemark;
+                default:
+                    return "MeasurementID " + measurement.MeasurementID;
+            }
+        }
+
+        private void UpdateLegend()
+        {
+            foreach (var plot in plotModel.Series)
+            {
+                plot.Title = GetMeasurementTitle((Measurement)plot.Tag);
+            }
+        }
+
+        private void UpdateAllPlots()
         {
             if (MeasurementIDList.Count() == 0) return;
 

@@ -7,12 +7,12 @@ using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
+using System.Reflection;
 
 namespace newRBS
 {
     static class MyGlobals
     {
-        //public static string ConString = "Data Source = SVRH; User ID = p4mist; Password = testtesttesttest; Initial Catalog = p4mist_db";
         public static string ConString = "";
 
         public static Database.DatabaseDataContext Database
@@ -28,7 +28,6 @@ namespace newRBS
 
                     while (logInDialog.ShowDialog() == true)
                     {
-                        //ConString = "Data Source = SVRH; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         newConnection = new Database.DatabaseDataContext(ConString);
                         newConnection.CommandTimeout = 10;
@@ -44,11 +43,26 @@ namespace newRBS
                     if (!newConnection.DatabaseExists())
                     {
                         Console.WriteLine("close");
-                        Environment.Exit(0);
+                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand();
                         return null;
                     }
                 }
                 return newConnection;
+            }
+        }
+
+        public static void GenericDetach<T>(T entity) where T : class
+        {
+            foreach (PropertyInfo pi in entity.GetType().GetProperties())
+            {
+                if (pi.GetCustomAttributes(typeof(System.Data.Linq.Mapping.AssociationAttribute), false).Length > 0)
+                {
+                    // Property is associated to another entity
+                    Type propType = pi.PropertyType;
+                    // Invoke Empty contructor (set to default value)
+                    ConstructorInfo ci = propType.GetConstructor(new Type[0]);
+                    pi.SetValue(entity, ci.Invoke(null), null);
+                }
             }
         }
     }

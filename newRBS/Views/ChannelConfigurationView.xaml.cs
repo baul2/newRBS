@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,18 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using OxyPlot;
-using GalaSoft.MvvmLight.Ioc;
+using System.Globalization;
 
 namespace newRBS.Views
 {
-    public partial class MainView : Window
+    /// <summary>
+    /// Interaction logic for ChannelConfigurationView.xaml
+    /// </summary>
+    public partial class ChannelConfigurationView : Window
     {
-        private Models.CAEN_x730 cAEN_x730;
-
-        public MainView()
+        public ChannelConfigurationView()
         {
             InitializeComponent();
         }

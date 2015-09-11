@@ -17,7 +17,8 @@ namespace newRBS.Models
         int waveformAutoTrigger = 1;
         CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
         int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
-        public List<int> activeChannels = new List<int>();
+        public List<int> ActiveChannels = new List<int>();
+        public int NumberOfChanels = 16384;
 
         TraceSource trace = new TraceSource("CAEN_x730");
 
@@ -190,7 +191,7 @@ namespace newRBS.Models
         /// <param name="channel">Channel number (0...7) to start the acquisition.</param>
         public void StartAcquisition(int channel)
         {
-            if (activeChannels.Contains(channel)) // Checks if measurement is already running
+            if (ActiveChannels.Contains(channel)) // Checks if measurement is already running
             {
                 trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}", channel);
                 return;
@@ -200,7 +201,7 @@ namespace newRBS.Models
             else
             {
                 trace.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel {0}", channel);
-                activeChannels.Add(channel); // Adds channel to the active channels
+                ActiveChannels.Add(channel); // Adds channel to the active channels
             }
         }
 
@@ -264,7 +265,7 @@ namespace newRBS.Models
         /// <param name="channel">Channel number (0...7) to stop the acquisition.</param>
         public void StopAcquisition(int channel)
         {
-            if (!activeChannels.Contains(channel)) // Checks if measurement is not running
+            if (!ActiveChannels.Contains(channel)) // Checks if measurement is not running
             {
                 trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}", channel);
                 return;
@@ -274,7 +275,7 @@ namespace newRBS.Models
             else
             {
                 trace.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel {0}", channel);
-                activeChannels.Remove(channel); // Removes channel from the active channels
+                ActiveChannels.Remove(channel); // Removes channel from the active channels
             }
         }
 

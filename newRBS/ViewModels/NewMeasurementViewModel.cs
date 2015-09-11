@@ -51,8 +51,9 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<ElementClass> Ions { get; set; }
+
+        public ObservableCollection<string> StopTypes { get; set; }
 
         private int _SelectedChamberTabIndex = 0;
         public int SelectedChamberTabIndex
@@ -82,7 +83,7 @@ namespace newRBS.ViewModels
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
+            StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
             Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
@@ -91,6 +92,7 @@ namespace newRBS.ViewModels
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
+
 
         private void _NewSampleCommand()
         {
@@ -107,33 +109,24 @@ namespace newRBS.ViewModels
         private void _StartMeasurementCommand()
         {
             DialogResult = false;
-            _DialogResult = null;
 
-            measureSpectra.MeasurementName = Measurement.MeasurementName;
-            measureSpectra.SampleID = Measurement.SampleID;
-            measureSpectra.SampleRemark = Measurement.SampleRemark;
-            measureSpectra.Orientation = Measurement.Orientation;
-            measureSpectra.IncomingIonAtomicNumber = Measurement.IncomingIonAtomicNumber;
-            measureSpectra.IncomingIonEnergy = Measurement.IncomingIonEnergy;
-            measureSpectra.IncomingIonAngle = Measurement.IncomingIonAngle;
-            measureSpectra.SolidAngle = Measurement.SolidAngle;
-            measureSpectra.StopType = Measurement.StopType;
-            measureSpectra.StopValue = Measurement.StopValue;
+            int SampleID = Measurement.SampleID;
+            MyGlobals.GenericDetach<Measurement>(Measurement);
 
             switch (SelectedChamberTabIndex)
             {
                 case 0: // -10° chamber
                     {
-                        measureSpectra.Chamber = "-10°";
+                        Measurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
                         break;
                     }
                 case 1: // -30° chamber
                     {
-                        measureSpectra.Chamber = "-30°";
+                        Measurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
                         break;
                     }
             }
