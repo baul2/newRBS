@@ -7,6 +7,7 @@ using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
+using System.Reflection;
 
 namespace newRBS
 {
@@ -47,6 +48,21 @@ namespace newRBS
                     }
                 }
                 return newConnection;
+            }
+        }
+
+        public static void GenericDetach<T>(T entity) where T : class
+        {
+            foreach (PropertyInfo pi in entity.GetType().GetProperties())
+            {
+                if (pi.GetCustomAttributes(typeof(System.Data.Linq.Mapping.AssociationAttribute), false).Length > 0)
+                {
+                    // Property is associated to another entity
+                    Type propType = pi.PropertyType;
+                    // Invoke Empty contructor (set to default value)
+                    ConstructorInfo ci = propType.GetConstructor(new Type[0]);
+                    pi.SetValue(entity, ci.Invoke(null), null);
+                }
             }
         }
     }

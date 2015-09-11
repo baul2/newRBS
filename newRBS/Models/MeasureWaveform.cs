@@ -63,7 +63,7 @@ namespace newRBS.Models
         /// <param name="channelParams">An instance of <see cref="ChannelParams"/> containing the channel configuration.</param>
         public void SetChannelConfig(int Channel, ChannelParams channelParams)
         {
-            if (cAEN_x730.activeChannels.Count() == 0)
+            if (cAEN_x730.ActiveChannels.Count() == 0)
             {
                 cAEN_x730.SetChannelConfig(Channel, channelParams);
                 return;
@@ -71,7 +71,7 @@ namespace newRBS.Models
             else
             {
                 waveformTimer.Enabled = false;
-                int activeChannel = cAEN_x730.activeChannels.First();
+                int activeChannel = cAEN_x730.ActiveChannels.First();
                 cAEN_x730.StopAcquisition(activeChannel);
                 cAEN_x730.SetChannelConfig(Channel, channelParams);
                 cAEN_x730.StartAcquisition(Channel);

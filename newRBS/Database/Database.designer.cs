@@ -1346,7 +1346,7 @@ namespace newRBS.Database
 		
 		private int _Channel;
 		
-		private System.Nullable<int> _SampleID;
+		private int _SampleID;
 		
 		private string _SampleRemark;
 		
@@ -1420,7 +1420,7 @@ namespace newRBS.Database
     partial void OnMeasurementNameChanged();
     partial void OnChannelChanging(int value);
     partial void OnChannelChanged();
-    partial void OnSampleIDChanging(System.Nullable<int> value);
+    partial void OnSampleIDChanging(int value);
     partial void OnSampleIDChanged();
     partial void OnSampleRemarkChanging(string value);
     partial void OnSampleRemarkChanged();
@@ -1549,8 +1549,8 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SampleID", DbType="Int")]
-		public System.Nullable<int> SampleID
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SampleID", DbType="Int NOT NULL")]
+		public int SampleID
 		{
 			get
 			{
@@ -2193,7 +2193,7 @@ namespace newRBS.Database
 					}
 					else
 					{
-						this._SampleID = default(Nullable<int>);
+						this._SampleID = default(int);
 					}
 					this.SendPropertyChanged("Sample");
 				}

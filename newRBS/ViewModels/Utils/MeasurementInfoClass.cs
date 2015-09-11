@@ -36,12 +36,12 @@ namespace newRBS.ViewModels.Utils
         public Measurement Measurement
         {
             get { return _Measurement; }
-            set { if (value == null) return; _Measurement = value; SelectedStopType = value.StopType; OnPropertyChanged("Measurement"); }
+            set { if (value == null) return; _Measurement = value; SelectedStopType = value.StopType;RaisePropertyChanged(); }
         }
 
         private ObservableCollection<Sample> _Samples;
         public ObservableCollection<Sample> Samples
-        { get { return _Samples; } set { _Samples = value; OnPropertyChanged("Samples"); } }
+        { get { return _Samples; } set { _Samples = value; RaisePropertyChanged(); } }
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
@@ -74,7 +74,7 @@ namespace newRBS.ViewModels.Utils
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypes = new ObservableCollection<string> { "Manual", "Duration", "Charge", "Counts", "ChopperCounts" };
-            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
+            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } }; 
         }
 
         private void SelectedStopTypeChanged()
@@ -143,15 +143,5 @@ namespace newRBS.ViewModels.Utils
                 Measurement.Sample = newSample;
             }
         }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = "")
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(name));
-        }
-        #endregion
     }
 }

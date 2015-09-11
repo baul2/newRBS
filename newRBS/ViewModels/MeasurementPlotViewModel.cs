@@ -157,7 +157,7 @@ namespace newRBS.ViewModels
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
-            Series delSerie = plotModel.Series.Where(x => (int)x.Tag == measurement.MeasurementID).FirstOrDefault();
+            Series delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
                 plotModel.Series.Remove(delSerie);

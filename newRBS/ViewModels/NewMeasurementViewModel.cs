@@ -54,15 +54,15 @@ namespace newRBS.ViewModels
         public ObservableCollection<ElementClass> Ions { get; set; }
 
         public ObservableCollection<string> StopTypes { get; set; }
-        private string _SelectedStopType = "Manual";
+        private string _SelectedStopType;
         public string SelectedStopType
         { get { return _SelectedStopType; } set { _SelectedStopType = value; SelectedStopTypeChanged(); RaisePropertyChanged(); } }
 
-        private string _StopValueLabel= "";
+        private string _StopValueLabel = "";
         public string StopValueLabel
         { get { return _StopValueLabel; } set { _StopValueLabel = value; RaisePropertyChanged(); } }
         public string StopValue { get; set; }
-        
+
         private int _SelectedChamberTabIndex = 0;
         public int SelectedChamberTabIndex
         { get { return _SelectedChamberTabIndex; } set { _SelectedChamberTabIndex = value; RaisePropertyChanged(); } }
@@ -98,17 +98,26 @@ namespace newRBS.ViewModels
 
             Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
 
+            SelectedStopType = Measurement.StopType;
+            switch (SelectedStopType)
+            {
+                case "Manual": StopValue = ""; break;
+                case "Duration": StopValue = (new DateTime(2000,01,01)- (DateTime)Measurement.FinalDuration).TotalMinutes.ToString(); break;
+                case "Charge": StopValue = Measurement.FinalCharge.ToString(); break;
+                case "Counts": StopValue = Measurement.FinalCounts.ToString(); break;
+                case "ChopperCounts": StopValue = Measurement.FinalChopperCounts.ToString(); break;
+            }
+
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
 
         private void SelectedStopTypeChanged()
         {
-            Console.WriteLine(Measurement.IncomingIonAtomicNumber);
             switch (SelectedStopType)
             {
                 case "Manual": StopValueLabel = ""; break;
-                case "Duration": StopValueLabel = "Duration (min):";break;
-                case "Charge": StopValueLabel = "Charge (µC):";  break;
+                case "Duration": StopValueLabel = "Duration (min):"; break;
+                case "Charge": StopValueLabel = "Charge (µC):"; break;
                 case "Counts": StopValueLabel = "Counts:"; break;
                 case "ChopperCounts": StopValueLabel = "ChopperCounts:"; break;
             }
@@ -129,40 +138,34 @@ namespace newRBS.ViewModels
         private void _StartMeasurementCommand()
         {
             DialogResult = false;
-            _DialogResult = null;
 
-            measureSpectra.MeasurementName = Measurement.MeasurementName;
-            measureSpectra.SampleID = Measurement.SampleID;
-            measureSpectra.SampleRemark = Measurement.SampleRemark;
-            measureSpectra.Orientation = Measurement.Orientation;
-            measureSpectra.IncomingIonAtomicNumber = Measurement.IncomingIonAtomicNumber;
-            measureSpectra.IncomingIonEnergy = Measurement.IncomingIonEnergy;
-            measureSpectra.IncomingIonAngle = Measurement.IncomingIonAngle;
-            measureSpectra.SolidAngle = Measurement.SolidAngle;
-            measureSpectra.StopType = Measurement.StopType;
+            Measurement.StopType = SelectedStopType;
+            int SampleID = Measurement.SampleID;
+            MyGlobals.GenericDetach<Measurement>(Measurement);
+
             switch (SelectedStopType)
             {
                 case "Manual": break;
-                case "Duration": measureSpectra.FinalDuration = new DateTime(2000,01,01)+TimeSpan.FromMinutes(Convert.ToDouble(StopValue)); break;
-                case "Charge": measureSpectra.FinalCharge = Convert.ToDouble(StopValue); break;
-                case "Counts": measureSpectra.FinalCounts = Convert.ToInt64(StopValue); break;
-                case "ChopperCounts": measureSpectra.FinalChopperCounts = Convert.ToInt64(StopValue); break;
+                case "Duration": Measurement.FinalDuration = new DateTime(2000, 01, 01) + TimeSpan.FromMinutes(Convert.ToDouble(StopValue)); break;
+                case "Charge": Measurement.FinalCharge = Convert.ToDouble(StopValue); break;
+                case "Counts": Measurement.FinalCounts = Convert.ToInt64(StopValue); break;
+                case "ChopperCounts": Measurement.FinalChopperCounts = Convert.ToInt64(StopValue); break;
             }
 
             switch (SelectedChamberTabIndex)
             {
                 case 0: // -10° chamber
                     {
-                        measureSpectra.Chamber = "-10°";
+                        Measurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
                         break;
                     }
                 case 1: // -30° chamber
                     {
-                        measureSpectra.Chamber = "-30°";
+                        Measurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels);
+                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
                         break;
                     }
             }
