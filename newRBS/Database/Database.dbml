@@ -70,6 +70,7 @@
       <Column Name="StartTime" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
       <Column Name="Runs" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
       <Column Name="Progress" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Remaining" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="NumOfChannels" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="SpectrumYByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
       <Column Name="SpectrumYCalculatedByte" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />

@@ -102,7 +102,7 @@ namespace newRBS.ViewModels
             switch (SelectedStopType)
             {
                 case "Manual": StopValue = ""; break;
-                case "Duration": StopValue = (new DateTime(2000,01,01)- (DateTime)Measurement.FinalDuration).TotalMinutes.ToString(); break;
+                case "Duration": StopValue = (new DateTime(2000, 01, 01) - (DateTime)Measurement.FinalDuration).TotalMinutes.ToString(); break;
                 case "Charge": StopValue = Measurement.FinalCharge.ToString(); break;
                 case "Counts": StopValue = Measurement.FinalCounts.ToString(); break;
                 case "ChopperCounts": StopValue = Measurement.FinalChopperCounts.ToString(); break;
@@ -142,10 +142,11 @@ namespace newRBS.ViewModels
             Measurement.StopType = SelectedStopType;
             int SampleID = Measurement.SampleID;
             MyGlobals.GenericDetach<Measurement>(Measurement);
+            Measurement.FinalDuration = null; Measurement.FinalCharge = null; Measurement.FinalCounts = null; Measurement.FinalChopperCounts = null;
 
             switch (SelectedStopType)
             {
-                case "Manual": break;
+                case "Manual":  break;
                 case "Duration": Measurement.FinalDuration = new DateTime(2000, 01, 01) + TimeSpan.FromMinutes(Convert.ToDouble(StopValue)); break;
                 case "Charge": Measurement.FinalCharge = Convert.ToDouble(StopValue); break;
                 case "Counts": Measurement.FinalCounts = Convert.ToInt64(StopValue); break;

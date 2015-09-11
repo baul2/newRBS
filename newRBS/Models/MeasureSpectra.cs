@@ -164,6 +164,8 @@ namespace newRBS.Models
                         MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / (long)MeasurementToUpdate.FinalChopperCounts; break;
                 }
 
+                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01)+TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+
                 Database.SubmitChanges();
 
                 if (MeasurementToUpdate.Progress >= 1)

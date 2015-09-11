@@ -1358,6 +1358,8 @@ namespace newRBS.Database
 		
 		private double _Progress;
 		
+		private System.Nullable<System.DateTime> _Remaining;
+		
 		private int _NumOfChannels;
 		
 		private System.Data.Linq.Binary _SpectrumYByte;
@@ -1432,6 +1434,8 @@ namespace newRBS.Database
     partial void OnRunsChanged();
     partial void OnProgressChanging(double value);
     partial void OnProgressChanged();
+    partial void OnRemainingChanging(System.Nullable<System.DateTime> value);
+    partial void OnRemainingChanged();
     partial void OnNumOfChannelsChanging(int value);
     partial void OnNumOfChannelsChanged();
     partial void OnSpectrumYByteChanging(System.Data.Linq.Binary value);
@@ -1669,6 +1673,26 @@ namespace newRBS.Database
 					this._Progress = value;
 					this.SendPropertyChanged("Progress");
 					this.OnProgressChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Remaining", DbType="DateTime")]
+		public System.Nullable<System.DateTime> Remaining
+		{
+			get
+			{
+				return this._Remaining;
+			}
+			set
+			{
+				if ((this._Remaining != value))
+				{
+					this.OnRemainingChanging(value);
+					this.SendPropertyChanging();
+					this._Remaining = value;
+					this.SendPropertyChanged("Remaining");
+					this.OnRemainingChanged();
 				}
 			}
 		}
