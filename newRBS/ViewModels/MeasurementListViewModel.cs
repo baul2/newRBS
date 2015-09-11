@@ -45,6 +45,19 @@ namespace newRBS.ViewModels
 
         public CollectionViewSource MeasurementListViewSource { get; set; }
 
+        private bool _SelectAll=false;
+        public bool SelectAll
+        {
+            get { return this._SelectAll; }
+            set
+            {
+                _SelectAll = value;
+                foreach (SelectableMeasurement s in MeasurementList)
+                    s.Selected = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private int _SelectedMeasurementID;
         public int SelectedMeasurementID
         {

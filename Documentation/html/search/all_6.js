@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['initializearrays',['initializeArrays',['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html#afd81629052d556fc805bb581d5b7d674',1,'newRBS::Models::CAENDPP_DgtzParams_t']]],
-  ['isacquiring',['IsAcquiring',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a84135362c2702d60eb9abc936e7e7797',1,'newRBS::Models::MeasureSpectra']]]
+  ['getchannelconfig',['GetChannelConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#ad13d88750d9a9968839e9326bae567b0',1,'newRBS.Models.CAEN_x730.GetChannelConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#a88e1cf781190c5329618219d56ebd051',1,'newRBS.Models.MeasureWaveform.GetChannelConfig()']]],
+  ['gethistogram',['GetHistogram',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a685ecded1c5cce6d388d517541dd0fa3',1,'newRBS::Models::CAEN_x730']]],
+  ['getwaveform',['GetWaveform',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a067a69530944d1362673fbc6961ab2b8',1,'newRBS::Models::CAEN_x730']]]
 ];

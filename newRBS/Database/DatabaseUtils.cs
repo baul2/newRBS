@@ -196,8 +196,8 @@ namespace newRBS.Database
                                 strEnergyChannel += "\t" + measurement.EnergyCalSlope.ToString(point);
                                 strOffset += "\t" + measurement.EnergyCalOffset.ToString(point);
                                 strSolidAngle += "\t" + measurement.SolidAngle.ToString(point);
-                                strCharge += "\t" + measurement.StopValue.ToString(point);
-                                strRealTime += "\t" + (measurement.Duration - new DateTime(2000, 01, 01)).TotalSeconds.ToString(point);
+                                strCharge += "\t" + measurement.CurrentCharge.ToString(point);
+                                strRealTime += "\t" + (measurement.CurrentDuration - new DateTime(2000, 01, 01)).TotalSeconds.ToString(point);
                                 strLiveTime += "\t";
                                 strFWHM += "\t";
                                 strChannel += "\t" + measurement.MeasurementName;
@@ -328,9 +328,9 @@ namespace newRBS.Database
                                         case "Solid angle":
                                             { newMeasurements[i].SolidAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Charge":
-                                            { break; }
+                                            { newMeasurements[i].CurrentCharge = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); newMeasurements[i].StopValue = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Real time":
-                                            { newMeasurements[i].Duration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); break; }
+                                            { newMeasurements[i].CurrentDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); newMeasurements[i].CurrentDuration = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(lineParts[i + 1].Replace(".", ","))); break; }
                                         case "Live time":
                                             { break; }
                                         case "FWHM":
@@ -350,8 +350,7 @@ namespace newRBS.Database
                                 newMeasurements[i].SpectrumY = spectraY[i].ToArray();
                                 newMeasurements[i].NumOfChannels = spectraY[i].Count();
                                 newMeasurements[i].Orientation = "(undefined)";
-                                newMeasurements[i].StopType = "(undefined)";
-                                newMeasurements[i].StopTime = newMeasurements[i].StartTime + (newMeasurements[i].Duration - new DateTime(2000, 01, 01));
+                                newMeasurements[i].StopType = "Charge (µC)";
                                 newMeasurements[i].Chamber = "(undefined)";
                             }
                         }

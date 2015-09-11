@@ -22,7 +22,7 @@ namespace newRBS.Database
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="p4mist_db")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="newRBSadmin_db")]
 	public partial class DatabaseDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -54,7 +54,7 @@ namespace newRBS.Database
     #endregion
 		
 		public DatabaseDataContext() : 
-				base(global::newRBS.Properties.Settings.Default.p4mist_dbConnectionString2, mappingSource)
+				base(global::newRBS.Properties.Settings.Default.newRBSadmin_dbConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -1346,7 +1346,7 @@ namespace newRBS.Database
 		
 		private int _Channel;
 		
-		private System.Nullable<int> _SampleID;
+		private int _SampleID;
 		
 		private string _SampleRemark;
 		
@@ -1354,15 +1354,11 @@ namespace newRBS.Database
 		
 		private System.DateTime _StartTime;
 		
-		private System.Nullable<System.DateTime> _StopTime;
-		
-		private System.DateTime _Duration;
-		
 		private bool _Runs;
 		
-		private System.Nullable<double> _Charge;
-		
 		private double _Progress;
+		
+		private System.Nullable<System.DateTime> _Remaining;
 		
 		private int _NumOfChannels;
 		
@@ -1373,6 +1369,14 @@ namespace newRBS.Database
 		private string _StopType;
 		
 		private double _StopValue;
+		
+		private System.DateTime _CurrentDuration;
+		
+		private double _CurrentCharge;
+		
+		private long _CurrentCounts;
+		
+		private long _CurrentChopperCounts;
 		
 		private double _EnergyCalOffset;
 		
@@ -1412,7 +1416,7 @@ namespace newRBS.Database
     partial void OnMeasurementNameChanged();
     partial void OnChannelChanging(int value);
     partial void OnChannelChanged();
-    partial void OnSampleIDChanging(System.Nullable<int> value);
+    partial void OnSampleIDChanging(int value);
     partial void OnSampleIDChanged();
     partial void OnSampleRemarkChanging(string value);
     partial void OnSampleRemarkChanged();
@@ -1420,16 +1424,12 @@ namespace newRBS.Database
     partial void OnOrientationChanged();
     partial void OnStartTimeChanging(System.DateTime value);
     partial void OnStartTimeChanged();
-    partial void OnStopTimeChanging(System.Nullable<System.DateTime> value);
-    partial void OnStopTimeChanged();
-    partial void OnDurationChanging(System.DateTime value);
-    partial void OnDurationChanged();
     partial void OnRunsChanging(bool value);
     partial void OnRunsChanged();
-    partial void OnChargeChanging(System.Nullable<double> value);
-    partial void OnChargeChanged();
     partial void OnProgressChanging(double value);
     partial void OnProgressChanged();
+    partial void OnRemainingChanging(System.Nullable<System.DateTime> value);
+    partial void OnRemainingChanged();
     partial void OnNumOfChannelsChanging(int value);
     partial void OnNumOfChannelsChanged();
     partial void OnSpectrumYByteChanging(System.Data.Linq.Binary value);
@@ -1440,6 +1440,14 @@ namespace newRBS.Database
     partial void OnStopTypeChanged();
     partial void OnStopValueChanging(double value);
     partial void OnStopValueChanged();
+    partial void OnCurrentDurationChanging(System.DateTime value);
+    partial void OnCurrentDurationChanged();
+    partial void OnCurrentChargeChanging(double value);
+    partial void OnCurrentChargeChanged();
+    partial void OnCurrentCountsChanging(long value);
+    partial void OnCurrentCountsChanged();
+    partial void OnCurrentChopperCountsChanging(long value);
+    partial void OnCurrentChopperCountsChanged();
     partial void OnEnergyCalOffsetChanging(double value);
     partial void OnEnergyCalOffsetChanged();
     partial void OnEnergyCalSlopeChanging(double value);
@@ -1533,8 +1541,8 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SampleID", DbType="Int")]
-		public System.Nullable<int> SampleID
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SampleID", DbType="Int NOT NULL")]
+		public int SampleID
 		{
 			get
 			{
@@ -1617,46 +1625,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StopTime", DbType="DateTime")]
-		public System.Nullable<System.DateTime> StopTime
-		{
-			get
-			{
-				return this._StopTime;
-			}
-			set
-			{
-				if ((this._StopTime != value))
-				{
-					this.OnStopTimeChanging(value);
-					this.SendPropertyChanging();
-					this._StopTime = value;
-					this.SendPropertyChanged("StopTime");
-					this.OnStopTimeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Duration", DbType="DateTime NOT NULL")]
-		public System.DateTime Duration
-		{
-			get
-			{
-				return this._Duration;
-			}
-			set
-			{
-				if ((this._Duration != value))
-				{
-					this.OnDurationChanging(value);
-					this.SendPropertyChanging();
-					this._Duration = value;
-					this.SendPropertyChanged("Duration");
-					this.OnDurationChanged();
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Runs", DbType="Bit NOT NULL")]
 		public bool Runs
 		{
@@ -1677,26 +1645,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Charge", DbType="Float")]
-		public System.Nullable<double> Charge
-		{
-			get
-			{
-				return this._Charge;
-			}
-			set
-			{
-				if ((this._Charge != value))
-				{
-					this.OnChargeChanging(value);
-					this.SendPropertyChanging();
-					this._Charge = value;
-					this.SendPropertyChanged("Charge");
-					this.OnChargeChanged();
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Progress", DbType="Float NOT NULL")]
 		public double Progress
 		{
@@ -1713,6 +1661,26 @@ namespace newRBS.Database
 					this._Progress = value;
 					this.SendPropertyChanged("Progress");
 					this.OnProgressChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Remaining", DbType="DateTime")]
+		public System.Nullable<System.DateTime> Remaining
+		{
+			get
+			{
+				return this._Remaining;
+			}
+			set
+			{
+				if ((this._Remaining != value))
+				{
+					this.OnRemainingChanging(value);
+					this.SendPropertyChanging();
+					this._Remaining = value;
+					this.SendPropertyChanged("Remaining");
+					this.OnRemainingChanged();
 				}
 			}
 		}
@@ -1813,6 +1781,86 @@ namespace newRBS.Database
 					this._StopValue = value;
 					this.SendPropertyChanged("StopValue");
 					this.OnStopValueChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentDuration", DbType="DateTime NOT NULL")]
+		public System.DateTime CurrentDuration
+		{
+			get
+			{
+				return this._CurrentDuration;
+			}
+			set
+			{
+				if ((this._CurrentDuration != value))
+				{
+					this.OnCurrentDurationChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentDuration = value;
+					this.SendPropertyChanged("CurrentDuration");
+					this.OnCurrentDurationChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentCharge", DbType="Float NOT NULL")]
+		public double CurrentCharge
+		{
+			get
+			{
+				return this._CurrentCharge;
+			}
+			set
+			{
+				if ((this._CurrentCharge != value))
+				{
+					this.OnCurrentChargeChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentCharge = value;
+					this.SendPropertyChanged("CurrentCharge");
+					this.OnCurrentChargeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentCounts", DbType="BigInt NOT NULL")]
+		public long CurrentCounts
+		{
+			get
+			{
+				return this._CurrentCounts;
+			}
+			set
+			{
+				if ((this._CurrentCounts != value))
+				{
+					this.OnCurrentCountsChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentCounts = value;
+					this.SendPropertyChanged("CurrentCounts");
+					this.OnCurrentCountsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CurrentChopperCounts", DbType="BigInt NOT NULL")]
+		public long CurrentChopperCounts
+		{
+			get
+			{
+				return this._CurrentChopperCounts;
+			}
+			set
+			{
+				if ((this._CurrentChopperCounts != value))
+				{
+					this.OnCurrentChopperCountsChanging(value);
+					this.SendPropertyChanging();
+					this._CurrentChopperCounts = value;
+					this.SendPropertyChanged("CurrentChopperCounts");
+					this.OnCurrentChopperCountsChanged();
 				}
 			}
 		}
@@ -2097,7 +2145,7 @@ namespace newRBS.Database
 					}
 					else
 					{
-						this._SampleID = default(Nullable<int>);
+						this._SampleID = default(int);
 					}
 					this.SendPropertyChanged("Sample");
 				}

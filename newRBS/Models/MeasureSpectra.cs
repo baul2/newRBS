@@ -20,23 +20,8 @@ namespace newRBS.Models
 
         TraceSource trace = new TraceSource("MeasureSpectra");
 
-        public string MeasurementName;
-        public int? SampleID;
-        public string SampleRemark;
-        public string Chamber = "-10°";
-        public string Orientation = "(undefined)";
-        public int NumOfChannels = 16384;
-        public int IncomingIonAtomicNumber = 2;
-        public double IncomingIonEnergy = 1400;
-        public double IncomingIonAngle = 180;
-        public double OutcomingIonAngle = 170;
-        public double SolidAngle = 2.45;
-
         public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-
-        public string StopType = "Manual";
-        public double StopValue = 0;
 
         private Timer[] MeasureSpectraTimer = new Timer[8];
 
@@ -56,7 +41,7 @@ namespace newRBS.Models
         /// <returns>TRUE if the divice is acquiring, FALS if not.</returns>
         public bool IsAcquiring()
         {
-            if (cAEN_x730.activeChannels.Count > 0)
+            if (cAEN_x730.ActiveChannels.Count > 0)
                 return true;
             else
                 return false;
@@ -66,7 +51,7 @@ namespace newRBS.Models
         /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Database.Measurement"/> in the database. 
         /// </summary>
         /// <param name="SelectedChannels">The channel numbers to start the acquisitions.</param>
-        public void StartAcquisitions(List<int> SelectedChannels)
+        public void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID)
         {
             List<int> IDs = new List<int>();
 
@@ -78,40 +63,28 @@ namespace newRBS.Models
                 {
                     cAEN_x730.StartAcquisition(channel);
 
-                    Measurement newSpectrum = new Measurement
-                    {
-                        MeasurementName = MeasurementName,
-                        SampleID = SampleID,
-                        Chamber = Chamber,
-                        Orientation = Orientation,
-                        SampleRemark = SampleRemark,
-                        Channel = channel,
-                        IncomingIonAtomicNumber = IncomingIonAtomicNumber,
-                        IncomingIonEnergy = IncomingIonEnergy,
-                        IncomingIonAngle = IncomingIonAngle,
-                        OutcomingIonAngle = OutcomingIonAngle,
-                        SolidAngle = SolidAngle,
-                        EnergyCalOffset = EnergyCalOffset[channel],
-                        EnergyCalSlope = EnergyCalSlope[channel],
-                        StartTime = DateTime.Now,
-                        Duration = new DateTime(2000, 01, 01),
-                        StopType = StopType,
-                        StopValue = StopValue,
-                        Runs = true,
-                        NumOfChannels = NumOfChannels,
-                        SpectrumY = new int[] { 0 }
-                    };
+                    NewMeasurement.MeasurementID = 0;
+                    NewMeasurement.Channel = channel;
+                    NewMeasurement.EnergyCalOffset = EnergyCalOffset[channel];//ToDo: Find latest value in database!
+                    NewMeasurement.EnergyCalSlope = EnergyCalSlope[channel];//ToDo: Find latest value in database!
+                    NewMeasurement.StartTime = DateTime.Now;
+                    NewMeasurement.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
+                    NewMeasurement.CurrentDuration = new DateTime(2000, 01, 01);
+                    NewMeasurement.CurrentCharge = 0;
+                    NewMeasurement.CurrentCounts = 0;
+                    NewMeasurement.CurrentChopperCounts = 0;
+                    NewMeasurement.NumOfChannels = cAEN_x730.NumberOfChanels;
+                    NewMeasurement.SpectrumY = new int[] { 0 };
+                    NewMeasurement.Runs = true;
 
-                    newSpectrum.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
-
-                    Database.Measurements.InsertOnSubmit(newSpectrum);
+                    Database.Measurements.InsertOnSubmit(NewMeasurement);
 
                     Database.SubmitChanges();
-                    activeChannels.Add(channel, newSpectrum.MeasurementID);
+                    activeChannels.Add(channel, NewMeasurement.MeasurementID);
 
-                    Console.WriteLine("New measurementID: {0}", newSpectrum.MeasurementID);
+                    Console.WriteLine("New measurementID: {0}", NewMeasurement.MeasurementID);
                     MeasureSpectraTimer[channel] = new Timer(500);
-                    MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(newSpectrum.MeasurementID, channel); };
+                    MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(NewMeasurement.MeasurementID, channel); };
                     MeasureSpectraTimer[channel].Start();
                 }
             }
@@ -139,7 +112,6 @@ namespace newRBS.Models
                     if (MeasurementToStop == null)
                     { trace.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = {0} not found", measurementID); return; }
 
-                    MeasurementToStop.StopTime = DateTime.Now;
                     MeasurementToStop.Runs = false;
 
                     Database.SubmitChanges();
@@ -173,18 +145,26 @@ namespace newRBS.Models
 
                 MeasurementToUpdate.SpectrumY = newSpectrumY;
 
-                MeasurementToUpdate.Duration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+                MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+                MeasurementToUpdate.CurrentCounts = newSpectrumY.Sum();
+                //MeasurementToUpdate.CurrentCharge = GetCharge();                  //TODO
+                //MeasurementToUpdate.CurrentChopperCounts = GetChopperCounts();    //TODO
 
                 switch (MeasurementToUpdate.StopType)
                 {
-                    case "Manual": MeasurementToUpdate.Progress = 0; break;
+                    case "Manual":
+                        MeasurementToUpdate.Progress = 0; break;
+                    case "Duration (min)":
+                        MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / MeasurementToUpdate.StopValue; break;
+                    case "Charge (µC)":
+                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / MeasurementToUpdate.StopValue; break;
                     case "Counts":
-                        MeasurementToUpdate.Progress = newSpectrumY.Sum() / (int)MeasurementToUpdate.StopValue;
-                        break;
-                    case "Time":
-                        MeasurementToUpdate.Progress = (MeasurementToUpdate.Duration - DateTime.MinValue).TotalMinutes / (int)MeasurementToUpdate.StopValue; break;
-                        // TODO: Chopper
+                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; Console.WriteLine(MeasurementToUpdate.Progress); break;
+                    case "ChopperCounts":
+                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
+
+                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01)+TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
 
                 Database.SubmitChanges();
 

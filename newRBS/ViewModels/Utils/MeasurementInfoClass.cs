@@ -26,7 +26,7 @@ namespace newRBS.ViewModels.Utils
     /// <summary>
     /// Class that is the view model of <see cref="Views.Utils.MeasurementInfo"/>. They display/edit the properties of a <see cref="Measurement"/>.
     /// </summary>
-    public class MeasurementInfoClass : INotifyPropertyChanged
+    public class MeasurementInfoClass : ViewModelBase
     {
         private DatabaseDataContext Database;
 
@@ -36,17 +36,18 @@ namespace newRBS.ViewModels.Utils
         public Measurement Measurement
         {
             get { return _Measurement; }
-            set { if (value == null) return; _Measurement = value; OnPropertyChanged("Measurement"); }
+            set { if (value == null) return; _Measurement = value; RaisePropertyChanged(); }
         }
 
         private ObservableCollection<Sample> _Samples;
         public ObservableCollection<Sample> Samples
-        { get { return _Samples; } set { _Samples = value; OnPropertyChanged("Samples"); } }
+        { get { return _Samples; } set { _Samples = value; RaisePropertyChanged(); } }
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<string> StopTypeList { get; set; }
         public ObservableCollection<ElementClass> Ions { get; set; }
+
+        public ObservableCollection<string> StopTypes { get; set; }
 
         /// <summary>
         /// Constructor of the class, storing the handled instance of <see cref="DatabaseDataContext"/> and initializing the collections for the Comboboxes.
@@ -61,9 +62,10 @@ namespace newRBS.ViewModels.Utils
 
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
-            StopTypeList = new ObservableCollection<string> { "(undefined)", "Manual", "Time", "Counts", "Chopper" };
-            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
+            StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
+            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } }; 
         }
+
 
         /// <summary>
         /// Function that creates a new <see cref="Sample"/> instance and attaches it the the current <see cref="Measurement"/>.
@@ -79,15 +81,5 @@ namespace newRBS.ViewModels.Utils
                 Measurement.Sample = newSample;
             }
         }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = "")
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(name));
-        }
-        #endregion
     }
 }
