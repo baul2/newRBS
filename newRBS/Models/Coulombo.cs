@@ -15,7 +15,6 @@ namespace newRBS.Models
     {
        
         private SerialPort SPort;
-        private string indata;
         private char IMess;
         private char ZS = (char)13;
 
@@ -47,31 +46,20 @@ namespace newRBS.Models
             SPort.ReadBufferSize = 100;
             SPort.WriteBufferSize = 100;
             SPort.Encoding = Encoding.GetEncoding(28591); 
-            SPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-
+           
             SPort.Open();
         }
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-        {
-            SerialPort sp = (SerialPort)sender;
-            Thread.Sleep(30);
-            indata = sp.ReadExisting();
-        }
+        
 
         private string WRCom(string text)
         {
-            int k;
+         string indata;
 
-            indata = SPort.ReadExisting();
-            indata = ""; k = 0;
+        indata = SPort.ReadExisting();
+            indata = "";
             SPort.Write(text);
-
-            do
-            {
-                Thread.Sleep(5);
-                k++;
-            }
-            while ((indata.Length == 0) & (k < 100));
+            Thread.Sleep(200);
+            indata = SPort.ReadExisting();
 
             if (indata == "")
             { return "Error"; }
@@ -93,7 +81,6 @@ namespace newRBS.Models
 
         public void Close()
         {
-            SPort.DataReceived -= new SerialDataReceivedEventHandler(DataReceivedHandler);
             SPort.Close();
         }
 
