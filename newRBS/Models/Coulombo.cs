@@ -153,7 +153,7 @@ namespace newRBS.Models
             return WRCom(lmsm + "pC" + IMess + ZS);
         }
 
-        public double GetLadung()
+        public double GetCharge()
         {
             string lms;
            

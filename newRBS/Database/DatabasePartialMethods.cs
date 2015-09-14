@@ -60,11 +60,40 @@ namespace newRBS.Database
         partial void UpdateMeasurement(Measurement measurement)
         {
             //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+            Console.WriteLine(DateTime.Now.Second + "," + DateTime.Now.Millisecond);
+            try
+            {
+                ExecuteDynamicUpdate(measurement);
+                int temp = measurement.Sample.SampleID;
+                DatabaseUtils.SendMeasurementUpdateEvent(measurement);
+            }
+            catch (ChangeConflictException e)
+            {
+                Console.WriteLine("Error: " + e.Message);
+                StringBuilder sb = new StringBuilder();
 
-            ExecuteDynamicUpdate(measurement);
+                foreach (ObjectChangeConflict changeConflict in this.ChangeConflicts)
+                {
+                    System.Data.Linq.Mapping.MetaTable metatable = this.Mapping.GetTable(changeConflict.Object.GetType());
+                    Console.WriteLine("fasdjklasfdjklsfda");
+                    sb.AppendFormat("Table name: {0}", metatable.TableName);
+                    sb.AppendLine();
 
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementUpdateEvent(measurement);
+                    foreach (MemberChangeConflict col in changeConflict.MemberConflicts)
+                    {
+                        sb.AppendFormat("Column name : {0}", col.Member.Name);
+                        sb.AppendLine();
+                        sb.AppendFormat("Original value : {0}", col.OriginalValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendFormat("Current value : {0}", col.CurrentValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendFormat("Database value : {0}", col.DatabaseValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendLine();
+                    }
+                }
+                Console.WriteLine(sb);
+            }
         }
 
         /// <summary>

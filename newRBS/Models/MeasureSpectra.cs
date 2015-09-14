@@ -82,7 +82,7 @@ namespace newRBS.Models
                     if (NewMeasurement.StopType == "Charge (µC)")
                     {
                         coulombo.SetLadung(NewMeasurement.StopValue);
-                        
+
                     }
                     else
                     {
@@ -160,7 +160,9 @@ namespace newRBS.Models
 
                 MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
                 MeasurementToUpdate.CurrentCounts = newSpectrumY.Sum();
-                MeasurementToUpdate.CurrentCharge = coulombo.GetLadung();               
+                MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
+                Console.WriteLine(MeasurementToUpdate.CurrentCharge);
+                MeasurementToUpdate.CurrentCharge = 0;
                 //MeasurementToUpdate.CurrentChopperCounts = GetChopperCounts();    //TODO
 
                 switch (MeasurementToUpdate.StopType)
@@ -177,7 +179,8 @@ namespace newRBS.Models
                         MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
 
-                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+                if (MeasurementToUpdate.Progress > 0)
+                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
 
                 Database.SubmitChanges();
 
