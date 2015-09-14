@@ -13,7 +13,7 @@ namespace newRBS.Models
 {
     public class Coulombo
     {
-       
+
         private SerialPort SPort;
         private char IMess;
         private char ZS = (char)13;
@@ -40,22 +40,21 @@ namespace newRBS.Models
             sb = (StopBits)Enum.Parse(typeof(StopBits), COM.Substring(0, i), true);
             COM = COM.Remove(0, i + 1);
             IMess = (char)int.Parse(COM, System.Globalization.NumberStyles.HexNumber);
-               
-            
+
+
             SPort = new SerialPort(Port, b, pari, d, sb);
             SPort.ReadBufferSize = 100;
             SPort.WriteBufferSize = 100;
-            SPort.Encoding = Encoding.GetEncoding(28591); 
-           
+            SPort.Encoding = Encoding.GetEncoding(28591);
+
             SPort.Open();
         }
-        
 
         private string WRCom(string text)
         {
-         string indata;
+            string indata;
 
-        indata = SPort.ReadExisting();
+            indata = SPort.ReadExisting();
             indata = "";
             SPort.Write(text);
             Thread.Sleep(200);
@@ -111,30 +110,30 @@ namespace newRBS.Models
             mb = "7";
             switch (mbs)
             {
-                case "1nA"  : mb = "9"; break;
-                case "10nA" : mb = "8"; break;
+                case "1nA": mb = "9"; break;
+                case "10nA": mb = "8"; break;
                 case "100nA": mb = "7"; break;
-                case "1µA"  : mb = "6"; break;
-                case "10µA" : mb = "5"; break;
-                
+                case "1µA": mb = "6"; break;
+                case "10µA": mb = "5"; break;
+
             }
-            
+
             return WRCom(mb + IMess + ZS);
         }
 
         public string SetLadung(double lm)
         {
-            string lms,lmsm;
+            string lms, lmsm;
             int lmi;
 
-            lmi = (int) System.Math.Round(lm * 1000000);
+            lmi = (int)System.Math.Round(lm * 1000000);
             lms = lmi.ToString("D12");
             lmsm = "";
-            lmsm= lmsm + (char)((lms[0] & 15) * 16 + (lms[1] & 15))+
-                        (char)((lms[2] & 15) * 16 + (lms[3] & 15))+
-                        (char)((lms[4] & 15) * 16 + (lms[5] & 15))+
-                        (char)((lms[6] & 15) * 16 + (lms[7] & 15))+
-                        (char)((lms[8] & 15) * 16 + (lms[9] & 15))+
+            lmsm = lmsm + (char)((lms[0] & 15) * 16 + (lms[1] & 15)) +
+                        (char)((lms[2] & 15) * 16 + (lms[3] & 15)) +
+                        (char)((lms[4] & 15) * 16 + (lms[5] & 15)) +
+                        (char)((lms[6] & 15) * 16 + (lms[7] & 15)) +
+                        (char)((lms[8] & 15) * 16 + (lms[9] & 15)) +
                         (char)((lms[10] & 15) * 16 + (lms[11] & 15));
 
             return WRCom(lmsm + "pC" + IMess + ZS);
@@ -143,7 +142,7 @@ namespace newRBS.Models
         public double GetCharge()
         {
             string lms;
-           
+
             lms = WRCom("Q" + IMess + ZS);
             if (lms.Length == 9)
             {
@@ -155,7 +154,7 @@ namespace newRBS.Models
                     (double)(lms[5] & 240) / 1600000 + (double)(lms[5] & 15) / 1000000;
             }
             else
-            { return -1; }
+            { return 0; }
         }
 
         public string Zustand()

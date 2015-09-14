@@ -141,7 +141,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Elements")]
-	public partial class Element : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Element : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -429,7 +429,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Materials")]
-	public partial class Material : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Material : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -599,7 +599,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Layers")]
-	public partial class Layer : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Layer : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -850,7 +850,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Samples")]
-	public partial class Sample : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Sample : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -1029,7 +1029,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Measurement_Project")]
-	public partial class Measurement_Project : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Measurement_Project : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -1221,7 +1221,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Projects")]
-	public partial class Project : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Project : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
@@ -1335,7 +1335,7 @@ namespace newRBS.Database
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Measurements")]
-	public partial class Measurement : INotifyPropertyChanging, INotifyPropertyChanged
+	public partial class Measurement : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);

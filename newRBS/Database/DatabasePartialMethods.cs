@@ -13,6 +13,20 @@ using GalaSoft.MvvmLight.Command;
 
 namespace newRBS.Database
 {
+    public abstract class EntityBase
+    {
+        internal virtual void OnSaving(ChangeAction changeAction) { }
+
+        internal virtual void OnSaved() { }
+    }
+
+    internal class ChangeEntity
+    {
+        public ChangeAction ChangeAction { get; set; }
+
+        public EntityBase Entity { get; set; }
+    }
+
     /// <summary>
     /// Class that represents the MS SQL Server database. 
     /// </summary>
@@ -40,73 +54,46 @@ namespace newRBS.Database
         }
 
         /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance is added to the database and which calls <see cref="DatabaseUtils.SendMeasurementNewEvent(Measurement)"/>.
+        /// Function (overriden version of SubmitChanges) that notifies all child entities about it's change.
         /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been added to the database.</param>
-        partial void InsertMeasurement(Measurement measurement)
+        /// <param name="failureMode"></param>
+        public override void SubmitChanges(ConflictMode failureMode)
         {
-            //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+            // Get the entities that are to be inserted / updated / deleted
+            ChangeSet changeSet = GetChangeSet();
 
-            ExecuteDynamicInsert(measurement);
+            // Get a single list of all the entities in the change set
+            IEnumerable<object> changeSetEntities = changeSet.Deletes;
+            changeSetEntities = changeSetEntities.Union(changeSet.Inserts);
+            changeSetEntities = changeSetEntities.Union(changeSet.Updates);
 
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementNewEvent(measurement);
-        }
+            // Get a single list of all the enitities that inherit from EntityBase
+            IEnumerable<ChangeEntity> entities =
+                 from entity in changeSetEntities.Cast<EntityBase>()
+                 select new ChangeEntity()
+                 {
+                     ChangeAction =
+                          changeSet.Deletes.Contains(entity) ? ChangeAction.Delete
+                        : changeSet.Inserts.Contains(entity) ? ChangeAction.Insert
+                        : changeSet.Updates.Contains(entity) ? ChangeAction.Update
+                        : ChangeAction.None,
+                     Entity = entity as EntityBase
+                 };
 
-        /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance in the database is modified and which calls <see cref="DatabaseUtils.SendMeasurementUpdateEvent(Measurement)"/>.
-        /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been modified.</param>
-        partial void UpdateMeasurement(Measurement measurement)
-        {
-            //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
-            Console.WriteLine(DateTime.Now.Second + "," + DateTime.Now.Millisecond);
-            try
+            // "Raise" the OnSaving event for the entities 
+            foreach (ChangeEntity entity in entities)
             {
-                ExecuteDynamicUpdate(measurement);
-                int temp = measurement.Sample.SampleID;
-                DatabaseUtils.SendMeasurementUpdateEvent(measurement);
+                entity.Entity.OnSaving(entity.ChangeAction);
             }
-            catch (ChangeConflictException e)
+
+            // Save the changes
+            base.SubmitChanges(failureMode);
+
+            // "Raise" the OnSaved event for the entities
+            foreach (ChangeEntity entity in entities)
             {
-                Console.WriteLine("Error: " + e.Message);
-                StringBuilder sb = new StringBuilder();
-
-                foreach (ObjectChangeConflict changeConflict in this.ChangeConflicts)
-                {
-                    System.Data.Linq.Mapping.MetaTable metatable = this.Mapping.GetTable(changeConflict.Object.GetType());
-                    Console.WriteLine("fasdjklasfdjklsfda");
-                    sb.AppendFormat("Table name: {0}", metatable.TableName);
-                    sb.AppendLine();
-
-                    foreach (MemberChangeConflict col in changeConflict.MemberConflicts)
-                    {
-                        sb.AppendFormat("Column name : {0}", col.Member.Name);
-                        sb.AppendLine();
-                        sb.AppendFormat("Original value : {0}", col.OriginalValue.ToString());
-                        sb.AppendLine();
-                        sb.AppendFormat("Current value : {0}", col.CurrentValue.ToString());
-                        sb.AppendLine();
-                        sb.AppendFormat("Database value : {0}", col.DatabaseValue.ToString());
-                        sb.AppendLine();
-                        sb.AppendLine();
-                    }
-                }
-                Console.WriteLine(sb);
+                entity.Entity.OnSaved();
             }
-        }
-
-        /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance is deleted from the database and which calls <see cref="DatabaseUtils.SendMeasurementRemoveEvent(Measurement)"/>.
-        /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been deleted from the database.</param>
-        partial void DeleteMeasurement(Measurement measurement)
-        {
-            //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
-
-            ExecuteDynamicDelete(measurement);
-
-            DatabaseUtils.SendMeasurementRemoveEvent(measurement);
         }
     }
 
@@ -118,6 +105,32 @@ namespace newRBS.Database
     /// </remarks>
     public partial class Measurement
     {
+        /// <summary>
+        /// Function that is called whenever a <see cref="Measurement"/> instance is inserted/updated/deleted. It calls the corresponding functions in <see cref="DatabaseUtils"/>.
+        /// </summary>
+        /// <param name="changeAction"></param>
+        internal override void OnSaving(ChangeAction changeAction)
+        {
+            base.OnSaving(changeAction);
+
+            int temp = this.Sample.SampleID; // Nessesary to load the sample entity before sending the Measurement instance
+
+            switch (changeAction)
+            {
+                case ChangeAction.Insert:
+                    DatabaseUtils.SendMeasurementNewEvent(this);
+                    break;
+                case ChangeAction.Update:
+                    DatabaseUtils.SendMeasurementUpdateEvent(this);
+                    break;
+                case ChangeAction.Delete:
+                    DatabaseUtils.SendMeasurementRemoveEvent(this);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         /// <summary>
         /// property that holds the array of the RBS counts per channel. 
         /// </summary>

@@ -18,6 +18,7 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Data.Linq;
 
 namespace newRBS.ViewModels
 {
@@ -46,7 +47,35 @@ namespace newRBS.ViewModels
 
         public void _SaveCommand()
         {
-            Database.SubmitChanges();
+            try
+            {
+                Database.SubmitChanges(ConflictMode.ContinueOnConflict);
+            }
+            catch (ChangeConflictException e)
+            {
+                foreach (ObjectChangeConflict changeConflict in Database.ChangeConflicts)
+                {
+                    System.Data.Linq.Mapping.MetaTable metatable = Database.Mapping.GetTable(changeConflict.Object.GetType());
+                    Console.WriteLine("fasdjklasfdjklsfda");
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Table name: {0}", metatable.TableName);
+                    sb.AppendLine();
+
+                    foreach (MemberChangeConflict col in changeConflict.MemberConflicts)
+                    {
+                        sb.AppendFormat("Column name : {0}", col.Member.Name);
+                        sb.AppendLine();
+                        sb.AppendFormat("Original value : {0}", col.OriginalValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendFormat("Current value : {0}", col.CurrentValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendFormat("Database value : {0}", col.DatabaseValue.ToString());
+                        sb.AppendLine();
+                        sb.AppendLine();
+                    }
+                    Console.WriteLine(sb);
+                }
+            }
             DialogResult = true;
         }
 
