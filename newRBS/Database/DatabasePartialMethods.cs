@@ -17,7 +17,7 @@ namespace newRBS.Database
     {
         internal virtual void OnSaving(ChangeAction changeAction) { }
 
-        internal virtual void OnSaved() { }
+        internal virtual void OnSaved(ChangeAction changeAction) { }
     }
 
     internal class ChangeEntity
@@ -87,12 +87,40 @@ namespace newRBS.Database
             }
 
             // Save the changes
-            base.SubmitChanges(failureMode);
+            try
+            {
+                base.SubmitChanges(failureMode);
+            }
+            catch (ChangeConflictException ex)
+            {
+                Console.WriteLine("Optimistic concurrency error in function DatabaseDataContext.SubmitChanges (DatabasePartialMethods.cs).");
+                Console.WriteLine(ex.Message);
+                foreach (ObjectChangeConflict changeConflict in base.ChangeConflicts)
+                {
+                    System.Data.Linq.Mapping.MetaTable metatable = base.Mapping.GetTable(changeConflict.Object.GetType());
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Table name: {0}", metatable.TableName);
+                    sb.AppendLine();
+
+                    foreach (MemberChangeConflict col in changeConflict.MemberConflicts)
+                    {
+                        sb.AppendFormat("Column name :    {0}", col.Member.Name); sb.AppendLine();
+                        if (col.Member.Name == "SpectrumYByte") { sb.AppendFormat("Original value : skipped"); sb.AppendLine(); sb.AppendFormat("Current value :  skipped"); sb.AppendLine(); sb.AppendFormat("Database value : skipped"); sb.AppendLine(); sb.AppendLine(); continue; }
+                        sb.AppendFormat("Original value : {0}", col.OriginalValue.ToString()); sb.AppendLine();
+                        sb.AppendFormat("Current value :  {0}", col.CurrentValue.ToString()); sb.AppendLine();
+                        sb.AppendFormat("Database value : {0}", col.DatabaseValue.ToString()); sb.AppendLine(); sb.AppendLine();
+                    }
+                    Console.WriteLine(sb);
+                    //changeConflict.Resolve(RefreshMode.KeepCurrentValues);
+                }
+                base.ChangeConflicts.ResolveAll(RefreshMode.KeepChanges);
+                this.SubmitChanges(ConflictMode.ContinueOnConflict);
+            }
 
             // "Raise" the OnSaved event for the entities
             foreach (ChangeEntity entity in entities)
             {
-                entity.Entity.OnSaved();
+                entity.Entity.OnSaved(entity.ChangeAction);
             }
         }
     }
@@ -109,9 +137,9 @@ namespace newRBS.Database
         /// Function that is called whenever a <see cref="Measurement"/> instance is inserted/updated/deleted. It calls the corresponding functions in <see cref="DatabaseUtils"/>.
         /// </summary>
         /// <param name="changeAction"></param>
-        internal override void OnSaving(ChangeAction changeAction)
+        internal override void OnSaved(ChangeAction changeAction)
         {
-            base.OnSaving(changeAction);
+            base.OnSaved(changeAction);
 
             int temp = this.Sample.SampleID; // Nessesary to load the sample entity before sending the Measurement instance
 

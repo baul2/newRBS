@@ -203,6 +203,7 @@ namespace newRBS.Models
                 {
                     trace.TraceEvent(TraceEventType.Information, 0, "Measurement has been finished (Progress=1)");
                     MeasurementToUpdate.Progress = 1;
+                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01);
                     Database.SubmitChanges();
                     StopAcquisitions();
                 }

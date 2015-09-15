@@ -136,8 +136,8 @@ namespace newRBS.ViewModels
             plotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
             plotModel.LegendBorder = OxyColors.Black;
 
-            var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
+            var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0, MinimumRange = 10 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
@@ -149,7 +149,6 @@ namespace newRBS.ViewModels
             { Console.WriteLine("Measurement is already in MeasurementIDList!"); return; }
 
             MeasurementIDList.Add(measurement.MeasurementID);
-
             PlotMeasurement(measurement);
         }
 
@@ -253,7 +252,7 @@ namespace newRBS.ViewModels
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
-
+            
             Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
