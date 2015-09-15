@@ -24,6 +24,9 @@ namespace newRBS.Models
         public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
 
+        public int ChopperStartChannel = 1000;
+        public int ChopperEndChannel = 2000;
+
         private Timer[] MeasureSpectraTimer = new Timer[8];
 
         private Dictionary<int, int> activeChannels = new Dictionary<int, int>(); // <Channel,ID>
@@ -65,6 +68,11 @@ namespace newRBS.Models
                 {
                     cAEN_x730.StartAcquisition(channel);
 
+                    if (NewMeasurement.StopType == "ChopperCounts")
+                    {
+                        cAEN_x730.StartAcquisition(7); // Start chopper
+                    }
+
                     NewMeasurement.MeasurementID = 0;
                     NewMeasurement.Channel = channel;
                     NewMeasurement.EnergyCalOffset = EnergyCalOffset[channel];//ToDo: Find latest value in database!
@@ -82,7 +90,6 @@ namespace newRBS.Models
                     if (NewMeasurement.StopType == "Charge (µC)")
                     {
                         coulombo.SetLadung(NewMeasurement.StopValue);
-                        
                     }
                     else
                     {
@@ -129,6 +136,9 @@ namespace newRBS.Models
 
                     Database.SubmitChanges();
 
+                    if (MeasurementToStop.StopType== "ChopperCounts")
+                        cAEN_x730.StopAcquisition(7);
+
                     Sample temp = MeasurementToStop.Sample; // To load the sample before the scope of Database ends
 
                     //if (EventMeasurementFinished != null) EventMeasurementFinished(MeasurementToStop);
@@ -144,7 +154,8 @@ namespace newRBS.Models
         private void MeasureSpectraWorker(int MeasurementID, int Channel)
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
-            trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", MeasurementID, newSpectrumY.Sum());
+            long sum = newSpectrumY.Sum();
+            trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", MeasurementID, sum);
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -153,15 +164,21 @@ namespace newRBS.Models
                 if (MeasurementToUpdate == null)
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = {0} not found", MeasurementID); return; }
 
-                if (newSpectrumY.Length != 16384) // TODO!!!
+                if (newSpectrumY.Length != MeasurementToUpdate.NumOfChannels)
                 { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
                 MeasurementToUpdate.SpectrumY = newSpectrumY;
 
                 MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
-                MeasurementToUpdate.CurrentCounts = newSpectrumY.Sum();
-                MeasurementToUpdate.CurrentCharge = coulombo.GetLadung();               
-                //MeasurementToUpdate.CurrentChopperCounts = GetChopperCounts();    //TODO
+                MeasurementToUpdate.CurrentCounts = sum;
+                MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
+                //Console.WriteLine(MeasurementToUpdate.CurrentCharge);
+                MeasurementToUpdate.CurrentCharge = 0;
+                if (MeasurementToUpdate.StopType == "ChopperCounts")
+                {
+                    MeasurementToUpdate.CurrentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum();
+                    Console.WriteLine("CurrentChopperCounts: " + MeasurementToUpdate.CurrentChopperCounts);
+                }
 
                 switch (MeasurementToUpdate.StopType)
                 {
@@ -177,13 +194,16 @@ namespace newRBS.Models
                         MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
 
-                MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+                if (MeasurementToUpdate.Progress > 0)
+                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
 
                 Database.SubmitChanges();
 
                 if (MeasurementToUpdate.Progress >= 1)
                 {
+                    trace.TraceEvent(TraceEventType.Information, 0, "Measurement has been finished (Progress=1)");
                     MeasurementToUpdate.Progress = 1;
+                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01);
                     Database.SubmitChanges();
                     StopAcquisitions();
                 }

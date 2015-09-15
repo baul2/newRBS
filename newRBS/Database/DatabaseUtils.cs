@@ -352,6 +352,7 @@ namespace newRBS.Database
                                 newMeasurements[i].Orientation = "(undefined)";
                                 newMeasurements[i].StopType = "Charge (µC)";
                                 newMeasurements[i].Chamber = "(undefined)";
+                                newMeasurements[i].Progress = 1;
                             }
                         }
                         break;

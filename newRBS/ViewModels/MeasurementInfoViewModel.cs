@@ -18,6 +18,7 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Data.Linq;
 
 namespace newRBS.ViewModels
 {
@@ -46,7 +47,13 @@ namespace newRBS.ViewModels
 
         public void _SaveCommand()
         {
-            Database.SubmitChanges();
+            Database.SubmitChanges(ConflictMode.ContinueOnConflict);
+
+            Console.WriteLine(MeasurementInfo.Measurement.CurrentDuration);
+            using (DatabaseDataContext D = MyGlobals.Database)
+            {
+                Console.WriteLine(D.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementInfo.Measurement.MeasurementID).CurrentDuration);
+            }
             DialogResult = true;
         }
 
