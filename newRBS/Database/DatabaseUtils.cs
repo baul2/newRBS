@@ -18,6 +18,7 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
+using System.Reflection;
 
 namespace newRBS.Database
 {
@@ -31,7 +32,8 @@ namespace newRBS.Database
         public static event EventHandlerMeasurement EventMeasurementUpdate;
         public static event EventHandlerMeasurement EventMeasurementRemove;
 
-        private static TraceSource trace = new TraceSource("DatabaseUtils");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
         /// Function that sends an event (<see cref="EventMeasurementNew"/>) if new <see cref="Measurement"/> has been added to the database. The event argument is the new measurement.
@@ -78,7 +80,6 @@ namespace newRBS.Database
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
             if (inputDialog.ShowDialog() == true)
             {
-                Console.WriteLine(inputDialog.Answer);
                 if (inputDialog.Answer == "") return null;
 
                 return AddNewSample(inputDialog.Answer);
@@ -100,7 +101,7 @@ namespace newRBS.Database
 
                 if (sample != null)
                 {
-                    Console.WriteLine("Sample already exists!");
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't create new sample: sample already exists");
 
                     MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -108,14 +109,14 @@ namespace newRBS.Database
                 }
 
                 // New sample
-                Console.WriteLine("new sample");
-
                 Sample newSample = new Sample();
                 newSample.SampleName = SampleName;
                 newSample.MaterialID = 1;
 
                 Database.Samples.InsertOnSubmit(newSample);
                 Database.SubmitChanges();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "New sample '" + newSample.SampleName + "' created");
 
                 return newSample.SampleID;
             }
@@ -178,7 +179,7 @@ namespace newRBS.Database
                             List<Measurement> MeasurementsToExport = Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
 
                             if (!MeasurementsToExport.Any())
-                            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
+                            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
 
                             NumberFormatInfo point = new NumberFormatInfo();
                             point.NumberDecimalSeparator = ".";
@@ -268,6 +269,7 @@ namespace newRBS.Database
                         XmlAttributes attrs = new XmlAttributes();
                         attrs.XmlIgnore = true;
 
+                        // Define the fields that shall not be imported
                         xOver.Add(typeof(Measurement), "Sample", attrs);
                         xOver.Add(typeof(Measurement), "SampleID", attrs);
                         xOver.Add(typeof(Measurement), "SampleRemark", attrs);
@@ -279,6 +281,7 @@ namespace newRBS.Database
                         {
                             newMeasurements = (List<Measurement>)SerializerObj.Deserialize(ReadFileStream);
                         }
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements loaded from .xml file");
                         break;
                     }
                 case ".dat":
@@ -290,7 +293,6 @@ namespace newRBS.Database
                             string[] lineParts = textReader.ReadLine().Split('\t');
 
                             int numSpectra = lineParts.Count() - 1;
-                            Console.WriteLine("Number of spectra: {0}", numSpectra);
 
                             for (int i = 0; i < numSpectra; i++)
                             {
@@ -355,6 +357,7 @@ namespace newRBS.Database
                                 newMeasurements[i].Progress = 1;
                             }
                         }
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements loaded from .dat file");
                         break;
                     }
             }

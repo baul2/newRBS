@@ -7,47 +7,47 @@ using System.IO.Ports;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using Microsoft.Practices.ServiceLocation;
+using System.Diagnostics;
+using System.Reflection;
 
 
 namespace newRBS.Models
 {
     public class Coulombo
     {
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private SerialPort SPort;
         private char IMess;
         private char ZS = (char)13;
 
-        private void Init(string COM)
+        [PreferredConstructor]
+        public Coulombo()
         {
-            string Port;
-            int b, i, d;
-            Parity pari;
-            StopBits sb;
+            Init("COM3", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
+        }
 
-            Port = COM.Substring(0, 4);
-            COM = COM.Remove(0, 5);
-            i = COM.IndexOf(",", 0);
-            b = int.Parse(COM.Substring(0, i));
-            COM = COM.Remove(0, i + 1);
-            i = COM.IndexOf(",", 0);
-            pari = (Parity)Enum.Parse(typeof(Parity), COM.Substring(0, i), true);
-            COM = COM.Remove(0, i + 1);
-            i = COM.IndexOf(",", 0);
-            d = int.Parse(COM.Substring(0, i));
-            COM = COM.Remove(0, i + 1);
-            i = COM.IndexOf(",", 0);
-            sb = (StopBits)Enum.Parse(typeof(StopBits), COM.Substring(0, i), true);
-            COM = COM.Remove(0, i + 1);
-            IMess = (char)int.Parse(COM, System.Globalization.NumberStyles.HexNumber);
+        public Coulombo(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
+        {
+            Init(PortName, BaudRate, parity, DataBits, stopBits, CoulomboID);
+        }
 
+        private void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
+        {
+            //"COM3,9600,None,8,Two,94"
+            IMess = (char)int.Parse(CoulomboID, System.Globalization.NumberStyles.HexNumber);
 
-            SPort = new SerialPort(Port, b, pari, d, sb);
+            SPort = new SerialPort(PortName, BaudRate, parity, DataBits, stopBits);
             SPort.ReadBufferSize = 100;
             SPort.WriteBufferSize = 100;
             SPort.Encoding = Encoding.GetEncoding(28591);
 
             SPort.Open();
+            if (Version() == "Error")
+                trace.Value.TraceEvent(TraceEventType.Error, 0, "Coulombo couldn't be opend");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Coulombo opend");
         }
 
         private string WRCom(string text)
@@ -66,18 +66,6 @@ namespace newRBS.Models
             { return indata; }
         }
 
-        [PreferredConstructor]
-        public Coulombo()
-        {
-            string COM = "COM3,9600,None,8,Two,94";  //94 = Kenncode des Gerätes in Hex
-            Init(COM);
-        }
-
-        public Coulombo(string COM)
-        {
-            Init(COM);
-        }
-
         public void Close()
         {
             SPort.Close();
@@ -88,26 +76,34 @@ namespace newRBS.Models
             return WRCom("V" + IMess + ZS);
         }
 
-        public string Stop()
+        public void Stop()
         {
-            return WRCom("P" + IMess + ZS);
+            if (WRCom("P" + IMess + ZS) == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be stoped");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement stoped");
         }
 
-        public string Start()
+        public void Start()
         {
-            return WRCom("S" + IMess + ZS);
+            if (WRCom("S" + IMess + ZS) == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be started");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement started");
         }
 
-        public string Cont()
+        public void Continue()
         {
-            return WRCom("K" + IMess + ZS);
+            if (WRCom("K" + IMess + ZS) == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be continued");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement continued");
         }
 
-        public string MBereich(string mbs)
+        public void MeasurementRange(string mbs)
         {
-            string mb;
+            string mb = "7";
 
-            mb = "7";
             switch (mbs)
             {
                 case "1nA": mb = "9"; break;
@@ -115,13 +111,15 @@ namespace newRBS.Models
                 case "100nA": mb = "7"; break;
                 case "1µA": mb = "6"; break;
                 case "10µA": mb = "5"; break;
-
             }
 
-            return WRCom(mb + IMess + ZS);
+            if (WRCom(mb + IMess + ZS) == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Measurement range couldn't be canged");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement range set to " + mbs);
         }
 
-        public string SetLadung(double lm)
+        public void SetCharge(double lm)
         {
             string lms, lmsm;
             int lmi;
@@ -136,17 +134,22 @@ namespace newRBS.Models
                         (char)((lms[8] & 15) * 16 + (lms[9] & 15)) +
                         (char)((lms[10] & 15) * 16 + (lms[11] & 15));
 
-            return WRCom(lmsm + "pC" + IMess + ZS);
+            if (WRCom(lmsm + "pC" + IMess + ZS) == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Final charge couldn't be canged");
+            else
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Final charge set to " + lm.ToString("{0.00}"));
         }
 
         public double GetCharge()
         {
             string lms;
 
+            double charge;
+
             lms = WRCom("Q" + IMess + ZS);
             if (lms.Length == 9)
             {
-                return (double)(lms[0] & 240) / 16 * 100000 + (double)(lms[0] & 15) * 10000 +
+                charge = (double)(lms[0] & 240) / 16 * 100000 + (double)(lms[0] & 15) * 10000 +
                     (double)(lms[1] & 240) / 16 * 1000 + (double)(lms[1] & 15) * 100 +
                     (double)(lms[2] & 240) / 16 * 10 + (double)(lms[2] & 15) +
                     (double)(lms[3] & 240) / 160 + (double)(lms[3] & 15) / 100 +
@@ -154,17 +157,26 @@ namespace newRBS.Models
                     (double)(lms[5] & 240) / 1600000 + (double)(lms[5] & 15) / 1000000;
             }
             else
-            { return 0; }
+            { charge = 0; }
+
+            if (lms == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Current charge couldn't be read");
+            else
+                trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Current charge was read: " + charge.ToString("{0.00}" + "µC"));
+
+            return charge;
         }
 
-        public string Zustand()
+        public string Status()
         {
             return WRCom("Z" + IMess + ZS);
         }
 
-        public double GetStrom()
+        public double GetCurrent()
         {
             string lms;
+
+            double current;
 
             lms = WRCom("I" + IMess + ZS);
             if (lms.Length == 8)
@@ -173,14 +185,21 @@ namespace newRBS.Models
                 { return -2; }
                 else
                 {
-                    return (double)(lms[1] & 240) / 16 * 10000 + (double)(lms[1] & 15) * 1000 +
+                    current = (double)(lms[1] & 240) / 16 * 10000 + (double)(lms[1] & 15) * 1000 +
                            (double)(lms[2] & 240) / 16 * 100 + (double)(lms[2] & 15) * 10 +
                            (double)(lms[3] & 240) / 16 + (double)(lms[3] & 15) / 10 +
                            (double)(lms[4] & 240) / 1600 + (double)(lms[4] & 15) / 1000;
                 }
             }
             else
-            { return -1; }
+            { current = -1; }
+
+            if (lms == "Error")
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Current current couldn't be read");
+            else
+                trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Current current was read: " + current.ToString("{0.00}" + "µC"));
+
+            return current;
         }
 
     }

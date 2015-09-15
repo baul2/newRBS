@@ -268,14 +268,10 @@ namespace newRBS.ViewModels
         /// <returns></returns>
         private double KineFak(double IncomingIonMass, double TargetAtomMass, double ThetaDegree)
         {
-            Console.WriteLine(IncomingIonMass);
-            Console.WriteLine(TargetAtomMass);
-            Console.WriteLine(ThetaDegree);
-
             double Theta = ThetaDegree / 360.0 * 2.0 * Math.PI;
-            Console.WriteLine(Theta);
+
             double k = Math.Pow((Math.Pow(1.0 - Math.Pow(IncomingIonMass * Math.Sin(Theta) / TargetAtomMass, 2.0), 0.5) + IncomingIonMass * Math.Cos(Theta) / TargetAtomMass) / (1.0 + IncomingIonMass / TargetAtomMass), 2.0);
-            Console.WriteLine(k);
+
             return k;
         }
     }

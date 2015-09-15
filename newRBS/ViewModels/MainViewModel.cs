@@ -20,6 +20,7 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using System.IO;
 using newRBS.Database;
+using System.Reflection;
 
 namespace newRBS.ViewModels
 {
@@ -49,13 +50,16 @@ namespace newRBS.ViewModels
         public ICommand LogOutCommand { get; set; }
         public ICommand CloseProgramCommand { get; set; }
 
-        TraceSource trace = new TraceSource("MainViewModel");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
         /// Constructor of the class. It sets up all the commands.
         /// </summary>
         public MainViewModel()
         {
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Program started");
+
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
 
@@ -167,7 +171,7 @@ namespace newRBS.ViewModels
             Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
             if (measureSpectra.IsAcquiring() == true)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
+            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
 
             ChannelConfigurationViewModel channelConfigurationViewModel = new ChannelConfigurationViewModel();
             Views.ChannelConfigurationView channelConfiguration = new Views.ChannelConfigurationView();
@@ -218,7 +222,7 @@ namespace newRBS.ViewModels
                     userEditorView.ShowDialog();
                 }
                 else
-                    Console.WriteLine("Connection problem");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Database connection problem");
             }
         }
 
@@ -255,10 +259,15 @@ namespace newRBS.ViewModels
                 Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
                 if (measureSpectra.IsAcquiring() == true)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
+                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
             }
 
+            string OldUserName = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
+
             MyGlobals.ConString = "";
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "User '" + OldUserName + "' logged out");
+
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().filterTree.Items.Clear();
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Projects.Clear();
             SimpleIoc.Default.GetInstance<MeasurementPlotViewModel>().ClearPlot(new List<int>());
@@ -267,7 +276,6 @@ namespace newRBS.ViewModels
             DatabaseDataContext temp = MyGlobals.Database;
 
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
-            //var adventurerWindowVM = SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>(System.Guid.NewGuid().ToString());
         }
 
         /// <summary>
@@ -280,13 +288,21 @@ namespace newRBS.ViewModels
                 Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
                 if (measureSpectra.IsAcquiring() == true)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't close program: Board is acquiring"); MessageBox.Show("Can't close program: Board is acquiring"); return; }
+                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring"); MessageBox.Show("Can't close the program: Board is acquiring"); return; }
             }
 
             if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
             {
                 SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
             }
+
+            if (SimpleIoc.Default.ContainsCreated<Models.Coulombo>() == true)
+            {
+                SimpleIoc.Default.GetInstance<Models.Coulombo>().Close();
+            }
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");
+
             Environment.Exit(0);
         }
     }

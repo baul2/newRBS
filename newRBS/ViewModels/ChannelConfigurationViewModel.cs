@@ -25,6 +25,8 @@ using System.Globalization;
 using System.Xml.Serialization;
 using System.IO;
 using Microsoft.Win32;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.ViewModels
 {
@@ -42,6 +44,9 @@ namespace newRBS.ViewModels
         public ICommand SendToDeviceCommand { get; set; }
         public ICommand SaveToFileCommand { get; set; }
         public ICommand LoadFromFileCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
         /// Contains all the plot data and the plot style of the OxyPlot in <see cref="Views.ChannelConfigurationView"/>.
@@ -242,6 +247,8 @@ namespace newRBS.ViewModels
                     WriteFileStream.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", i, measureWaveform.waveform.AT1[i], measureWaveform.waveform.AT2[i], measureWaveform.waveform.DT1[i], measureWaveform.waveform.DT2[i]);
 
                 WriteFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Waveform saved to file");
             }
         }
 
@@ -267,6 +274,8 @@ namespace newRBS.ViewModels
                 TextWriter WriteFileStream = new StreamWriter(saveFileDialog.FileName);
                 SerializerObj.Serialize(WriteFileStream, channelParams);
                 WriteFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Channel configuration saved to file");
             }
         }
 
@@ -275,8 +284,6 @@ namespace newRBS.ViewModels
         /// </summary>
         private void _LoadFromFileCommand()
         {
-            Console.WriteLine("_LoadFromFileCommand");
-
             XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -286,6 +293,8 @@ namespace newRBS.ViewModels
                 FileStream ReadFileStream = new FileStream(openFileDialog.FileName, FileMode.Open);
                 channelParams = (Models.ChannelParams)SerializerObj.Deserialize(ReadFileStream);
                 ReadFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Channel configuration read from file");
             }
         }
     }

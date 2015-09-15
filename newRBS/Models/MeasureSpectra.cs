@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using newRBS.Database;
+using System.Reflection;
 
 namespace newRBS.Models
 {
@@ -19,7 +20,8 @@ namespace newRBS.Models
         private CAEN_x730 cAEN_x730;
         private Coulombo coulombo;
 
-        TraceSource trace = new TraceSource("MeasureSpectra");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
         public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -89,11 +91,11 @@ namespace newRBS.Models
 
                     if (NewMeasurement.StopType == "Charge (µC)")
                     {
-                        coulombo.SetLadung(NewMeasurement.StopValue);
+                        coulombo.SetCharge(NewMeasurement.StopValue);
                     }
                     else
                     {
-                        coulombo.SetLadung(9999);
+                        coulombo.SetCharge(9999);
                     }
                     coulombo.Start();
 
@@ -102,7 +104,7 @@ namespace newRBS.Models
                     Database.SubmitChanges();
                     activeChannels.Add(channel, NewMeasurement.MeasurementID);
 
-                    Console.WriteLine("New measurementID: {0}", NewMeasurement.MeasurementID);
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + NewMeasurement.MeasurementID + " started on channel " + NewMeasurement.Channel);
                     MeasureSpectraTimer[channel] = new Timer(500);
                     MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(NewMeasurement.MeasurementID, channel); };
                     MeasureSpectraTimer[channel].Start();
@@ -121,7 +123,6 @@ namespace newRBS.Models
                 cAEN_x730.StopAcquisition(channel);
 
                 MeasureSpectraTimer[channel].Stop();
-                Console.WriteLine("ID to stop: {0}", measurementID);
 
                 activeChannels.Remove(channel);
 
@@ -130,17 +131,18 @@ namespace newRBS.Models
                     Measurement MeasurementToStop = Database.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
 
                     if (MeasurementToStop == null)
-                    { trace.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = {0} not found", measurementID); return; }
+                    { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = " + measurementID + " not found"); return; }
 
                     MeasurementToStop.Runs = false;
 
                     Database.SubmitChanges();
 
-                    if (MeasurementToStop.StopType== "ChopperCounts")
+                    if (MeasurementToStop.StopType == "ChopperCounts")
                         cAEN_x730.StopAcquisition(7);
 
                     Sample temp = MeasurementToStop.Sample; // To load the sample before the scope of Database ends
 
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToStop.MeasurementID + " stopped (channel " + MeasurementToStop.Channel + ")");
                     //if (EventMeasurementFinished != null) EventMeasurementFinished(MeasurementToStop);
                 }
             }
@@ -155,17 +157,17 @@ namespace newRBS.Models
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
             long sum = newSpectrumY.Sum();
-            trace.TraceEvent(TraceEventType.Verbose, 0, "MeasurementWorker ID = {0}; Counts = {1} ", MeasurementID, sum);
+            trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureSpectraWorker ID = " + MeasurementID + "; Counts = " + sum);
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
                 Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
 
                 if (MeasurementToUpdate == null)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = {0} not found", MeasurementID); return; }
+                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = " + MeasurementID + " not found"); return; }
 
                 if (newSpectrumY.Length != MeasurementToUpdate.NumOfChannels)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
+                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
 
                 MeasurementToUpdate.SpectrumY = newSpectrumY;
 
@@ -189,7 +191,7 @@ namespace newRBS.Models
                     case "Charge (µC)":
                         MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / MeasurementToUpdate.StopValue; break;
                     case "Counts":
-                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; Console.WriteLine(MeasurementToUpdate.Progress); break;
+                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; break;
                     case "ChopperCounts":
                         MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
                 }
@@ -201,7 +203,7 @@ namespace newRBS.Models
 
                 if (MeasurementToUpdate.Progress >= 1)
                 {
-                    trace.TraceEvent(TraceEventType.Information, 0, "Measurement has been finished (Progress=1)");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToUpdate.MeasurementID + " has been finished (Progress=1)");
                     MeasurementToUpdate.Progress = 1;
                     MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01);
                     Database.SubmitChanges();

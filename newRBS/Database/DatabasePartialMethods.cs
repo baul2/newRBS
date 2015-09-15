@@ -10,6 +10,8 @@ using System.ComponentModel;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.Database
 {
@@ -36,6 +38,9 @@ namespace newRBS.Database
     /// </remarks>
     public partial class DatabaseDataContext
     {
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
+
         /// <summary>
         /// Function that can be used to load specific childs of a table class at its initialization.
         /// </summary>
@@ -93,8 +98,9 @@ namespace newRBS.Database
             }
             catch (ChangeConflictException ex)
             {
-                Console.WriteLine("Optimistic concurrency error in function DatabaseDataContext.SubmitChanges (DatabasePartialMethods.cs).");
-                Console.WriteLine(ex.Message);
+                trace.Value.TraceEvent(TraceEventType.Error, 0, "Optimistic concurrency error during Database.SubmitChanges(). Conflicting fiels: " + string.Join(", ", ChangeConflicts[0].MemberConflicts.Select(X => X.Member.Name).ToList()));
+
+                /*
                 foreach (ObjectChangeConflict changeConflict in base.ChangeConflicts)
                 {
                     System.Data.Linq.Mapping.MetaTable metatable = base.Mapping.GetTable(changeConflict.Object.GetType());
@@ -113,6 +119,8 @@ namespace newRBS.Database
                     Console.WriteLine(sb);
                     //changeConflict.Resolve(RefreshMode.KeepCurrentValues);
                 }
+                */
+
                 base.ChangeConflicts.ResolveAll(RefreshMode.KeepChanges);
                 this.SubmitChanges(ConflictMode.ContinueOnConflict);
             }
@@ -170,8 +178,6 @@ namespace newRBS.Database
         {
             get
             {
-                if (SpectrumYByte == null)
-                    Console.WriteLine("null");
                 int[] intArray = new int[SpectrumYByte.Length / sizeof(int)];
                 Buffer.BlockCopy(SpectrumYByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
                 return intArray;

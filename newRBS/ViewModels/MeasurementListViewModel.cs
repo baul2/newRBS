@@ -86,8 +86,6 @@ namespace newRBS.ViewModels
 
         private void _DataGridDoubleClickCommand(EventArgs eventArgs)
         {
-            Console.WriteLine("_DataGridDoubleClick");
-
             MeasurementInfoViewModel measurementInfoViewModel = new MeasurementInfoViewModel(SelectedMeasurementID);
             Views.MeasurementInfoView measurementInfoView = new Views.MeasurementInfoView();
             measurementInfoView.DataContext = measurementInfoViewModel;
@@ -176,7 +174,6 @@ namespace newRBS.ViewModels
 
         private void AddNewMeasurementToList(Measurement measurement)
         {
-            Console.WriteLine("AddNewMeasurementToList");
             MeasurementList.Add(new SelectableMeasurement() { Selected = true, Measurement = measurement });
 
             if (EventMeasurementToPlot != null) EventMeasurementToPlot(measurement);
@@ -185,7 +182,6 @@ namespace newRBS.ViewModels
 
         private void DeleteRemovedMeasurementFromList(Measurement measurement)
         {
-            Console.WriteLine("DeleteRemovedMeasurementFromList");
             SelectableMeasurement delMeasurement = MeasurementList.FirstOrDefault(x => x.Measurement.MeasurementID == measurement.MeasurementID);
 
             if (delMeasurement != null)

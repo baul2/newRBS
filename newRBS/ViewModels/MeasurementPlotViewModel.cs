@@ -145,8 +145,7 @@ namespace newRBS.ViewModels
 
         private void MeasurementToPlot(Measurement measurement)
         {
-            if (MeasurementIDList.Contains(measurement.MeasurementID))
-            { Console.WriteLine("Measurement is already in MeasurementIDList!"); return; }
+            if (MeasurementIDList.Contains(measurement.MeasurementID)) return; 
 
             MeasurementIDList.Add(measurement.MeasurementID);
             PlotMeasurement(measurement);
