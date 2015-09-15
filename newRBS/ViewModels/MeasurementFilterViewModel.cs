@@ -18,6 +18,9 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Diagnostics;
+using System.Reflection;
+using System.IO;
 
 namespace newRBS.ViewModels
 {
@@ -39,6 +42,9 @@ namespace newRBS.ViewModels
 
         public ICommand AddMeasurementCommand { get; set; }
         public ICommand RemoveMeasurementCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private bool _measurementFilterPanelVis = true;
         public bool measurementFilterPanelVis
@@ -77,7 +83,6 @@ namespace newRBS.ViewModels
             if (e != null && e.DependencyPropertyChangedEventArgs.NewValue != null)
             {
                 FilterClass temp = (FilterClass)e.DependencyPropertyChangedEventArgs.NewValue;
-                Console.WriteLine(temp.Name);
                 SelectedProject = null;
                 NewFilterSelected(temp);
             }
@@ -95,7 +100,6 @@ namespace newRBS.ViewModels
             {
                 if (value != null)
                 {
-                    Console.WriteLine("SelectedProject");
                     ClearFilterTreeSelectedItem();
                     SelectProject(value);
                 }
@@ -159,7 +163,8 @@ namespace newRBS.ViewModels
 
         private void FillFilterList(string filterType)
         {
-            Console.WriteLine("Update filter list with filterType: {0}", filterType);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Update filter list with filterType: " + filterType);
+
             if (filterTree.Items.Count() > 0)
             {
                 while (filterTree.Items.Count > 0)
@@ -177,7 +182,6 @@ namespace newRBS.ViewModels
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
-                        Console.WriteLine("All count: {0}", Database.Measurements.ToList().Count());
                         List<int> allYears = (from spec in Database.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
                         {
@@ -210,42 +214,36 @@ namespace newRBS.ViewModels
                     break;
 
                 case "Channel":
-                    Console.WriteLine("Channel");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         List<int> allChannels = Database.Measurements.Select(x => x.Channel).Distinct().ToList();
-                        Console.WriteLine("NumChannels {0}", allChannels.Count());
 
                         foreach (int Channel in allChannels)
                         {
-                            Console.WriteLine(Channel);
                             filterTree.Items.Add(new FilterClass() { Name = Channel.ToString(), Type = "Channel", Channel = Channel });
                         }
                     }
                     break;
 
                 case "Sample":
-                    Console.WriteLine("Sample");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         //List<string> allSampleNames = (from sample in Database.Samples select sample.SampleName).Distinct().ToList();
                         List<string> allSampleNames = Database.Samples.Select(x => x.SampleName).ToList();
-                        Console.WriteLine("NumSamples {0}", allSampleNames.Count());
 
                         foreach (string sampleName in allSampleNames)
                         {
-                            Console.WriteLine(sampleName);
                             filterTree.Items.Add(new FilterClass() { Name = sampleName, Type = "Sample", SampleName = sampleName });
                         }
                     }
                     break;
 
                 default:
-                    Console.WriteLine("No action found for filterType: {0}", filterType);
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "No action found for filterType: " + filterType);
                     break;
             }
             if (EventNewFilter != null) EventNewFilter(new List<int>());
@@ -254,6 +252,8 @@ namespace newRBS.ViewModels
         public void NewFilterSelected(FilterClass filter)
         {
             if (selectedFilter == null) return;
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filter: " + filter.Name + " (" + filter.Type + ", " + filter.SubType);
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -312,9 +312,10 @@ namespace newRBS.ViewModels
         {
             if (project == null) return;
 
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected project: " + project.ProjectName);
+
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Console.WriteLine("Load project");
                 List<int> MeasurementIDList = Database.Measurement_Projects.Where(x => x.ProjectID == project.ProjectID).Select(x => x.MeasurementID).ToList();
                 // Send event (to SpectraListView...)
                 if (EventNewFilter != null) EventNewFilter(MeasurementIDList);
@@ -332,6 +333,8 @@ namespace newRBS.ViewModels
                         Database.Projects.InsertOnSubmit(newProject);
                         Database.SubmitChanges();
                         Projects.Add(newProject);
+
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Created new project: " + newProject.ProjectName);
                     }
         }
 
@@ -346,8 +349,11 @@ namespace newRBS.ViewModels
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         Project renamedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
+                        string OldName = renamedProject.ProjectName;
                         renamedProject.ProjectName = inputDialog.Answer;
                         Database.SubmitChanges();
+
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Project  '" + OldName + "' renamed to '" + renamedProject.ProjectName + "'");
                     }
 
                     Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID).ProjectName = inputDialog.Answer;
@@ -365,8 +371,11 @@ namespace newRBS.ViewModels
                 using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => x.ProjectID == SelectedProject.ProjectID));
-                    Database.Projects.DeleteOnSubmit(Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
+                    Project deletedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
+                    Database.Projects.DeleteOnSubmit(deletedProject);
                     Database.SubmitChanges();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Project  '" + deletedProject.ProjectName + "' was deleted");
                 }
 
                 Projects.Remove(Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
@@ -383,8 +392,6 @@ namespace newRBS.ViewModels
             Views.Utils.ProjectSelector projectSelector = new Views.Utils.ProjectSelector();
             if (projectSelector.ShowDialog() == true)
             {
-                Console.WriteLine(projectSelector.SelectedProject.ProjectName);
-
                 using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     List<Measurement_Project> newMeasurement_Projects = new List<Measurement_Project>();
@@ -396,6 +403,8 @@ namespace newRBS.ViewModels
 
                     Database.Measurement_Projects.InsertAllOnSubmit(newMeasurement_Projects);
                     Database.SubmitChanges();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " added to Project  '" + projectSelector.SelectedProject.ProjectName + "'");
                 }
             }
         }
@@ -410,8 +419,10 @@ namespace newRBS.ViewModels
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)));
+                Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)).Where(y => y.ProjectID == SelectedProject.ProjectID));
                 Database.SubmitChanges();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " removed from Project '" + SelectedProject.ProjectName + "'");
             }
 
             SelectProject(SelectedProject);

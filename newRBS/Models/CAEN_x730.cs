@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace newRBS.Models
 {
@@ -20,7 +21,9 @@ namespace newRBS.Models
         public List<int> ActiveChannels = new List<int>();
         public int NumberOfChanels = 16384;
 
-        TraceSource trace = new TraceSource("CAEN_x730");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
+        //trace.Value.TraceEvent(TraceEventType.Information, 0, "Configuration send");
 
         const string cAENDPPLib = "CAENDPPLib.dll";
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
@@ -51,8 +54,8 @@ namespace newRBS.Models
         {
             //Init library
             int ret = CAENDPP_InitLibrary(ref handle);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Library initialized"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library initialized"); }
 
             //Add board
             ConnParam connParam = new ConnParam();
@@ -60,8 +63,8 @@ namespace newRBS.Models
             connParam.LinkNum = 0;
             connParam.ConetNode = 0;
             ret = CAENDPP_AddBoard(handle, connParam, ref bID);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Board added"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Board added"); }
 
             //Reset board to default parameters
             SetDefaultConfig();
@@ -180,9 +183,9 @@ namespace newRBS.Models
             ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
             for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
 
-            if (ret1 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error {0}: {1}", ret1, GetErrorText(ret1)); }
-            if (ret2 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error {0}: {1}", ret2, GetErrorText(ret2)); }
-            if (ret1 == 0 & ret2 == 0) { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
+            if (ret1 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error " + ret1 + ": " + GetErrorText(ret1)); }
+            if (ret2 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error " + ret2 + ": " + GetErrorText(ret2)); }
+            if (ret1 == 0 & ret2 == 0) { trace.Value.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
         }
 
         /// <summary>
@@ -193,14 +196,14 @@ namespace newRBS.Models
         {
             if (ActiveChannels.Contains(channel)) // Checks if measurement is already running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel " + channel);
                 return;
             }
             int ret = CAENDPP_StartAcquisition(handle, channel);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else
             {
-                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel " + channel);
                 ActiveChannels.Add(channel); // Adds channel to the active channels
             }
         }
@@ -218,8 +221,8 @@ namespace newRBS.Models
             int acqStatus = 0;
 
             int ret = CAENDPP_GetCurrentHistogram(handle, channel, h1, ref counts, ref realTime, ref deadTime, ref acqStatus);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Verbose, 0, "Histogram read on channel {0}", channel); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Histogram read on channel " + channel); }
 
             return (int[])(object)h1;
         }
@@ -245,17 +248,17 @@ namespace newRBS.Models
             for (int i = 0; i < 100; i++)
             {
                 int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
-                if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return waveform; }
+                if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return waveform; }
                 else
                 {
                     if (waveform.NumSamples > 0)
                     {
-                        trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
+                        trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel " + channel);
                         return waveform;
                     }
                 }
             }
-            trace.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel {0}", channel);
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel " + channel);
             return waveform;
         }
 
@@ -267,14 +270,14 @@ namespace newRBS.Models
         {
             if (!ActiveChannels.Contains(channel)) // Checks if measurement is not running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel " + channel);
                 return;
             }
             int ret = CAENDPP_StopAcquisition(handle, channel);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else
             {
-                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel " + channel);
                 ActiveChannels.Remove(channel); // Removes channel from the active channels
             }
         }
@@ -285,8 +288,8 @@ namespace newRBS.Models
         public void Close()
         {
             int ret = CAENDPP_EndLibrary(handle);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Library closed"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library closed"); }
         }
 
         /// <summary>

@@ -48,15 +48,8 @@
       <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="ProjectID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Association Name="Project_Measurement_Project" Member="Project" ThisKey="ProjectID" OtherKey="ProjectID" Type="Project" IsForeignKey="true" />
       <Association Name="Measurement_Measurement_Project" Member="Measurement" ThisKey="MeasurementID" OtherKey="MeasurementID" Type="Measurement" IsForeignKey="true" />
-    </Type>
-  </Table>
-  <Table Name="dbo.Projects" Member="Projects">
-    <Type Name="Project">
-      <Column Name="ProjectID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="ProjectName" Type="System.String" DbType="NChar(50) NOT NULL" CanBeNull="false" />
-      <Association Name="Project_Measurement_Project" Member="Measurement_Projects" ThisKey="ProjectID" OtherKey="ProjectID" Type="Measurement_Project" />
+      <Association Name="Project_Measurement_Project" Member="Project" ThisKey="ProjectID" OtherKey="ProjectID" Type="Project" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Measurements" Member="Measurements">
@@ -94,6 +87,13 @@
       <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Association Name="Measurement_Measurement_Project" Member="Measurement_Projects" ThisKey="MeasurementID" OtherKey="MeasurementID" Type="Measurement_Project" />
       <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Projects" Member="Projects">
+    <Type Name="Project">
+      <Column Name="ProjectID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ProjectName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Project_Measurement_Project" Member="Measurement_Projects" ThisKey="ProjectID" OtherKey="ProjectID" Type="Measurement_Project" />
     </Type>
   </Table>
 </Database>

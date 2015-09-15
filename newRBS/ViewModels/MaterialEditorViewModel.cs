@@ -18,6 +18,8 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.ViewModels
 {
@@ -37,6 +39,9 @@ namespace newRBS.ViewModels
 
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -124,8 +129,6 @@ namespace newRBS.ViewModels
 
         public void _AddMaterialCommand()
         {
-            Console.WriteLine("_AddMaterialCommand");
-
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", "new Material");
             if (inputDialog.ShowDialog() == true)
             {
@@ -139,8 +142,6 @@ namespace newRBS.ViewModels
 
         public void _RemoveMaterialCommand()
         {
-            Console.WriteLine("_RemoveMaterialCommand");
-
             if (SelectedMaterial == null) return;
 
             Database.Elements.DeleteAllOnSubmit(Database.Elements.Where(x => x.MaterialID == SelectedMaterial.MaterialID));
@@ -153,8 +154,6 @@ namespace newRBS.ViewModels
 
         public void _RenameMaterialCommand()
         {
-            Console.WriteLine("_RenameMaterialCommand");
-
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", SelectedMaterial.MaterialName);
             if (inputDialog.ShowDialog() == true)
                 SelectedMaterial.MaterialName = inputDialog.Answer;
@@ -162,8 +161,6 @@ namespace newRBS.ViewModels
 
         public void _AddLayerCommand()
         {
-            Console.WriteLine("_AddLayerCommand");
-
             if (SelectedMaterial == null) return;
 
             Layer newLayer = new Layer { LayerIndex = Layers.Count(), MaterialID = SelectedMaterial.MaterialID, Density = 1 };
@@ -174,8 +171,6 @@ namespace newRBS.ViewModels
 
         public void _RemoveLayerCommand()
         {
-            Console.WriteLine("_RemoveLayerCommand");
-
             if (SelectedMaterial == null || SelectedLayer == null) return;
 
             var LayersToDecreaseIndex = Database.Layers.Where(x => x.MaterialID == SelectedMaterial.MaterialID && x.LayerIndex > SelectedLayer.LayerIndex);
@@ -192,8 +187,6 @@ namespace newRBS.ViewModels
 
         public void _MoveLayerUpCommand()
         {
-            Console.WriteLine("_MoveLayerUpCommand");
-
             if (SelectedLayer.LayerIndex == 0) return;
 
             int SelectedLayerIndex = SelectedLayer.LayerIndex;
@@ -211,8 +204,6 @@ namespace newRBS.ViewModels
 
         public void _MoveLayerDownCommand()
         {
-            Console.WriteLine("_MoveLayerDownCommand");
-
             if (SelectedLayer.LayerIndex == SelectedMaterial.Layers.Count() - 1) return;
 
             int SelectedLayerIndex = SelectedLayer.LayerIndex;
@@ -230,8 +221,6 @@ namespace newRBS.ViewModels
 
         public void _AddElementCommand()
         {
-            Console.WriteLine("_AddElementButton");
-
             if (SelectedLayer == null) return;
             //if (SelectedLayer.LayerID == 0) { MessageBox.Show("Save the new layer before adding elements!"); return; }
 
@@ -243,8 +232,6 @@ namespace newRBS.ViewModels
 
         public void _RemoveElementCommand()
         {
-            Console.WriteLine("_RemoveElementButton");
-
             if (SelectedLayer == null || SelectedElement == null) return;
 
             Database.Elements.DeleteOnSubmit(SelectedElement);
@@ -253,9 +240,9 @@ namespace newRBS.ViewModels
 
         public void _SaveCommand()
         {
-            Console.WriteLine("_SaveCommand");
-
             Database.SubmitChanges();
+
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Saved material changes in the database");
 
             DialogResult = false;
         }

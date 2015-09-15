@@ -22,6 +22,8 @@ using System.IO;
 using OxyPlot;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.ViewModels
 {
@@ -30,6 +32,9 @@ namespace newRBS.ViewModels
         public ICommand AddCurrentMeasurementCommand { get; set; }
         public ICommand AddAllMeasurementsCommand { get; set; }
         public ICommand CancelCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private DatabaseDataContext Database;
 
@@ -119,12 +124,14 @@ namespace newRBS.ViewModels
             Database.Measurements.InsertOnSubmit(selectedMeasurement);
             Database.SubmitChanges();
 
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Inserted current imported measurement into the database");
+
             selectedMeasurement = null;
 
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
 
             newMeausurements.Remove(selectedMeasurement);
-            Console.WriteLine(newMeausurements.Count());
+
             if (newMeausurements.Count() > 0)
                 selectedMeasurement = newMeausurements.First();
             else
@@ -138,6 +145,8 @@ namespace newRBS.ViewModels
         {
             Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
             Database.SubmitChanges();
+
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Inserted all imported measurement into the database");
 
             DialogResult = false;
             _DialogResult = null;

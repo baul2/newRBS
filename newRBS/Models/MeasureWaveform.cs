@@ -6,6 +6,8 @@ using GalaSoft.MvvmLight.Ioc;
 using System.Data.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.Models
 {
@@ -15,6 +17,9 @@ namespace newRBS.Models
     public class MeasureWaveform
     {
         private CAEN_x730 cAEN_x730;
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private Timer waveformTimer = new Timer();
 
@@ -44,6 +49,7 @@ namespace newRBS.Models
         public void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2, bool AUTO)
         {
             cAEN_x730.SetWaveformConfig(AP1, AP2, DP1, DP2, AUTO);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform config was send to the device");
         }
 
         /// <summary>
@@ -53,7 +59,9 @@ namespace newRBS.Models
         /// <returns>An instance of <see cref="ChannelParams"/> containing the channel configuration.</returns>
         public ChannelParams GetChannelConfig(int Channel)
         {
-            return cAEN_x730.GetChannelConfig(Channel);
+            ChannelParams parameter = cAEN_x730.GetChannelConfig(Channel);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform config was read from the device");
+            return parameter;
         }
 
         /// <summary>
@@ -77,7 +85,7 @@ namespace newRBS.Models
                 cAEN_x730.StartAcquisition(Channel);
                 waveformTimer.Enabled = true;
             }
-
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel config was send to the device");
         }
 
         /// <summary>
@@ -90,8 +98,10 @@ namespace newRBS.Models
             cAEN_x730.StartAcquisition(Channel);
             activeChannels.Add(Channel);
 
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform acquisition was started for channel " + Channel);
+
             waveformTimer = new Timer(500);
-            waveformTimer.Elapsed += delegate { WaveformMeasurementWorker(Channel); };
+            waveformTimer.Elapsed += delegate { MeasureWaveformWorker(Channel); };
             waveformTimer.Start();
         }
 
@@ -107,6 +117,8 @@ namespace newRBS.Models
 
             cAEN_x730.StopAcquisition(activeChannels.First());
 
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform acquisition was stopped");
+
             activeChannels.Clear();
         }
 
@@ -114,10 +126,11 @@ namespace newRBS.Models
         /// Function that gets the new <see cref="Waveform"/>s from <see cref="CAEN_x730.GetWaveform(int)"/> and sends it with an event.
         /// </summary>
         /// <param name="Channel">Number of the channel to get the waveforms.</param>
-        private void WaveformMeasurementWorker(int Channel)
+        private void MeasureWaveformWorker(int Channel)
         {
             waveform = cAEN_x730.GetWaveform(Channel);
-            if (EventWaveform != null) { EventWaveform(waveform); } else { Console.WriteLine("EventWaveform null"); }
+            trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureWaveformWorker Channel = " + Channel);
+            if (EventWaveform != null) { EventWaveform(waveform); }
         }
     }
 }

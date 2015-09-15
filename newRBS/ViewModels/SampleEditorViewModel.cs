@@ -18,6 +18,8 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.ViewModels
 {
@@ -29,6 +31,9 @@ namespace newRBS.ViewModels
 
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -131,9 +136,9 @@ namespace newRBS.ViewModels
 
         public void _SaveCommand()
         {
-            Console.WriteLine("_SaveCommand");
-
             Database.SubmitChanges();
+
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Saved samples changes in the database");
 
             DialogResult = false;
         }

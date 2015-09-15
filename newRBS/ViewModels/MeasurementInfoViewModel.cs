@@ -49,11 +49,6 @@ namespace newRBS.ViewModels
         {
             Database.SubmitChanges(ConflictMode.ContinueOnConflict);
 
-            Console.WriteLine(MeasurementInfo.Measurement.CurrentDuration);
-            using (DatabaseDataContext D = MyGlobals.Database)
-            {
-                Console.WriteLine(D.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementInfo.Measurement.MeasurementID).CurrentDuration);
-            }
             DialogResult = true;
         }
 
