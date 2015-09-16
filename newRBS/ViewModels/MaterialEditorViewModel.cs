@@ -103,7 +103,7 @@ namespace newRBS.ViewModels
         {
             Database = MyGlobals.Database;
 
-            Materials = new ObservableCollection<Material>(Database.Materials.ToList());
+            Materials = new ObservableCollection<Material>(Database.Materials.Where(x => x.MaterialName != "(undefined)").ToList());
             Layers = new ObservableCollection<Layer>();
             Elements = new ObservableCollection<Element>();
 
@@ -132,10 +132,10 @@ namespace newRBS.ViewModels
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", "new Material");
             if (inputDialog.ShowDialog() == true)
             {
-  
                 Material newMaterial = new Material { MaterialName = inputDialog.Answer };
 
                 Database.Materials.InsertOnSubmit(newMaterial);
+
                 Materials.Add(newMaterial);
             }
         }
@@ -164,9 +164,10 @@ namespace newRBS.ViewModels
             if (SelectedMaterial == null) return;
 
             Layer newLayer = new Layer { LayerIndex = Layers.Count(), MaterialID = SelectedMaterial.MaterialID, Density = 1 };
-            
-            Database.Layers.InsertOnSubmit(newLayer);
+
             Layers.Add(newLayer);
+
+            SelectedMaterial.Layers.Add(newLayer);
         }
 
         public void _RemoveLayerCommand()
@@ -224,10 +225,12 @@ namespace newRBS.ViewModels
             if (SelectedLayer == null) return;
             //if (SelectedLayer.LayerID == 0) { MessageBox.Show("Save the new layer before adding elements!"); return; }
 
-            Element newElement = new Element { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID };
+            Element newElement = new Element { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID, ElementName = "", StoichiometricFactor = 1, AtomicNumber = 0, MassNumber = 0 };
 
-            Database.Elements.InsertOnSubmit(newElement);
             Elements.Add(newElement);
+
+            SelectedLayer.Elements.Add(newElement);
+            SelectedMaterial.Elements.Add(newElement);
         }
 
         public void _RemoveElementCommand()
@@ -242,7 +245,7 @@ namespace newRBS.ViewModels
         {
             Database.SubmitChanges();
 
-            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Saved material changes in the database");
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Saved material changes in the database");
 
             DialogResult = false;
         }

@@ -141,17 +141,15 @@ namespace newRBS.Models
                     string path = "Backup/" + DateTime.Now.ToString("yyyy'/'MM'/'dd'/'");
                     string user = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
                     string file = DateTime.Now.ToString("HH-mm-ss") + "_User-" + user + "_MeasurementID-" + MeasurementToStop.MeasurementID + ".dat";
-                    Console.WriteLine(path + file);
+
                     DirectoryInfo di = Directory.CreateDirectory(path);
+
                     DatabaseUtils.ExportMeasurements(new List<int> { MeasurementToStop.MeasurementID }, path + file);
 
                     if (MeasurementToStop.StopType == "ChopperCounts")
                         cAEN_x730.StopAcquisition(7);
 
-                    Sample temp = MeasurementToStop.Sample; // To load the sample before the scope of Database ends
-
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToStop.MeasurementID + " stopped (channel " + MeasurementToStop.Channel + ")");
-                    //if (EventMeasurementFinished != null) EventMeasurementFinished(MeasurementToStop);
                 }
             }
         }
