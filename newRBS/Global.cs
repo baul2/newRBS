@@ -28,27 +28,29 @@ namespace newRBS
         {
             if (string.IsNullOrEmpty(message)) return;
 
-            WriteLine(string.Format("{0}, {1}, {2}, {3}", DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]"), eventType , source, message.Replace("\r", string.Empty).Replace("\n", string.Empty)));
+            WriteLine(string.Format("{0}, {1}, {2}, {3}", DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]"), eventType, source, message.Replace("\r", string.Empty).Replace("\n", string.Empty)));
         }
     }
 
     public static class TraceSources
     {
-        private static MyTextWriterTraceListener textWriterTraceListener = new MyTextWriterTraceListener("Logs/LogStart_"+ DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+        private static MyTextWriterTraceListener textWriterTraceListener = new MyTextWriterTraceListener("Logs/LogStart_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
         public static TraceSource Create(string sourceName)
         {
             var source = new TraceSource(sourceName);
 
+            // Console listemer
             Essential.Diagnostics.ColoredConsoleTraceListener listener1 = new Essential.Diagnostics.ColoredConsoleTraceListener();
-            listener1.Template = "{DateTime:'['HH':'mm':'ss'.'fff']'}, {EventType}, "+sourceName+", {Message}{Data}";
+            listener1.Template = "{DateTime:'['HH':'mm':'ss'.'fff']'}, {EventType}, " + sourceName + ", {Message}{Data}";
             listener1.ConvertWriteToEvent = true;
             listener1.Filter = new EventTypeFilter(SourceLevels.All);
             source.Listeners.Add(listener1);
 
+            // Log file listener
             string path = "Logs/";
             DirectoryInfo di = Directory.CreateDirectory(path);
             MyTextWriterTraceListener listener2 = textWriterTraceListener;
-            listener2.Filter = new EventTypeFilter(SourceLevels.Information);   
+            listener2.Filter = new EventTypeFilter(SourceLevels.Information);
             Trace.AutoFlush = true;
             source.Listeners.Add(listener2);
 
@@ -91,11 +93,11 @@ namespace newRBS
                     }
                     if (!newConnection.DatabaseExists())
                     {
-                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Connection proglem");
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Connection problem");
                         SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand();
                         return null;
                     }
-                    trace.Value.TraceEvent(TraceEventType.Information, 0, "User '"+logInDialog.logIn.UserName+ "' logged in");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "User '" + logInDialog.logIn.UserName + "' logged in");
                 }
                 return newConnection;
             }

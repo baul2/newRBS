@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using newRBS.Database;
 using System.Reflection;
+using System.IO;
 
 namespace newRBS.Models
 {
@@ -113,7 +114,7 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that stops the acquisition for all active channels and finishes the corresponging instances of <see cref="Database.Measurement"/> in the database.
+        /// Function that stops the acquisition for all active channels, finishes the corresponging instances of <see cref="Database.Measurement"/> in the database and exports the measurement to the backup folder.
         /// </summary>
         public void StopAcquisitions()
         {
@@ -136,6 +137,13 @@ namespace newRBS.Models
                     MeasurementToStop.Runs = false;
 
                     Database.SubmitChanges();
+
+                    string path = "Backup/" + DateTime.Now.ToString("yyyy'/'MM'/'dd'/'");
+                    string user = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
+                    string file = DateTime.Now.ToString("HH-mm-ss") + "_User-" + user + "_MeasurementID-" + MeasurementToStop.MeasurementID + ".dat";
+                    Console.WriteLine(path + file);
+                    DirectoryInfo di = Directory.CreateDirectory(path);
+                    DatabaseUtils.ExportMeasurements(new List<int> { MeasurementToStop.MeasurementID }, path + file);
 
                     if (MeasurementToStop.StopType == "ChopperCounts")
                         cAEN_x730.StopAcquisition(7);
