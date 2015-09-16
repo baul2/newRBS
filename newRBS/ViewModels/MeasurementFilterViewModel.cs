@@ -163,7 +163,9 @@ namespace newRBS.ViewModels
 
         private void FillFilterList(string filterType)
         {
-            trace.Value.TraceEvent(TraceEventType.Information, 0, "Update filter list with filterType: " + filterType);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filterType: '" + filterType + "'");
+
+            ClearFilterTreeSelectedItem();
 
             if (filterTree.Items.Count() > 0)
             {
@@ -243,7 +245,7 @@ namespace newRBS.ViewModels
                     break;
 
                 default:
-                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "No action found for filterType: " + filterType);
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "No action found for filterType: '" + filterType +"'");
                     break;
             }
             if (EventNewFilter != null) EventNewFilter(new List<int>());
@@ -253,7 +255,7 @@ namespace newRBS.ViewModels
         {
             if (selectedFilter == null) return;
 
-            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filter: " + filter.Name + " (" + filter.Type + ", " + filter.SubType);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filter: '" + filter.Name + " (" + filter.Type + ", " + filter.SubType + ")'");
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -312,7 +314,7 @@ namespace newRBS.ViewModels
         {
             if (project == null) return;
 
-            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected project: " + project.ProjectName);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected project: '" + project.ProjectName + "'");
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -334,7 +336,7 @@ namespace newRBS.ViewModels
                         Database.SubmitChanges();
                         Projects.Add(newProject);
 
-                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Created new project: " + newProject.ProjectName);
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Created new project: '" + newProject.ProjectName + "'");
                     }
         }
 
@@ -353,7 +355,7 @@ namespace newRBS.ViewModels
                         renamedProject.ProjectName = inputDialog.Answer;
                         Database.SubmitChanges();
 
-                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Project  '" + OldName + "' renamed to '" + renamedProject.ProjectName + "'");
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Project '" + OldName + "' renamed to '" + renamedProject.ProjectName + "'");
                     }
 
                     Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID).ProjectName = inputDialog.Answer;
@@ -375,7 +377,7 @@ namespace newRBS.ViewModels
                     Database.Projects.DeleteOnSubmit(deletedProject);
                     Database.SubmitChanges();
 
-                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Project  '" + deletedProject.ProjectName + "' was deleted");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Project '" + deletedProject.ProjectName + "' was deleted");
                 }
 
                 Projects.Remove(Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
@@ -404,7 +406,7 @@ namespace newRBS.ViewModels
                     Database.Measurement_Projects.InsertAllOnSubmit(newMeasurement_Projects);
                     Database.SubmitChanges();
 
-                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " added to Project  '" + projectSelector.SelectedProject.ProjectName + "'");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " added to Project '" + projectSelector.SelectedProject.ProjectName + "'");
                 }
             }
         }

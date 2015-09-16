@@ -50,7 +50,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Coulombo opend");
         }
 
-        private string WRCom(string text)
+        private string Command(string text)
         {
             string indata;
 
@@ -73,12 +73,12 @@ namespace newRBS.Models
 
         public string Version()
         {
-            return WRCom("V" + IMess + ZS);
+            return Command("V" + IMess + ZS);
         }
 
         public void Stop()
         {
-            if (WRCom("P" + IMess + ZS) == "Error")
+            if (Command("P" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be stoped");
             else
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement stoped");
@@ -86,7 +86,7 @@ namespace newRBS.Models
 
         public void Start()
         {
-            if (WRCom("S" + IMess + ZS) == "Error")
+            if (Command("S" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be started");
             else
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement started");
@@ -94,7 +94,7 @@ namespace newRBS.Models
 
         public void Continue()
         {
-            if (WRCom("K" + IMess + ZS) == "Error")
+            if (Command("K" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be continued");
             else
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement continued");
@@ -113,7 +113,7 @@ namespace newRBS.Models
                 case "10µA": mb = "5"; break;
             }
 
-            if (WRCom(mb + IMess + ZS) == "Error")
+            if (Command(mb + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Measurement range couldn't be canged");
             else
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement range set to " + mbs);
@@ -124,7 +124,7 @@ namespace newRBS.Models
             string lms, lmsm;
             int lmi;
 
-            lmi = (int)System.Math.Round(lm * 1000000);
+            lmi = (int)Math.Round(lm * 1000000);
             lms = lmi.ToString("D12");
             lmsm = "";
             lmsm = lmsm + (char)((lms[0] & 15) * 16 + (lms[1] & 15)) +
@@ -134,7 +134,7 @@ namespace newRBS.Models
                         (char)((lms[8] & 15) * 16 + (lms[9] & 15)) +
                         (char)((lms[10] & 15) * 16 + (lms[11] & 15));
 
-            if (WRCom(lmsm + "pC" + IMess + ZS) == "Error")
+            if (Command(lmsm + "pC" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Final charge couldn't be canged");
             else
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Final charge set to " + lm.ToString("{0.00}"));
@@ -146,7 +146,7 @@ namespace newRBS.Models
 
             double charge;
 
-            lms = WRCom("Q" + IMess + ZS);
+            lms = Command("Q" + IMess + ZS);
             if (lms.Length == 9)
             {
                 charge = (double)(lms[0] & 240) / 16 * 100000 + (double)(lms[0] & 15) * 10000 +
@@ -169,7 +169,7 @@ namespace newRBS.Models
 
         public string Status()
         {
-            return WRCom("Z" + IMess + ZS);
+            return Command("Z" + IMess + ZS);
         }
 
         public double GetCurrent()
@@ -178,7 +178,7 @@ namespace newRBS.Models
 
             double current;
 
-            lms = WRCom("I" + IMess + ZS);
+            lms = Command("I" + IMess + ZS);
             if (lms.Length == 8)
             {
                 if ((byte)lms[1] == 255)

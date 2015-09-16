@@ -152,6 +152,8 @@ namespace newRBS.Database
 
                             XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
                             SerializerObj.Serialize(WriteFileStream, Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList());
+
+                            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", measurementIDs) + " exported to a newRBS data file (.xml)");
                             break;
                         }
                     case ".dat":
@@ -238,6 +240,8 @@ namespace newRBS.Database
                                 }
                                 tw.WriteLine(dataLine);
                             }
+
+                            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", measurementIDs) + " exported to a Spektrenverwaltung data file (.dat)");
 
                             break;
                         }
@@ -374,9 +378,16 @@ namespace newRBS.Database
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
+                var projects = Database.Measurement_Projects.Where(x => MeasurementIDs.Contains(x.MeasurementID));
+                if (projects.ToList().Count > 0)
+                    if (MessageBox.Show("Selected measurements belong to projects. Delete them nevertheless?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                        return;
+                Database.Measurement_Projects.DeleteAllOnSubmit(projects);
                 Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();
             }
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", MeasurementIDs) + " deleted from the database");
         }
 
         /// <summary>
@@ -465,6 +476,7 @@ namespace newRBS.Database
                             break;
                         }
                 }
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Plot of selected measurements exported");
             }
         }
     }
