@@ -24,9 +24,6 @@ namespace newRBS.Models
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-
         public int ChopperStartChannel = 1000;
         public int ChopperEndChannel = 2000;
 
@@ -76,10 +73,20 @@ namespace newRBS.Models
                         cAEN_x730.StartAcquisition(7); // Start chopper
                     }
 
+                    var LastMeasurement = Database.Measurements.Where(x => x.Channel == channel).OrderByDescending(y => y.StartTime).FirstOrDefault();
+                    if (LastMeasurement != null)
+                    {
+                        NewMeasurement.EnergyCalOffset = LastMeasurement.EnergyCalOffset;
+                        NewMeasurement.EnergyCalSlope = LastMeasurement.EnergyCalSlope;
+                    }
+                    else
+                    {
+                        NewMeasurement.EnergyCalOffset = 0;
+                        NewMeasurement.EnergyCalSlope = 0.2;
+                    }
+
                     NewMeasurement.MeasurementID = 0;
                     NewMeasurement.Channel = channel;
-                    NewMeasurement.EnergyCalOffset = EnergyCalOffset[channel];//ToDo: Find latest value in database!
-                    NewMeasurement.EnergyCalSlope = EnergyCalSlope[channel];//ToDo: Find latest value in database!
                     NewMeasurement.StartTime = DateTime.Now;
                     NewMeasurement.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
                     NewMeasurement.CurrentDuration = new DateTime(2000, 01, 01);
