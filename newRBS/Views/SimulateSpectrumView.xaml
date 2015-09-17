@@ -32,7 +32,7 @@
                 <Button Command="{Binding StartSimulationCommand}" Content="Start simulation" Margin="5" Padding="3"/>
             </StackPanel>
         </StackPanel>
-        <oxy:PlotView MinHeight="200" InvalidateFlag="{Binding MeasuredSpectrumData.Count, Delay=100}">
+        <oxy:PlotView MinHeight="200" InvalidateFlag="{Binding UpdatePlot.Count, Delay=100}">
             <oxy:PlotView.Axes>
                 <oxy:LinearAxis Title="Energy (keV)" Position="Bottom"/>
                 <oxy:LinearAxis Title="Counts" Position="Left"/>

@@ -37,6 +37,8 @@ namespace newRBS.Models
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_GetBoardConfiguration(int handle, int bID, ref int acqMode, ref CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int CAENDPP_ClearCurrentHistogram(int handle, int channel);
+        [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_StartAcquisition(int handle, int channel);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_StopAcquisition(int handle, int channel);
@@ -199,6 +201,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel " + channel);
                 return;
             }
+            int ret2 = CAENDPP_ClearCurrentHistogram(handle, channel);
             int ret = CAENDPP_StartAcquisition(handle, channel);
             if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else

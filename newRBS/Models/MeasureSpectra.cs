@@ -180,8 +180,7 @@ namespace newRBS.Models
                 MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
                 MeasurementToUpdate.CurrentCounts = sum;
                 MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
-                //Console.WriteLine(MeasurementToUpdate.CurrentCharge);
-                MeasurementToUpdate.CurrentCharge = 0;
+
                 if (MeasurementToUpdate.StopType == "ChopperCounts")
                 {
                     MeasurementToUpdate.CurrentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum();

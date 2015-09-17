@@ -25,7 +25,7 @@ namespace newRBS.Models
         [PreferredConstructor]
         public Coulombo()
         {
-            Init("COM3", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
+            Init("COM4", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
         }
 
         public Coulombo(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
@@ -35,9 +35,14 @@ namespace newRBS.Models
 
         private void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
         {
+            string[] ports = SerialPort.GetPortNames();
+            foreach (string s in ports)
+                Console.WriteLine(s);
             //"COM3,9600,None,8,Two,94"
             IMess = (char)int.Parse(CoulomboID, System.Globalization.NumberStyles.HexNumber);
-
+            Console.WriteLine(IMess);
+            IMess = (char)148;
+            Console.WriteLine(IMess);
             SPort = new SerialPort(PortName, BaudRate, parity, DataBits, stopBits);
             SPort.ReadBufferSize = 100;
             SPort.WriteBufferSize = 100;

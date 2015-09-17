@@ -41,6 +41,8 @@ namespace newRBS.ViewModels
         public ObservableCollection<AreaData> SimulatedSpectrumData
         { get { return _SimulatedSpectrumData; } set { _SimulatedSpectrumData = value; RaisePropertyChanged(); } }
 
+        public ObservableCollection<int> UpdatePlot { get; set; }
+
         public ObservableCollection<Sample> Samples { get; set; }
         private Sample _SelectedSample;
         public Sample SelectedSample
@@ -65,8 +67,10 @@ namespace newRBS.ViewModels
 
             Measurements = new ObservableCollection<Measurement>();
 
-            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
-            Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
+            Samples = new ObservableCollection<Sample>(Database.Samples.Where(x => x.SampleName != "(undefined)").Where(y=>y.Material.MaterialName != "(undefined)").ToList());
+
+            UpdatePlot = new ObservableCollection<int>();
+
             //SelectedSample = Samples.FirstOrDefault();
         }
 
@@ -88,9 +92,26 @@ namespace newRBS.ViewModels
             float[] spectrumX = SelectedMeasurement.SpectrumXCal;
             int[] spectrumY = SelectedMeasurement.SpectrumY;
             for (int i = 0; i < spectrumY.Count(); i++)
+            {
                 MeasuredSpectrumData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
+            }
 
-            //plotModel.InvalidatePlot(true);
+            UpdatePlot.Add(1); // Updates the plot
+        }
+
+        private double CalculateAtomicDensity(Layer layer, Element element)
+        {
+            double MassOfMolecule = 0;
+            foreach (Element e in layer.Elements)
+                MassOfMolecule += e.MassNumber * e.StoichiometricFactor;
+
+            double NumberOfMolecules = 1.0 / MassOfMolecule / 1.66053904E-24;
+
+            double NumberOfAtomsInMolecule = layer.Elements.Select(x => x.StoichiometricFactor).ToList().Sum();
+
+            double AtomicDensityOfElement = NumberOfMolecules * element.StoichiometricFactor;
+            Console.WriteLine("AtomicDensityOf "+element.ElementName+" "+AtomicDensityOfElement);
+            return AtomicDensityOfElement;
         }
 
         private void _StartSimulationCommand()
@@ -119,7 +140,7 @@ namespace newRBS.ViewModels
             simpleMeasurement.OdeOutMaxPrec = 1e-10;
 
             double layerStart = 0;
-            Console.WriteLine(SelectedSample.Material.Layers.Count);
+            Console.WriteLine("Material count: " + SelectedSample.Material.Layers.Count);
             for (int i = 0; i < SelectedSample.Material.Layers.Count; i++)
             {
                 Layer layer = SelectedSample.Material.Layers.FirstOrDefault(x => x.LayerIndex == i);
@@ -132,7 +153,8 @@ namespace newRBS.ViewModels
                     newSimpleMaterial.MassNoInitialTarget = (int)element.MassNumber;
                     newSimpleMaterial.LayerBegin = layerStart;
                     newSimpleMaterial.LayerEnd = layerStart + layer.Thickness;
-                    newSimpleMaterial.AtomicDensity = 2.1937e22; // TODO: calculate actual atomic density
+                    //newSimpleMaterial.AtomicDensity = 2.1937e22; // TODO: calculate actual atomic density
+                    newSimpleMaterial.AtomicDensity = CalculateAtomicDensity(layer, element);
                     newSimpleMaterial.QValue = 0.0;
                     newSimpleMaterial.AtomicNoRemainTarget = (int)element.AtomicNumber;
                     newSimpleMaterial.MassNoRemainTarget = (int)element.MassNumber;
@@ -153,12 +175,12 @@ namespace newRBS.ViewModels
             SimulatedSpectrumData.Clear();
             for (int i = 0; i < SelectedMeasurement.NumOfChannels; i++)
             {
-                SimulatedSpectrumData.Add(new AreaData { x1 = i, y1 = resultMatrix[2, i], x2 = i, y2 = 0 });
-                //Console.WriteLine(resultMatrix[2, i]);
+                double x = (double)i * SelectedMeasurement.EnergyCalSlope + SelectedMeasurement.EnergyCalOffset;
+                SimulatedSpectrumData.Add(new AreaData { x1 = x, y1 = resultMatrix[2, i], x2 = x, y2 = 0 });
+                Console.Write(resultMatrix[2, i]+", ");
             }
 
-            MeasuredSpectrumData.Add(new AreaData());
-            MeasuredSpectrumData.RemoveAt(MeasuredSpectrumData.Count() - 1);
+            UpdatePlot.Add(1);
         }
     }
 }

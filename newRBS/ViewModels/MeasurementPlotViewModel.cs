@@ -137,7 +137,7 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0, MinimumRange = 10 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
