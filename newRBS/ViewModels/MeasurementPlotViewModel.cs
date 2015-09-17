@@ -78,6 +78,10 @@ namespace newRBS.ViewModels
         public string SelectedLegendCaption
         { get { return _SelectedLegendCaption; } set { _SelectedLegendCaption = value; RaisePropertyChanged(); UpdateLegend(); } }
 
+        private double _CutOffCountsPercent = 1;
+        public double CutOffCountsPercent
+        { get { return _CutOffCountsPercent; } set { _CutOffCountsPercent = value; RaisePropertyChanged(); UpdateAllPlots(); } }
+
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
@@ -189,14 +193,17 @@ namespace newRBS.ViewModels
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
 
-            // Remove "Counts<3" data points from start/end of the spectra
+            // Remove "Counts<CutOffCounts" data points from start/end of the spectra
             int BorderOffset = 200;
 
+            double CutOffCounts = spectrumY.Max() * CutOffCountsPercent / 100;
+            if (CutOffCounts == 0) CutOffCounts = 1;
+
             int rightBorderIndex = spectrumY.Count();
-            while (spectrumY[rightBorderIndex - 1] < 3 && rightBorderIndex > 2) rightBorderIndex--;
+            while (spectrumY[rightBorderIndex - 1] < CutOffCounts && rightBorderIndex > 2) rightBorderIndex--;
 
             int leftBorderIndex = 0;
-            while (spectrumY[leftBorderIndex] < 3 && leftBorderIndex < spectrumY.Count() - 2) leftBorderIndex++;
+            while (spectrumY[leftBorderIndex] < CutOffCounts && leftBorderIndex < spectrumY.Count() - 2) leftBorderIndex++;
 
             if (rightBorderIndex < 5) rightBorderIndex = spectrumY.Count();
             if (leftBorderIndex > spectrumY.Count() - 5) leftBorderIndex = 0;
@@ -216,12 +223,13 @@ namespace newRBS.ViewModels
                         int XDataWidth = rightBorderIndex - leftBorderIndex;
 
                         int AverageCount = (int)Math.Floor((double)XDataWidth / XPlotWidth / 2);
+                        if (AverageCount == 0) AverageCount = 1;
 
                         int Count = 0;
                         int newY = 0;
                         for (int i = leftBorderIndex; i < rightBorderIndex; i++)
                         {
-                            //Console.WriteLine(AveragedSpectrumXIndex);
+                            //Console.WriteLine(spectrumY[i]);
                             newY += spectrumY[i];
 
                             if (Count < AverageCount-1)
