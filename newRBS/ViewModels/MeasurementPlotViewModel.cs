@@ -145,7 +145,7 @@ namespace newRBS.ViewModels
 
         private void MeasurementToPlot(Measurement measurement)
         {
-            if (MeasurementIDList.Contains(measurement.MeasurementID)) return; 
+            if (MeasurementIDList.Contains(measurement.MeasurementID)) return;
 
             MeasurementIDList.Add(measurement.MeasurementID);
             PlotMeasurement(measurement);
@@ -207,14 +207,35 @@ namespace newRBS.ViewModels
             // Add points to plot
             switch (SelectedDataBindingInterval)
             {
-                case 0: // All points in spectrumX/spectrumY
+                case 0: // Average undistinguishable points in spectrumX/spectrumY
                     {
-                        float y;
+                        var XAxis = plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
+
+                        int XPlotWidth = (int)(XAxis.ScreenMax.X - XAxis.ScreenMin.X);
+
+                        int XDataWidth = rightBorderIndex - leftBorderIndex;
+
+                        int AverageCount = (int)Math.Floor((double)XDataWidth / XPlotWidth / 2);
+
+                        int Count = 0;
+                        int newY = 0;
                         for (int i = leftBorderIndex; i < rightBorderIndex; i++)
                         {
-                            if (spectrumY[i] == 0) y = (float)0.0001; else y = spectrumY[i];
-                            areaSeries.Points.Add(new DataPoint(spectrumX[i], y));
-                            areaSeries.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
+                            //Console.WriteLine(AveragedSpectrumXIndex);
+                            newY += spectrumY[i];
+
+                            if (Count < AverageCount-1)
+                            {
+                                Count++;
+                            }
+                            else
+                            {
+                                if (newY == 0) newY = 1;
+                                areaSeries.Points.Add(new DataPoint(spectrumX[i], (double)newY / AverageCount));
+                                areaSeries.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
+                                Count = 0;
+                                newY = 0;
+                            }    
                         }
                         break;
                     }
@@ -251,7 +272,7 @@ namespace newRBS.ViewModels
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
-            
+
             Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {
