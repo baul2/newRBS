@@ -231,7 +231,10 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _SimulateSpectrumCommand()
         {
-            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 1) { MessageBox.Show("Select exactly one measurement", "Error"); return; }
+
+            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel(selectedMeasurementIDs.FirstOrDefault());
             Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
             simulateSpectrumView.DataContext = simulateSpectrumViewModel;
             simulateSpectrumView.ShowDialog();

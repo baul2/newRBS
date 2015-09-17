@@ -33,7 +33,7 @@
             </MenuItem>
             <MenuItem Header="Analysis">
                 <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
-                <MenuItem Header="Simulata Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
+                <MenuItem Header="Simulate Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
             </MenuItem>
             <MenuItem Header="Manage">
                 <MenuItem Header="Materials" Command="{Binding MaterialEditorCommand}"/>
