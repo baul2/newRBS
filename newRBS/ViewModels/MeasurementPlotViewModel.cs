@@ -86,8 +86,6 @@ namespace newRBS.ViewModels
         public bool ShowSimulatedSpectra
         { get { return _ShowSimulatedSpectra; } set { _ShowSimulatedSpectra = value; RaisePropertyChanged(); UpdateAllPlots(); } }
 
-        public PlotController myController { get; set; }
-
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
@@ -151,10 +149,6 @@ namespace newRBS.ViewModels
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
-
-            myController = new PlotController();
-            //myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
-            //myController.BindKeyDown(OxyKey., PlotCommands.Reset);
         }
 
         private void MeasurementToPlot(Measurement measurement)

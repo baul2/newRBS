@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.Views"
+             xmlns:global="clr-namespace:newRBS"
              xmlns:oxy="http://oxyplot.org/wpf"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
@@ -58,8 +59,8 @@
             </StackPanel>
         </Border>
         <Border DockPanel.Dock="Top">
-            <TextBlock TextAlignment="Center" Text="Hint: Use left button to mark, middle button to zoom and right button to pan."/>
+            <TextBlock TextAlignment="Center" Text="Hint: Use left button to zoom, middle button to mark and right button to pan."/>
         </Border>
-        <oxy:PlotView Model="{Binding plotModel}" Controller="{Binding myController}" Margin="10"/>
+        <oxy:PlotView Model="{Binding plotModel}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
     </DockPanel>
 </UserControl>

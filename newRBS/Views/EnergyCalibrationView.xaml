@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:newRBS.ViewModels"
+             xmlns:global="clr-namespace:newRBS"
              xmlns:viewmodelutils="clr-namespace:newRBS.ViewModels.Utils"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:oxy="http://oxyplot.org/wpf"
@@ -101,6 +102,6 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <oxy:PlotView Model="{Binding SelectedMeasurementsPlot}" Margin="10" Grid.Row="1"/>
+        <oxy:PlotView Model="{Binding SelectedMeasurementsPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10" Grid.Row="1"/>
     </DockPanel>
 </Window>

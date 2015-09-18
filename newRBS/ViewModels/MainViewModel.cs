@@ -21,6 +21,7 @@ using Microsoft.Win32;
 using System.IO;
 using newRBS.Database;
 using System.Reflection;
+using OxyPlot;
 
 namespace newRBS.ViewModels
 {
@@ -83,6 +84,11 @@ namespace newRBS.ViewModels
 
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
             CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
+
+            MyGlobals.myController = new PlotController();
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Middle, PlotCommands.PointsOnlyTrack);
         }
 
         /// <summary>
