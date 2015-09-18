@@ -248,7 +248,7 @@ namespace newRBS.ViewModels
 
                 WriteFileStream.Close();
 
-                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Waveform saved to file");
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform saved to file");
             }
         }
 
@@ -275,7 +275,7 @@ namespace newRBS.ViewModels
                 SerializerObj.Serialize(WriteFileStream, channelParams);
                 WriteFileStream.Close();
 
-                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Channel configuration saved to file");
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration saved to file");
             }
         }
 
@@ -294,7 +294,7 @@ namespace newRBS.ViewModels
                 channelParams = (Models.ChannelParams)SerializerObj.Deserialize(ReadFileStream);
                 ReadFileStream.Close();
 
-                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Channel configuration read from file");
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration read from file");
             }
         }
     }

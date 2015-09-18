@@ -24,9 +24,6 @@ namespace newRBS.Models
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public double[] EnergyCalOffset = new double[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        public double[] EnergyCalSlope = new double[8] { 1, 1, 1, 1, 1, 1, 1, 1 };
-
         public int ChopperStartChannel = 1000;
         public int ChopperEndChannel = 2000;
 
@@ -76,10 +73,20 @@ namespace newRBS.Models
                         cAEN_x730.StartAcquisition(7); // Start chopper
                     }
 
+                    var LastMeasurement = Database.Measurements.Where(x => x.Channel == channel).OrderByDescending(y => y.StartTime).FirstOrDefault();
+                    if (LastMeasurement != null)
+                    {
+                        NewMeasurement.EnergyCalOffset = LastMeasurement.EnergyCalOffset;
+                        NewMeasurement.EnergyCalSlope = LastMeasurement.EnergyCalSlope;
+                    }
+                    else
+                    {
+                        NewMeasurement.EnergyCalOffset = 0;
+                        NewMeasurement.EnergyCalSlope = 0.2;
+                    }
+
                     NewMeasurement.MeasurementID = 0;
                     NewMeasurement.Channel = channel;
-                    NewMeasurement.EnergyCalOffset = EnergyCalOffset[channel];//ToDo: Find latest value in database!
-                    NewMeasurement.EnergyCalSlope = EnergyCalSlope[channel];//ToDo: Find latest value in database!
                     NewMeasurement.StartTime = DateTime.Now;
                     NewMeasurement.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
                     NewMeasurement.CurrentDuration = new DateTime(2000, 01, 01);
@@ -141,17 +148,15 @@ namespace newRBS.Models
                     string path = "Backup/" + DateTime.Now.ToString("yyyy'/'MM'/'dd'/'");
                     string user = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
                     string file = DateTime.Now.ToString("HH-mm-ss") + "_User-" + user + "_MeasurementID-" + MeasurementToStop.MeasurementID + ".dat";
-                    Console.WriteLine(path + file);
+
                     DirectoryInfo di = Directory.CreateDirectory(path);
+
                     DatabaseUtils.ExportMeasurements(new List<int> { MeasurementToStop.MeasurementID }, path + file);
 
                     if (MeasurementToStop.StopType == "ChopperCounts")
                         cAEN_x730.StopAcquisition(7);
 
-                    Sample temp = MeasurementToStop.Sample; // To load the sample before the scope of Database ends
-
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToStop.MeasurementID + " stopped (channel " + MeasurementToStop.Channel + ")");
-                    //if (EventMeasurementFinished != null) EventMeasurementFinished(MeasurementToStop);
                 }
             }
         }
@@ -182,8 +187,7 @@ namespace newRBS.Models
                 MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
                 MeasurementToUpdate.CurrentCounts = sum;
                 MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
-                //Console.WriteLine(MeasurementToUpdate.CurrentCharge);
-                MeasurementToUpdate.CurrentCharge = 0;
+
                 if (MeasurementToUpdate.StopType == "ChopperCounts")
                 {
                     MeasurementToUpdate.CurrentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum();

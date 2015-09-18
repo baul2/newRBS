@@ -78,6 +78,16 @@ namespace newRBS.ViewModels
         public string SelectedLegendCaption
         { get { return _SelectedLegendCaption; } set { _SelectedLegendCaption = value; RaisePropertyChanged(); UpdateLegend(); } }
 
+        private double _CutOffCountsPercent = 1;
+        public double CutOffCountsPercent
+        { get { return _CutOffCountsPercent; } set { _CutOffCountsPercent = value; RaisePropertyChanged(); UpdateAllPlots(); } }
+
+        private bool _ShowSimulatedSpectra = true;
+        public bool ShowSimulatedSpectra
+        { get { return _ShowSimulatedSpectra; } set { _ShowSimulatedSpectra = value; RaisePropertyChanged(); UpdateAllPlots(); } }
+
+        public PlotController myController { get; set; }
+
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
@@ -137,15 +147,19 @@ namespace newRBS.ViewModels
             plotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0, MinimumRange = 10 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
+
+            myController = new PlotController();
+            //myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
+            //myController.BindKeyDown(OxyKey., PlotCommands.Reset);
         }
 
         private void MeasurementToPlot(Measurement measurement)
         {
-            if (MeasurementIDList.Contains(measurement.MeasurementID)) return; 
+            if (MeasurementIDList.Contains(measurement.MeasurementID)) return;
 
             MeasurementIDList.Add(measurement.MeasurementID);
             PlotMeasurement(measurement);
@@ -155,10 +169,19 @@ namespace newRBS.ViewModels
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
-            Series delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
+            var delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
                 plotModel.Series.Remove(delSerie);
+
+                plotModel.InvalidatePlot(true);
+            }
+
+            delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
+            if (delSerie != null)
+            {
+                plotModel.Series.Remove(delSerie);
+
                 plotModel.InvalidatePlot(true);
             }
         }
@@ -175,7 +198,7 @@ namespace newRBS.ViewModels
             if (SelectedDataBindingInterval > 0 && measurement.EnergyCalSlope > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
 
-            var areaSeries = new AreaSeries
+            var MeassuredPlot = new AreaSeries
             {
                 Tag = measurement,
                 StrokeThickness = 2,
@@ -186,17 +209,37 @@ namespace newRBS.ViewModels
                 Smooth = false,
             };
 
+            var SimulatedPlot = new AreaSeries
+            {
+                Tag = measurement,
+                StrokeThickness = 2,
+                MarkerSize = 3,
+                Color = LineColors[measurement.MeasurementID % LineColors.Count],
+                CanTrackerInterpolatePoints = false,
+                Title = GetMeasurementTitle(measurement) + " (Sim.)",
+                Smooth = false,
+            };
+
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
+            int[] spectrumYCalculated = measurement.SpectrumYCalculated;
 
-            // Remove "Counts<3" data points from start/end of the spectra
+            if (spectrumYCalculated == null || ShowSimulatedSpectra == false)
+            {
+                spectrumYCalculated = new int[measurement.NumOfChannels];
+            }
+
+            // Remove "Counts<CutOffCounts" data points from start/end of the spectra
             int BorderOffset = 200;
 
+            double CutOffCounts = spectrumY.Max() * CutOffCountsPercent / 100;
+            if (CutOffCounts == 0) CutOffCounts = 1;
+
             int rightBorderIndex = spectrumY.Count();
-            while (spectrumY[rightBorderIndex - 1] < 3 && rightBorderIndex > 2) rightBorderIndex--;
+            while (spectrumY[rightBorderIndex - 1] < CutOffCounts && rightBorderIndex > 2) rightBorderIndex--;
 
             int leftBorderIndex = 0;
-            while (spectrumY[leftBorderIndex] < 3 && leftBorderIndex < spectrumY.Count() - 2) leftBorderIndex++;
+            while (spectrumY[leftBorderIndex] < CutOffCounts && leftBorderIndex < spectrumY.Count() - 2) leftBorderIndex++;
 
             if (rightBorderIndex < 5) rightBorderIndex = spectrumY.Count();
             if (leftBorderIndex > spectrumY.Count() - 5) leftBorderIndex = 0;
@@ -207,20 +250,51 @@ namespace newRBS.ViewModels
             // Add points to plot
             switch (SelectedDataBindingInterval)
             {
-                case 0: // All points in spectrumX/spectrumY
+                case 0: // Average undistinguishable points in spectrumX/spectrumY
                     {
-                        float y;
+                        var XAxis = plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
+
+                        int XPlotWidth = (int)(XAxis.ScreenMax.X - XAxis.ScreenMin.X);
+
+                        int XDataWidth = rightBorderIndex - leftBorderIndex;
+
+                        int AverageCount = (int)Math.Floor((double)XDataWidth / XPlotWidth / 2);
+                        if (AverageCount == 0) AverageCount = 1;
+
+                        int Count = 0;
+                        int newY = 0;
+                        int newYCalculated = 0;
+
                         for (int i = leftBorderIndex; i < rightBorderIndex; i++)
                         {
-                            if (spectrumY[i] == 0) y = (float)0.0001; else y = spectrumY[i];
-                            areaSeries.Points.Add(new DataPoint(spectrumX[i], y));
-                            areaSeries.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
+                            newY += spectrumY[i];
+                            newYCalculated = +spectrumYCalculated[i];
+
+                            if (Count < AverageCount - 1)
+                            {
+                                Count++;
+                            }
+                            else
+                            {
+                                if (newY == 0) newY = 1;
+                                if (newYCalculated == 0) newYCalculated = 1;
+
+                                MeassuredPlot.Points.Add(new DataPoint(spectrumX[i], (double)newY / AverageCount));
+                                MeassuredPlot.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
+
+                                SimulatedPlot.Points.Add(new DataPoint(spectrumX[i], (double)newYCalculated / AverageCount));
+                                SimulatedPlot.Points2.Add(new DataPoint(spectrumX[i], (float)0.0001));
+
+                                Count = 0;
+                                newY = 0;
+                                newYCalculated = 0;
+                            }
                         }
                         break;
                     }
                 default: // Bind points inside SelectedDataBinding intervall
                     {
-                        float x, y = 0;
+                        float x, y = 0, yCalculated = 0;
                         float intervalStart = SelectedDataBindingInterval * ((int)(spectrumX[leftBorderIndex] / SelectedDataBindingInterval) + (float)0.5); ;
                         int numOfPoints = 0;
 
@@ -229,21 +303,31 @@ namespace newRBS.ViewModels
                             if (spectrumX[i] - intervalStart > SelectedDataBindingInterval)
                             {
                                 x = intervalStart + (float)SelectedDataBindingInterval / 2;
+
                                 if (y == 0) y = (float)0.0001;
-                                areaSeries.Points.Add(new DataPoint(x, y / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
-                                areaSeries.Points2.Add(new DataPoint(x, (float)0.0001));
+                                if (yCalculated == 0) yCalculated = (float)0.0001;
+
+                                MeassuredPlot.Points.Add(new DataPoint(x, y / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
+                                MeassuredPlot.Points2.Add(new DataPoint(x, (float)0.0001));
+
+                                SimulatedPlot.Points.Add(new DataPoint(x, yCalculated / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
+                                SimulatedPlot.Points2.Add(new DataPoint(x, (float)0.0001));
 
                                 y = 0;
+                                yCalculated = 0;
                                 numOfPoints = 0;
                                 intervalStart += SelectedDataBindingInterval;
                             }
                             y += spectrumY[i];
+                            yCalculated += spectrumYCalculated[i];
                             numOfPoints++;
                         }
                         break;
                     }
             }
-            plotModel.Series.Add(areaSeries);
+            plotModel.Series.Add(MeassuredPlot);
+            if (measurement.SpectrumYCalculated != null && ShowSimulatedSpectra == true)
+                plotModel.Series.Add(SimulatedPlot);
             plotModel.InvalidatePlot(true);
         }
 
@@ -251,7 +335,7 @@ namespace newRBS.ViewModels
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
-            
+
             Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (updateSerie != null)
             {

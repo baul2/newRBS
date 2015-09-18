@@ -138,7 +138,7 @@ namespace newRBS.ViewModels
         {
             Database.SubmitChanges();
 
-            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Saved samples changes in the database");
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Saved samples changes in the database");
 
             DialogResult = false;
         }

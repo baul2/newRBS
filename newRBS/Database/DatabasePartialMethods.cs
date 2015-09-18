@@ -190,6 +190,23 @@ namespace newRBS.Database
             }
         }
 
+        public int[] SpectrumYCalculated
+        {
+            get
+            {
+                if (SpectrumYCalculatedByte == null) return null;
+                int[] intArray = new int[SpectrumYCalculatedByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYCalculatedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                return intArray;
+            }
+            set
+            {
+                byte[] byteArray = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
+                SpectrumYCalculatedByte = byteArray;
+            }
+        }
+
         /// <summary>
         /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/> and <see cref="Measurement.EnergyCalSlope"/>.
         /// </summary>

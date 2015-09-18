@@ -25,7 +25,7 @@ namespace newRBS.Models
         [PreferredConstructor]
         public Coulombo()
         {
-            Init("COM3", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
+            Init("COM4", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
         }
 
         public Coulombo(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
@@ -37,21 +37,33 @@ namespace newRBS.Models
         {
             //"COM3,9600,None,8,Two,94"
             IMess = (char)int.Parse(CoulomboID, System.Globalization.NumberStyles.HexNumber);
+            //IMess = (char)148;
 
             SPort = new SerialPort(PortName, BaudRate, parity, DataBits, stopBits);
             SPort.ReadBufferSize = 100;
             SPort.WriteBufferSize = 100;
             SPort.Encoding = Encoding.GetEncoding(28591);
 
-            SPort.Open();
-            if (Version() == "Error")
-                trace.Value.TraceEvent(TraceEventType.Error, 0, "Coulombo couldn't be opend");
-            else
+            try
+            {
+                SPort.Open();
+
+                if (Version() == "Error")
+                    throw new System.IO.IOException();
+
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Coulombo opend");
+            }
+            catch (System.IO.IOException e)
+            {
+                trace.Value.TraceEvent(TraceEventType.Error, 0, "Coulombo couldn't be opend");
+            }
+
         }
 
         private string Command(string text)
         {
+            if (SPort.IsOpen == false) return "Error";
+
             string indata;
 
             indata = SPort.ReadExisting();

@@ -124,7 +124,7 @@ namespace newRBS.ViewModels
             Database.Measurements.InsertOnSubmit(selectedMeasurement);
             Database.SubmitChanges();
 
-            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Inserted current imported measurement into the database");
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Inserted current imported measurement into the database");
 
             selectedMeasurement = null;
 
@@ -146,7 +146,7 @@ namespace newRBS.ViewModels
             Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
             Database.SubmitChanges();
 
-            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Inserted all imported measurement into the database");
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Inserted all imported measurement into the database");
 
             DialogResult = false;
             _DialogResult = null;

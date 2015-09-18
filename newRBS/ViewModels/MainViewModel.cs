@@ -40,12 +40,14 @@ namespace newRBS.ViewModels
 
         public ICommand SaveMeasurementPlotCommand { get; set; }
 
-        public ICommand MaterialEditorCommand { get; set; }
-        public ICommand SampleEditorCommand { get; set; }
-
         public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
+        public ICommand CalculateCommand { get; set; }
+
+        public ICommand MaterialEditorCommand { get; set; }
+        public ICommand SampleEditorCommand { get; set; }
         public ICommand UserEditorCommand { get; set; }
+
 
         public ICommand LogOutCommand { get; set; }
         public ICommand CloseProgramCommand { get; set; }
@@ -77,6 +79,7 @@ namespace newRBS.ViewModels
 
             EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
+            CalculateCommand = new RelayCommand(() => _CalculateCommand(), () => true);
 
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
             CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
@@ -231,10 +234,24 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _SimulateSpectrumCommand()
         {
-            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 1) { MessageBox.Show("Select exactly one measurement", "Error"); return; }
+
+            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel(selectedMeasurementIDs.FirstOrDefault());
             Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
             simulateSpectrumView.DataContext = simulateSpectrumViewModel;
             simulateSpectrumView.ShowDialog();
+        }
+
+        public void _CalculateCommand()
+        {
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 2) { MessageBox.Show("Select exactly two measurements", "Error"); return; }
+
+            CalculateViewModel calculateViewModel = new CalculateViewModel(selectedMeasurementIDs);
+            Views.CalculateView calculateView = new Views.CalculateView();
+            calculateView.DataContext = calculateViewModel;
+            calculateView.ShowDialog();
         }
 
         /// <summary>
