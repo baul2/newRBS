@@ -178,6 +178,7 @@
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
+    <Compile Include="ViewModels\CalculateViewModel.cs" />
     <Compile Include="ViewModels\EnergyCalibrationViewModel.cs" />
     <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
     <Compile Include="ViewModels\MeasurementImportViewModel.cs" />
@@ -201,6 +202,9 @@
     <Compile Include="ViewModels\Utils\NameValueClass.cs" />
     <Compile Include="ViewModels\Utils\SelectableMeasurement.cs" />
     <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
+    <Compile Include="Views\CalculateView.xaml.cs">
+      <DependentUpon>CalculateView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\EnergyCalibrationView.xaml.cs">
       <DependentUpon>EnergyCalibrationView.xaml</DependentUpon>
     </Compile>
@@ -256,6 +260,10 @@
     <Compile Include="Views\Utils\ProjectSelector.xaml.cs">
       <DependentUpon>ProjectSelector.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\CalculateView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\EnergyCalibrationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

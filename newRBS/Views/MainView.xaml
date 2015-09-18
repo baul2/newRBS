@@ -34,6 +34,7 @@
             <MenuItem Header="Analysis">
                 <MenuItem Header="Energy Calibration" Command="{Binding EnergyCalCommand}"/>
                 <MenuItem Header="Simulate Spectrum" Command="{Binding SimulateSpectrumCommand}"/>
+                <MenuItem Header="Calculate Something" Command="{Binding CalculateCommand}"/>
             </MenuItem>
             <MenuItem Header="Manage">
                 <MenuItem Header="Materials" Command="{Binding MaterialEditorCommand}"/>
