@@ -93,10 +93,10 @@ namespace newRBS.ViewModels
             simpleMeasurement.ConstEloss = 1;
             simpleMeasurement.ChannelMin = 0;
             simpleMeasurement.ChannelMax = (uint)(SelectedMeasurement.NumOfChannels - 1);
-            simpleMeasurement.CaliEnergyPerChannel = SelectedMeasurement.EnergyCalSlope;
+            simpleMeasurement.CaliEnergyPerChannel = SelectedMeasurement.EnergyCalLinear;
             simpleMeasurement.CaliEnergyPerChannelSquare = 0.0;
             simpleMeasurement.CaliEnergyPerChannelCube = 0.0;
-            simpleMeasurement.CaliEnergyOffset = -SelectedMeasurement.EnergyCalOffset / SelectedMeasurement.EnergyCalSlope; // My E-Cal: ECal=Offset+x*Slope; Emanuels E-Cal: ECal=(x-Offset)*Slope
+            simpleMeasurement.CaliEnergyOffset = -SelectedMeasurement.EnergyCalOffset / SelectedMeasurement.EnergyCalLinear; // My E-Cal: ECal=Offset+x*Slope; Emanuels E-Cal: ECal=(x-Offset)*Slope
             simpleMeasurement.OdeInInitPrec = 1e-8;
             simpleMeasurement.OdeInMaxPrec = 1e-10;
             simpleMeasurement.OdeOutInitPrec = 1e-8;

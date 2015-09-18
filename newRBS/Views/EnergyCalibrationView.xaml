@@ -92,8 +92,11 @@
                         <Label Content="Offset:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
                         <TextBox Text="{Binding ECalOffset}" Grid.Column="1" Grid.Row="0" Margin="3" MinWidth="80"/>
 
-                        <Label Content="Slope:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                        <TextBox Text="{Binding ECalSlope}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+                        <Label Content="Linear:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                        <TextBox Text="{Binding ECalLinear}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+
+                        <Label Content="Quadratic:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                        <TextBox Text="{Binding ECalQuadratic}" Grid.Column="1" Grid.Row="2" Margin="3"/>
                     </Grid>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="Save Energy Calibration" Command="{Binding SaveEnergyCalCommand}" Margin="3" Padding="3"/>

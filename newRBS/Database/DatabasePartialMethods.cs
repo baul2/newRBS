@@ -208,7 +208,7 @@ namespace newRBS.Database
         }
 
         /// <summary>
-        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/> and <see cref="Measurement.EnergyCalSlope"/>.
+        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/>, <see cref="Measurement.EnergyCalLinear"/> and <see cref="Measurement.EnergyCalQuadratic"/>.
         /// </summary>
         public float[] SpectrumXCal
         {
@@ -216,7 +216,7 @@ namespace newRBS.Database
             {
                 float[] spectrumXCal = new float[NumOfChannels];
                 for (int i = 0; i < NumOfChannels; i++)
-                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalSlope;
+                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalLinear + i*i*(float)EnergyCalQuadratic;
                 return spectrumXCal;
             }
         }

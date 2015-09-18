@@ -80,8 +80,11 @@ namespace newRBS.ViewModels
         private double? _ECalOffset;
         public double? ECalOffset { get { return _ECalOffset; } set { _ECalOffset = value; RaisePropertyChanged(); } }
 
-        private double? _ECalSlope;
-        public double? ECalSlope { get { return _ECalSlope; } set { _ECalSlope = value; RaisePropertyChanged(); } }
+        private double? _ECalLinear;
+        public double? ECalLinear { get { return _ECalLinear; } set { _ECalLinear = value; RaisePropertyChanged(); } }
+
+        private double? _ECalQuadratic;
+        public double? ECalQuadratic { get { return _ECalQuadratic; } set { _ECalQuadratic = value; RaisePropertyChanged(); } }
 
         /// <summary>
         /// Constructor of the class. Sets up the commands, collections and selected items of the view.
@@ -217,26 +220,50 @@ namespace newRBS.ViewModels
         /// </summary>
         private void _CalculateEnergyCalCommand()
         {
-            if (EnergyCalList.Count() < 2)
-            { MessageBox.Show("Add at least two points to the list!", "Error"); return; }
+            if (EnergyCalList.Count() < 1)
+            { MessageBox.Show("Add at least one points to the list!", "Error"); return; }
 
             Measurement m = selectedMeasurements[0];
 
             foreach (EnergyCalListItem e in EnergyCalList)
                 e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * KineFak(ElementData.AtomicMass[m.IncomingIonAtomicNumber - 1], e.Element.AtomicMass, m.OutcomingIonAngle), 1);
 
-            Tuple<double, double> result = Fit.Line(EnergyCalList.Select(x => (double)x.Channel).ToArray(), EnergyCalList.Select(x => (double)x.CalibratedEnergy).ToArray());
+            ECalOffset = 0;
+            ECalLinear = 0;
+            ECalQuadratic = 0;
 
-            ECalOffset = Math.Round(result.Item1,1);
-            ECalSlope = Math.Round(result.Item2,4);
+            switch (EnergyCalList.Count())
+            {
+                case 1: // One Point
+                    {
+                        ECalLinear = Math.Round((double)EnergyCalList.Select(x => x.CalibratedEnergy).FirstOrDefault() / EnergyCalList.Select(x => x.Channel).FirstOrDefault(),4);
+                        break;
+                    }
+                case 2: // Linear Fit
+                    {
+                        Tuple<double, double> result = Fit.Line(EnergyCalList.Select(x => (double)x.Channel).ToArray(), EnergyCalList.Select(x => (double)x.CalibratedEnergy).ToArray());
+                        ECalOffset = Math.Round(result.Item1, 1);
+                        ECalLinear = Math.Round(result.Item2, 4);
+                        break;
+                    }
+                default: // Quadratic Fit
+                    {
+                        double[] result = Fit.Polynomial(EnergyCalList.Select(x => (double)x.Channel).ToArray(), EnergyCalList.Select(x => (double)x.CalibratedEnergy).ToArray(), 2);
+                        ECalOffset = Math.Round(result[0], 1);
+                        ECalLinear = Math.Round(result[1], 4);
+                        ECalQuadratic = Math.Round(result[2], 4);
+                        break;
+                    }
+            }
         }
 
         /// <summary>
-        /// Function that saves the values of <see cref="ECalOffset"/> and <see cref="ECalSlope"/> in the selected measurements and closes the dialog.
+        /// Function that saves the values of <see cref="ECalOffset"/> and <see cref="ECalLinear"/> in the selected measurements and closes the dialog.
         /// </summary>
         private void _SaveEnergyCalCommand()
         {
-            if (ECalOffset == null || ECalSlope == null) return;
+            if (ECalOffset == null || ECalLinear == null || ECalQuadratic == null) return;
+            if (ECalOffset == 0 && ECalLinear == 0 && ECalQuadratic == 0) return;
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -244,7 +271,8 @@ namespace newRBS.ViewModels
                 foreach (Measurement measurement in m)
                 {
                     measurement.EnergyCalOffset = (double)ECalOffset;
-                    measurement.EnergyCalSlope = (double)ECalSlope;
+                    measurement.EnergyCalLinear = (double)ECalLinear;
+                    measurement.EnergyCalQuadratic = (double)ECalQuadratic;
                 }
                 Database.SubmitChanges();
             }

@@ -189,7 +189,7 @@ namespace newRBS.ViewModels
 
         private void PlotMeasurement(Measurement measurement)
         {
-            if (SelectedDataBindingInterval > 0 && measurement.EnergyCalSlope > SelectedDataBindingInterval)
+            if (SelectedDataBindingInterval > 0 && measurement.EnergyCalLinear > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
 
             var MeassuredPlot = new AreaSeries
@@ -301,10 +301,10 @@ namespace newRBS.ViewModels
                                 if (y == 0) y = (float)0.0001;
                                 if (yCalculated == 0) yCalculated = (float)0.0001;
 
-                                MeassuredPlot.Points.Add(new DataPoint(x, y / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
+                                MeassuredPlot.Points.Add(new DataPoint(x, y / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalLinear)));
                                 MeassuredPlot.Points2.Add(new DataPoint(x, (float)0.0001));
 
-                                SimulatedPlot.Points.Add(new DataPoint(x, yCalculated / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalSlope)));
+                                SimulatedPlot.Points.Add(new DataPoint(x, yCalculated / numOfPoints * (SelectedDataBindingInterval / measurement.EnergyCalLinear)));
                                 SimulatedPlot.Points2.Add(new DataPoint(x, (float)0.0001));
 
                                 y = 0;

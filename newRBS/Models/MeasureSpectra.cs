@@ -77,12 +77,12 @@ namespace newRBS.Models
                     if (LastMeasurement != null)
                     {
                         NewMeasurement.EnergyCalOffset = LastMeasurement.EnergyCalOffset;
-                        NewMeasurement.EnergyCalSlope = LastMeasurement.EnergyCalSlope;
+                        NewMeasurement.EnergyCalLinear = LastMeasurement.EnergyCalLinear;
                     }
                     else
                     {
                         NewMeasurement.EnergyCalOffset = 0;
-                        NewMeasurement.EnergyCalSlope = 0.2;
+                        NewMeasurement.EnergyCalLinear = 0.2;
                     }
 
                     NewMeasurement.MeasurementID = 0;

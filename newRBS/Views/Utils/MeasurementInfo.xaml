@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:newRBS.Views.Utils"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="500" Background="White">
+             d:DesignHeight="400" d:DesignWidth="700" Background="White">
     <GroupBox Header="Measurement properties">
         <Grid HorizontalAlignment="Center">
             <Grid.RowDefinitions>
@@ -23,10 +23,12 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Label Content="Name:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="0"/>
@@ -57,26 +59,27 @@
 
             <Label Content="Start Time:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="6"/>
             <xctk:DateTimePicker Value="{Binding Measurement.StartTime, Mode=TwoWay}" Format="Custom" FormatString="yyyy-MM-dd HH:mm" Margin="3" Grid.Column="1" Grid.Row="6" />
-
-            <Label Content="Current Duration:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="7"/>
-            <TextBox Text="{Binding Measurement.CurrentDuration, Mode=OneWay, StringFormat='{}{0:HH:mm:ss}'}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="7"/>
-            <Label Content="Current Charge:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="7"/>
-            <TextBox Text="{Binding Measurement.CurrentCharge, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7"/>
-
-            <Label Content="Current Counts:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="8"/>
-            <TextBox Text="{Binding Measurement.CurrentCounts, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="8"/>
-            <Label Content="Current Chopper Counts:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="8"/>
-            <TextBox Text="{Binding Measurement.CurrentChopperCounts, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="8"/>
+            <Label Content="Current Duration:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="6"/>
+            <TextBox Text="{Binding Measurement.CurrentDuration, Mode=OneWay, StringFormat='{}{0:HH:mm:ss}'}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="6"/>
+            
+            <Label Content="Current Charge:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="7"/>
+            <TextBox Text="{Binding Measurement.CurrentCharge, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="7"/>
+            <Label Content="Current Counts:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="7"/>
+            <TextBox Text="{Binding Measurement.CurrentCounts, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7"/>
+            <Label Content="Current Ch. Counts:" HorizontalAlignment="Right" Margin="3" Grid.Column="4" Grid.Row="7"/>
+            <TextBox Text="{Binding Measurement.CurrentChopperCounts, Mode=OneWay}" IsEnabled="False" VerticalContentAlignment="Center" Margin="3" MinWidth="80" Grid.Column="5" Grid.Row="7"/>
 
             <Label Content="Stop Type:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="9"/>
             <ComboBox ItemsSource="{Binding StopTypes}" SelectedItem="{Binding Measurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="9" />
             <Label Content="Stop Value:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="9"/>
             <TextBox Text="{Binding Measurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="9" />
 
-            <Label Content="ECal Offset:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="10"/>
+            <Label Content="Calibration Offset:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="10"/>
             <TextBox Text="{Binding Measurement.EnergyCalOffset, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="10" />
-            <Label Content="ECal Slope:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="10"/>
-            <TextBox Text="{Binding Measurement.EnergyCalSlope, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="10" />
+            <Label Content="Calibration Linear:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="10"/>
+            <TextBox Text="{Binding Measurement.EnergyCalLinear, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="10" />
+            <Label Content="Calibration Quadratic:" HorizontalAlignment="Right" Margin="3" Grid.Column="4" Grid.Row="10"/>
+            <TextBox Text="{Binding Measurement.EnergyCalQuadratic, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="5" Grid.Row="10" />
         </Grid>
     </GroupBox>
 </UserControl>

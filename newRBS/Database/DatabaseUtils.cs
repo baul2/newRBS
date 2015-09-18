@@ -196,8 +196,8 @@ namespace newRBS.Database
                                 strScatteringAngle += "\t" + measurement.OutcomingIonAngle.ToString(point);
                                 strIncidentAngle += "\t 0.00";
                                 strExitAngle += "\t" + (180 - measurement.OutcomingIonAngle).ToString(point);
-                                strEnergyChannel += "\t" + measurement.EnergyCalSlope.ToString(point);
-                                strOffset += "\t" + (-measurement.EnergyCalOffset/measurement.EnergyCalSlope).ToString(point);
+                                strEnergyChannel += "\t" + measurement.EnergyCalLinear.ToString(point);
+                                strOffset += "\t" + (-measurement.EnergyCalOffset/measurement.EnergyCalLinear).ToString(point);
                                 strSolidAngle += "\t" + measurement.SolidAngle.ToString(point);
                                 strCharge += "\t" + measurement.CurrentCharge.ToString(point);
                                 strRealTime += "\t" + (measurement.CurrentDuration - new DateTime(2000, 01, 01)).TotalSeconds.ToString(point);
@@ -328,9 +328,9 @@ namespace newRBS.Database
                                         case "Exit angle":
                                             { break; }
                                         case "Energy / Channel":
-                                            { newMeasurements[i].EnergyCalSlope = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].EnergyCalLinear = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Offset":
-                                            { newMeasurements[i].EnergyCalOffset = - newMeasurements[i].EnergyCalSlope* Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].EnergyCalOffset = - newMeasurements[i].EnergyCalLinear* Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Solid angle":
                                             { newMeasurements[i].SolidAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Charge":
@@ -359,6 +359,7 @@ namespace newRBS.Database
                                 newMeasurements[i].StopType = "Charge (µC)";
                                 newMeasurements[i].Chamber = "(undefined)";
                                 newMeasurements[i].Progress = 1;
+                                newMeasurements[i].EnergyCalQuadratic = 0;
                             }
                         }
                         trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements loaded from .dat file");

@@ -45,12 +45,12 @@ namespace newRBS.Database
     partial void InsertMeasurement_Project(Measurement_Project instance);
     partial void UpdateMeasurement_Project(Measurement_Project instance);
     partial void DeleteMeasurement_Project(Measurement_Project instance);
-    partial void InsertMeasurement(Measurement instance);
-    partial void UpdateMeasurement(Measurement instance);
-    partial void DeleteMeasurement(Measurement instance);
     partial void InsertProject(Project instance);
     partial void UpdateProject(Project instance);
     partial void DeleteProject(Project instance);
+    partial void InsertMeasurement(Measurement instance);
+    partial void UpdateMeasurement(Measurement instance);
+    partial void DeleteMeasurement(Measurement instance);
     #endregion
 		
 		public DatabaseDataContext() : 
@@ -123,19 +123,19 @@ namespace newRBS.Database
 			}
 		}
 		
-		public System.Data.Linq.Table<Measurement> Measurements
-		{
-			get
-			{
-				return this.GetTable<Measurement>();
-			}
-		}
-		
 		public System.Data.Linq.Table<Project> Projects
 		{
 			get
 			{
 				return this.GetTable<Project>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Measurement> Measurements
+		{
+			get
+			{
+				return this.GetTable<Measurement>();
 			}
 		}
 	}
@@ -1040,9 +1040,9 @@ namespace newRBS.Database
 		
 		private int _ProjectID;
 		
-		private EntityRef<Measurement> _Measurement;
-		
 		private EntityRef<Project> _Project;
+		
+		private EntityRef<Measurement> _Measurement;
 		
     #region Definitionen der Erweiterungsmethoden
     partial void OnLoaded();
@@ -1058,8 +1058,8 @@ namespace newRBS.Database
 		
 		public Measurement_Project()
 		{
-			this._Measurement = default(EntityRef<Measurement>);
 			this._Project = default(EntityRef<Project>);
+			this._Measurement = default(EntityRef<Measurement>);
 			OnCreated();
 		}
 		
@@ -1131,40 +1131,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Measurement_Measurement_Project", Storage="_Measurement", ThisKey="MeasurementID", OtherKey="MeasurementID", IsForeignKey=true)]
-		public Measurement Measurement
-		{
-			get
-			{
-				return this._Measurement.Entity;
-			}
-			set
-			{
-				Measurement previousValue = this._Measurement.Entity;
-				if (((previousValue != value) 
-							|| (this._Measurement.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Measurement.Entity = null;
-						previousValue.Measurement_Projects.Remove(this);
-					}
-					this._Measurement.Entity = value;
-					if ((value != null))
-					{
-						value.Measurement_Projects.Add(this);
-						this._MeasurementID = value.MeasurementID;
-					}
-					else
-					{
-						this._MeasurementID = default(int);
-					}
-					this.SendPropertyChanged("Measurement");
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Project_Measurement_Project", Storage="_Project", ThisKey="ProjectID", OtherKey="ProjectID", IsForeignKey=true)]
 		public Project Project
 		{
@@ -1199,6 +1165,40 @@ namespace newRBS.Database
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Measurement_Measurement_Project", Storage="_Measurement", ThisKey="MeasurementID", OtherKey="MeasurementID", IsForeignKey=true)]
+		public Measurement Measurement
+		{
+			get
+			{
+				return this._Measurement.Entity;
+			}
+			set
+			{
+				Measurement previousValue = this._Measurement.Entity;
+				if (((previousValue != value) 
+							|| (this._Measurement.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Measurement.Entity = null;
+						previousValue.Measurement_Projects.Remove(this);
+					}
+					this._Measurement.Entity = value;
+					if ((value != null))
+					{
+						value.Measurement_Projects.Add(this);
+						this._MeasurementID = value.MeasurementID;
+					}
+					else
+					{
+						this._MeasurementID = default(int);
+					}
+					this.SendPropertyChanged("Measurement");
+				}
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -1217,6 +1217,120 @@ namespace newRBS.Database
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Projects")]
+	public partial class Project : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _ProjectID;
+		
+		private string _ProjectName;
+		
+		private EntitySet<Measurement_Project> _Measurement_Projects;
+		
+    #region Definitionen der Erweiterungsmethoden
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnProjectIDChanging(int value);
+    partial void OnProjectIDChanged();
+    partial void OnProjectNameChanging(string value);
+    partial void OnProjectNameChanged();
+    #endregion
+		
+		public Project()
+		{
+			this._Measurement_Projects = new EntitySet<Measurement_Project>(new Action<Measurement_Project>(this.attach_Measurement_Projects), new Action<Measurement_Project>(this.detach_Measurement_Projects));
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int ProjectID
+		{
+			get
+			{
+				return this._ProjectID;
+			}
+			set
+			{
+				if ((this._ProjectID != value))
+				{
+					this.OnProjectIDChanging(value);
+					this.SendPropertyChanging();
+					this._ProjectID = value;
+					this.SendPropertyChanged("ProjectID");
+					this.OnProjectIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectName", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string ProjectName
+		{
+			get
+			{
+				return this._ProjectName;
+			}
+			set
+			{
+				if ((this._ProjectName != value))
+				{
+					this.OnProjectNameChanging(value);
+					this.SendPropertyChanging();
+					this._ProjectName = value;
+					this.SendPropertyChanged("ProjectName");
+					this.OnProjectNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Project_Measurement_Project", Storage="_Measurement_Projects", ThisKey="ProjectID", OtherKey="ProjectID")]
+		public EntitySet<Measurement_Project> Measurement_Projects
+		{
+			get
+			{
+				return this._Measurement_Projects;
+			}
+			set
+			{
+				this._Measurement_Projects.Assign(value);
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_Measurement_Projects(Measurement_Project entity)
+		{
+			this.SendPropertyChanging();
+			entity.Project = this;
+		}
+		
+		private void detach_Measurement_Projects(Measurement_Project entity)
+		{
+			this.SendPropertyChanging();
+			entity.Project = null;
 		}
 	}
 	
@@ -1266,7 +1380,9 @@ namespace newRBS.Database
 		
 		private double _EnergyCalOffset;
 		
-		private double _EnergyCalSlope;
+		private double _EnergyCalLinear;
+		
+		private double _EnergyCalQuadratic;
 		
 		private string _Chamber;
 		
@@ -1336,8 +1452,10 @@ namespace newRBS.Database
     partial void OnCurrentChopperCountsChanged();
     partial void OnEnergyCalOffsetChanging(double value);
     partial void OnEnergyCalOffsetChanged();
-    partial void OnEnergyCalSlopeChanging(double value);
-    partial void OnEnergyCalSlopeChanged();
+    partial void OnEnergyCalLinearChanging(double value);
+    partial void OnEnergyCalLinearChanged();
+    partial void OnEnergyCalQuadraticChanging(double value);
+    partial void OnEnergyCalQuadraticChanged();
     partial void OnChamberChanging(string value);
     partial void OnChamberChanged();
     partial void OnIncomingIonAtomicNumberChanging(int value);
@@ -1771,22 +1889,42 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EnergyCalSlope", DbType="Float NOT NULL")]
-		public double EnergyCalSlope
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EnergyCalLinear", DbType="Float NOT NULL")]
+		public double EnergyCalLinear
 		{
 			get
 			{
-				return this._EnergyCalSlope;
+				return this._EnergyCalLinear;
 			}
 			set
 			{
-				if ((this._EnergyCalSlope != value))
+				if ((this._EnergyCalLinear != value))
 				{
-					this.OnEnergyCalSlopeChanging(value);
+					this.OnEnergyCalLinearChanging(value);
 					this.SendPropertyChanging();
-					this._EnergyCalSlope = value;
-					this.SendPropertyChanged("EnergyCalSlope");
-					this.OnEnergyCalSlopeChanged();
+					this._EnergyCalLinear = value;
+					this.SendPropertyChanged("EnergyCalLinear");
+					this.OnEnergyCalLinearChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EnergyCalQuadratic", DbType="Float NOT NULL")]
+		public double EnergyCalQuadratic
+		{
+			get
+			{
+				return this._EnergyCalQuadratic;
+			}
+			set
+			{
+				if ((this._EnergyCalQuadratic != value))
+				{
+					this.OnEnergyCalQuadraticChanging(value);
+					this.SendPropertyChanging();
+					this._EnergyCalQuadratic = value;
+					this.SendPropertyChanged("EnergyCalQuadratic");
+					this.OnEnergyCalQuadraticChanged();
 				}
 			}
 		}
@@ -2068,120 +2206,6 @@ namespace newRBS.Database
 		{
 			this.SendPropertyChanging();
 			entity.Measurement = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Projects")]
-	public partial class Project : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _ProjectID;
-		
-		private string _ProjectName;
-		
-		private EntitySet<Measurement_Project> _Measurement_Projects;
-		
-    #region Definitionen der Erweiterungsmethoden
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnProjectIDChanging(int value);
-    partial void OnProjectIDChanged();
-    partial void OnProjectNameChanging(string value);
-    partial void OnProjectNameChanged();
-    #endregion
-		
-		public Project()
-		{
-			this._Measurement_Projects = new EntitySet<Measurement_Project>(new Action<Measurement_Project>(this.attach_Measurement_Projects), new Action<Measurement_Project>(this.detach_Measurement_Projects));
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int ProjectID
-		{
-			get
-			{
-				return this._ProjectID;
-			}
-			set
-			{
-				if ((this._ProjectID != value))
-				{
-					this.OnProjectIDChanging(value);
-					this.SendPropertyChanging();
-					this._ProjectID = value;
-					this.SendPropertyChanged("ProjectID");
-					this.OnProjectIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectName", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
-		public string ProjectName
-		{
-			get
-			{
-				return this._ProjectName;
-			}
-			set
-			{
-				if ((this._ProjectName != value))
-				{
-					this.OnProjectNameChanging(value);
-					this.SendPropertyChanging();
-					this._ProjectName = value;
-					this.SendPropertyChanged("ProjectName");
-					this.OnProjectNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Project_Measurement_Project", Storage="_Measurement_Projects", ThisKey="ProjectID", OtherKey="ProjectID")]
-		public EntitySet<Measurement_Project> Measurement_Projects
-		{
-			get
-			{
-				return this._Measurement_Projects;
-			}
-			set
-			{
-				this._Measurement_Projects.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_Measurement_Projects(Measurement_Project entity)
-		{
-			this.SendPropertyChanging();
-			entity.Project = this;
-		}
-		
-		private void detach_Measurement_Projects(Measurement_Project entity)
-		{
-			this.SendPropertyChanging();
-			entity.Project = null;
 		}
 	}
 }
