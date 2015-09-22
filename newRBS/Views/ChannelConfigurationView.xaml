@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
+        xmlns:global="clr-namespace:newRBS"
         xmlns:xc="clr-namespace:newRBS.ViewModels.Utils"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
@@ -166,7 +167,7 @@
             </GroupBox>
         </Border>
         <Border>
-            <oxy:PlotView x:Name="Plot1" Title="A Graph" Model="{Binding WaveformPlot}" Margin="10"/>
+            <oxy:PlotView x:Name="Plot1" Title="A Graph" Model="{Binding WaveformPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
         </Border>
     </DockPanel>
 </Window>

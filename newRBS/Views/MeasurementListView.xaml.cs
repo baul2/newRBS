@@ -33,7 +33,10 @@ namespace newRBS.Views
         public object Convert(object value, Type targetType, object parameter,
                           System.Globalization.CultureInfo culture)
         {
-            return ViewModels.Utils.ElementData.ShortName[(int)value-1].ToString();
+            using (Database.DatabaseDataContext Database = MyGlobals.Database)
+            {
+                return Database.Elements.FirstOrDefault(x => x.AtomicNumber == (int)value).ShortName;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter,

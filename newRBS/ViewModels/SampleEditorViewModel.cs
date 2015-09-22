@@ -97,8 +97,8 @@ namespace newRBS.ViewModels
             foreach (Layer layer in SelectedMaterial.Layers)
             {
                 string newLayerString = string.Format("{0} ({1}nm", layer.LayerName, layer.Thickness);
-                foreach (Element element in layer.Elements)
-                    newLayerString += string.Format(", {0}", element.ElementName);
+                foreach (LayerElement layerElement in layer.LayerElements)
+                    newLayerString += string.Format(", {0}", layerElement.Isotope.Element.LongName);
                 newLayerString += ")";
                 Layers.Add(newLayerString);
             }

@@ -10,6 +10,7 @@ using GalaSoft.MvvmLight.Command;
 using System.Reflection;
 using System.Diagnostics;
 using System.IO;
+using OxyPlot;
 
 namespace newRBS
 {
@@ -61,6 +62,8 @@ namespace newRBS
 
     static class MyGlobals
     {
+        public static PlotController myController { get; set; }
+
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 

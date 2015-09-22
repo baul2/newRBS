@@ -64,5 +64,15 @@ namespace newRBS.Properties {
                 return ((string)(this["newRBSadmin_dbConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=SVRH;Initial Catalog=test_db;Persist Security Info=True;User ID=test")]
+        public string test_dbConnectionString {
+            get {
+                return ((string)(this["test_dbConnectionString"]));
+            }
+        }
     }
 }

@@ -156,6 +156,7 @@ namespace newRBS.ViewModels
 
             List<Measurement> newMeasurementList = new List<Measurement>();
             Sample tempSample;
+            Isotope tempIsotope;
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -164,6 +165,7 @@ namespace newRBS.ViewModels
                 foreach (Measurement measurement in newMeasurementList)
                 {
                     tempSample = measurement.Sample;
+                    tempIsotope = measurement.Isotope;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
                     MeasurementList.Add(new SelectableMeasurement() { Selected = false, Measurement = measurement });
                 }

@@ -53,7 +53,7 @@ namespace newRBS.Database
             var dlo = new DataLoadOptions();
             dlo.LoadWith<Measurement>(c => c.Sample);
             dlo.LoadWith<Material>(c => c.Layers);
-            dlo.LoadWith<Layer>(c => c.Elements);
+            dlo.LoadWith<Layer>(c => c.LayerElements);
             //this.LoadOptions = dlo;
             //this.Log = Console.Out;
         }
@@ -208,7 +208,7 @@ namespace newRBS.Database
         }
 
         /// <summary>
-        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/> and <see cref="Measurement.EnergyCalSlope"/>.
+        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/>, <see cref="Measurement.EnergyCalLinear"/> and <see cref="Measurement.EnergyCalQuadratic"/>.
         /// </summary>
         public float[] SpectrumXCal
         {
@@ -216,19 +216,57 @@ namespace newRBS.Database
             {
                 float[] spectrumXCal = new float[NumOfChannels];
                 for (int i = 0; i < NumOfChannels; i++)
-                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalSlope;
+                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalLinear + i*i*(float)EnergyCalQuadratic;
                 return spectrumXCal;
             }
         }
     }
 
     /// <summary>
-    /// Class that stores the properties of a element in <see cref="Layer"/> of a <see cref="Material"/>.
+    /// Class that stores the properties of an element of the periodic system.
     /// </summary>
     /// <remarks>
     /// Can be saved to the MS SQL Server database via a table of <see cref="Element"/>s in <see cref="DatabaseDataContext"/>.
     /// </remarks>
-    public partial class Element { }
+    public partial class Element
+    {
+        public string DisplayName
+        { get { return (AtomicNumber.ToString() + " - " + ShortName + " - " + LongName); } }
+    }
+
+    /// <summary>
+    /// Class that stores the properties of an isotope of the periodic system.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Isotope"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Isotope
+    {
+        public string IsotopeDisplayName
+        {
+            get
+            {
+                if (MassNumber == 0) return "(natural)" + this.Element.ShortName;
+                else return MassNumber+this.Element.ShortName + " (" + Abundance + "%)";
+            }
+        }
+
+        public string ShortDisplayName
+        {
+            get
+            {
+                return MassNumber+this.Element.ShortName;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Class that stores the properties of an element in <see cref="Layer"/> of a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="LayerElement"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class ElementLayer { }
 
     /// <summary>
     /// Class that stores the properties of a layer of a <see cref="Material"/>.
