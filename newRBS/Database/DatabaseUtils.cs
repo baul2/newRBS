@@ -183,21 +183,20 @@ namespace newRBS.Database
                             if (!MeasurementsToExport.Any())
                             { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
 
-                            NumberFormatInfo point = new NumberFormatInfo();
-                            point.NumberDecimalSeparator = ".";
+                            NumberFormatInfo point = new NumberFormatInfo { NumberDecimalSeparator = "." };
 
                             foreach (var measurement in MeasurementsToExport)
                             {
                                 strName += "\t" + measurement.MeasurementName;
                                 strData += "\t" + String.Format("{0:dd.MM.yyyy HH:mm}", measurement.StartTime); ;
                                 strRemark += "\t" + measurement.Sample.SampleName;
-                                strProjectile += "\t" + measurement.IncomingIonAtomicNumber.ToString(point);
+                                strProjectile += "\t" + measurement.Isotope.AtomicNumber.ToString(point);
                                 strEnergy += "\t" + measurement.IncomingIonEnergy.ToString(point);
                                 strScatteringAngle += "\t" + measurement.OutcomingIonAngle.ToString(point);
                                 strIncidentAngle += "\t 0.00";
                                 strExitAngle += "\t" + (180 - measurement.OutcomingIonAngle).ToString(point);
                                 strEnergyChannel += "\t" + measurement.EnergyCalLinear.ToString(point);
-                                strOffset += "\t" + (-measurement.EnergyCalOffset/measurement.EnergyCalLinear).ToString(point);
+                                strOffset += "\t" + (-measurement.EnergyCalOffset / measurement.EnergyCalLinear).ToString(point);
                                 strSolidAngle += "\t" + measurement.SolidAngle.ToString(point);
                                 strCharge += "\t" + measurement.CurrentCharge.ToString(point);
                                 strRealTime += "\t" + (measurement.CurrentDuration - new DateTime(2000, 01, 01)).TotalSeconds.ToString(point);
@@ -318,7 +317,11 @@ namespace newRBS.Database
                                         case "Remark":
                                             { newMeasurements[i].SampleRemark = lineParts[i + 1]; break; }
                                         case "Projectile":
-                                            { newMeasurements[i].IncomingIonAtomicNumber = Int32.Parse(lineParts[i + 1]); break; }
+                                            {
+                                                using (DatabaseDataContext Database = MyGlobals.Database)
+                                                {
+                                                    newMeasurements[i].IncomingIonIsotopeID = Database.Isotopes.FirstOrDefault(x=>x.AtomicNumber == Int32.Parse(lineParts[i + 1])).IsotopeID; break; }
+                                            }
                                         case "Energy":
                                             { newMeasurements[i].IncomingIonEnergy = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Scattering angle":
@@ -330,7 +333,7 @@ namespace newRBS.Database
                                         case "Energy / Channel":
                                             { newMeasurements[i].EnergyCalLinear = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Offset":
-                                            { newMeasurements[i].EnergyCalOffset = - newMeasurements[i].EnergyCalLinear* Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].EnergyCalOffset = -newMeasurements[i].EnergyCalLinear * Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Solid angle":
                                             { newMeasurements[i].SolidAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Charge":

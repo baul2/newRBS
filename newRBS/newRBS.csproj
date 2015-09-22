@@ -195,8 +195,6 @@
     <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
-    <Compile Include="ViewModels\Utils\ElementClass.cs" />
-    <Compile Include="ViewModels\Utils\ElementData.cs" />
     <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
     <Compile Include="ViewModels\Utils\NameValueClass.cs" />

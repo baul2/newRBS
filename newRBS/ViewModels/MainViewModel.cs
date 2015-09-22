@@ -22,6 +22,7 @@ using System.IO;
 using newRBS.Database;
 using System.Reflection;
 using OxyPlot;
+using System.Globalization;
 
 namespace newRBS.ViewModels
 {
@@ -89,6 +90,49 @@ namespace newRBS.ViewModels
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Middle, PlotCommands.PointsOnlyTrack);
+
+            FillPeriodicSystem();
+        }
+
+        public void FillPeriodicSystem()
+        {
+            string line;
+            string[] lineParts;
+            using (DatabaseDataContext Database = MyGlobals.Database)
+            {
+                using (TextReader textReader = new StreamReader("Elements.txt"))
+                {
+                    while ((line = textReader.ReadLine()) != null)
+                    {
+                        //lineParts = line.Split(' ');
+                        //    Database.Element newElement = new Database.Element { AtomicNumber = int.Parse(lineParts[0]), LongName = lineParts[2], ShortName = lineParts[3] };
+                        //Isotope newIsotope = new Isotope { AtomicNumber = int.Parse(lineParts[0]), Mass = double.Parse(lineParts[1], CultureInfo.InvariantCulture), MassNumber = 0, Element = Database.Elements.FirstOrDefault(x => x.AtomicNumber == int.Parse(lineParts[0])) };
+                        //    newElement.Isotopes.Add(newIsotope);
+                        //    Database.Elements.InsertOnSubmit(newElement);
+                        //    Console.WriteLine(newElement.ShortName);
+                        //Database.Isotopes.InsertOnSubmit(newIsotope);
+                    }
+                }
+
+                using (TextReader textReader = new StreamReader("Isotopes.txt"))
+                {
+                    //while ((line = textReader.ReadLine()) != null)
+                    // {
+                    //     lineParts = line.Split(' ');
+                    //     Database.Element element = Database.Elements.FirstOrDefault(x => x.ShortName == lineParts[0]);
+                    //     Isotope newIsotope = new Isotope { AtomicNumber = element.AtomicNumber, MassNumber = int.Parse(lineParts[1]), Mass = double.Parse(lineParts[2], CultureInfo.InvariantCulture), Abundance = double.Parse(lineParts[3], CultureInfo.InvariantCulture),Element=element };
+
+                    //                        Console.WriteLine(newIsotope.AtomicNumber);
+                    //                      Database.Isotopes.InsertOnSubmit(newIsotope);
+                    //}
+                }
+                //var temp = Database.Isotopes.Where(x => x.AtomicNumber < 8).OrderBy(y=>y.MassNumber).OrderBy(z=>z.AtomicNumber);
+
+                //foreach (var t in temp)
+                //    Console.WriteLine(t.AtomicNumber +" "+t.MassNumber);
+
+                //Database.SubmitChanges();
+            }
         }
 
         /// <summary>
@@ -265,8 +309,18 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _EnergyCalCommand()
         {
-            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel();
-            if (energyCalibrationViewModel.ValidSelectedMeasurements == false) return;
+            var selectedMeasurements = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(x => x.Measurement).ToList();
+
+            if (selectedMeasurements.Count() == 0)
+            { MessageBox.Show("Select at least one measurement!"); return; }
+
+            if (selectedMeasurements.Select(x => x.Channel).Distinct().ToList().Count > 1)
+            { MessageBox.Show("Select only measurements from the same channel!"); return; }
+
+            if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonIsotopeID).Distinct().ToList().Count > 1)
+            { MessageBox.Show("Select only measurements with identical irradiation parameters!"); return; }
+
+            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements);
             Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
             energyCalibrationView.DataContext = energyCalibrationViewModel;
             energyCalibrationView.ShowDialog();

@@ -44,7 +44,7 @@
                 <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
 
                 <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
-                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="ShortName" SelectedValuePath="AtomicNumber" SelectedValue="{Binding Measurement.IncomingIonAtomicNumber, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
+                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="ShortDisplayName" SelectedValuePath="IsotopeID" SelectedValue="{Binding Measurement.IncomingIonIsotopeID, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
                 <Label Content="Ion Energy (keV):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="3"/>
                 <TextBox Text="{Binding Measurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
 

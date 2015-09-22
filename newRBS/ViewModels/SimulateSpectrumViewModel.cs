@@ -62,26 +62,26 @@ namespace newRBS.ViewModels
             IonFluence = 1E14;
         }
 
-        private double CalculateAtomicDensity(Layer layer, Element element)
+        private double CalculateAtomicDensity(Layer layer, LayerElement layerElement)
         {
             double MassOfMolecule = 0;
-            foreach (Element e in layer.Elements)
-                MassOfMolecule += e.MassNumber * e.StoichiometricFactor;
+            foreach (LayerElement l in layer.LayerElements)
+                MassOfMolecule += l.Isotope.Mass * l.StoichiometricFactor;
 
             double NumberOfMolecules = layer.Density / MassOfMolecule / 1.66053904E-24;
 
-            double NumberOfAtomsInMolecule = layer.Elements.Select(x => x.StoichiometricFactor).ToList().Sum();
+            double NumberOfAtomsInMolecule = layer.LayerElements.Select(x => x.StoichiometricFactor).ToList().Sum();
 
-            double AtomicDensityOfElement = NumberOfMolecules * element.StoichiometricFactor;
-            Console.WriteLine("Atomic density of " + element.ElementName + ": " + AtomicDensityOfElement);
+            double AtomicDensityOfElement = NumberOfMolecules * layerElement.StoichiometricFactor;
+            Console.WriteLine("Atomic density of " + layerElement.Isotope.Element.LongName+ ": " + AtomicDensityOfElement);
             return AtomicDensityOfElement;
         }
 
         private void _StartSimulationCommand()
         {
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
-            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonAtomicNumber;
-            simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
+            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.Isotope.AtomicNumber;
+            simpleMeasurement.MassNoIncIon = (int)SelectedMeasurement.Isotope.Mass;
             simpleMeasurement.IonEnergy = SelectedMeasurement.IncomingIonEnergy;
             simpleMeasurement.IonFluence = IonFluence;
             simpleMeasurement.SolidAngle = SelectedMeasurement.SolidAngle;
@@ -108,20 +108,20 @@ namespace newRBS.ViewModels
             {
                 Layer layer = SelectedSample.Material.Layers.FirstOrDefault(x => x.LayerIndex == i);
                 Console.WriteLine("Try to add layer: {0}", layer.LayerName);
-                foreach (Element element in layer.Elements)
+                foreach (LayerElement layerElement in layer.LayerElements)
                 {
-                    Console.WriteLine("Try to add element: {0}", element.ElementName);
+                    Console.WriteLine("Try to add element: {0}", layerElement.Isotope.Element.ShortName);
                     DataSimpleMaterial newSimpleMaterial = new DataSimpleMaterial();
-                    newSimpleMaterial.AtomicNoInitialTarget = (int)element.AtomicNumber;
-                    newSimpleMaterial.MassNoInitialTarget = (int)element.MassNumber;
+                    newSimpleMaterial.AtomicNoInitialTarget = (int)layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoInitialTarget = (int)layerElement.Isotope.Mass;
                     newSimpleMaterial.LayerBegin = layerStart;
                     newSimpleMaterial.LayerEnd = layerStart + layer.Thickness;
-                    newSimpleMaterial.AtomicDensity = CalculateAtomicDensity(layer, element);
+                    newSimpleMaterial.AtomicDensity = CalculateAtomicDensity(layer, layerElement);
                     newSimpleMaterial.QValue = 0.0;
-                    newSimpleMaterial.AtomicNoRemainTarget = (int)element.AtomicNumber;
-                    newSimpleMaterial.MassNoRemainTarget = (int)element.MassNumber;
-                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.IncomingIonAtomicNumber;
-                    newSimpleMaterial.MassNoDetIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
+                    newSimpleMaterial.AtomicNoRemainTarget = (int)layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoRemainTarget = (int)layerElement.Isotope.Mass;
+                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoDetIon = (int)SelectedMeasurement.Isotope.Mass;
                     newSimpleMaterial.RbsActive = true;
                     newSimpleMaterial.NraActive = false;
 

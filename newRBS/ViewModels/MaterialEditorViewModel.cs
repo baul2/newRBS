@@ -74,30 +74,23 @@ namespace newRBS.ViewModels
 
         private Layer _SelectedLayer;
         public Layer SelectedLayer
-        {
-            get { return _SelectedLayer; }
-            set
-            {
-                _SelectedLayer = value;
-
-                Elements.Clear();
-
-                if (_SelectedLayer != null)
-                    if (_SelectedLayer.Elements != null)
-                        foreach (Element element in _SelectedLayer.Elements)
-                            Elements.Add(element);
-
-                RaisePropertyChanged();
-            }
-        }
+        { get { return _SelectedLayer; } set { _SelectedLayer = value; FillLayerElements(); RaisePropertyChanged(); } }
 
         public CollectionViewSource LayersViewSource { get; set; }
+
+        public ObservableCollection<LayerElement> LayerElements { get; set; }
+
+        private LayerElement _SelectedLayerElement;
+        public LayerElement SelectedLayerElement
+        { get { return _SelectedLayerElement; } set { _SelectedLayerElement = value; RaisePropertyChanged(); } }
 
         public ObservableCollection<Element> Elements { get; set; }
 
         private Element _SelectedElement;
         public Element SelectedElement
-        { get { return _SelectedElement; } set { _SelectedElement = value; RaisePropertyChanged(); } }
+        { get { return _SelectedElement; } set { _SelectedElement = value; FillIsotopes(); RaisePropertyChanged(); } }
+
+        public ObservableCollection<Isotope> Isotopes { get; set; }
 
         public MaterialEditorViewModel()
         {
@@ -105,7 +98,7 @@ namespace newRBS.ViewModels
 
             Materials = new ObservableCollection<Material>(Database.Materials.Where(x => x.MaterialName != "(undefined)").ToList());
             Layers = new ObservableCollection<Layer>();
-            Elements = new ObservableCollection<Element>();
+            LayerElements = new ObservableCollection<LayerElement>();
 
             AddMaterialCommand = new RelayCommand(() => _AddMaterialCommand(), () => true);
             RemoveMaterialCommand = new RelayCommand(() => _RemoveMaterialCommand(), () => true);
@@ -116,7 +109,7 @@ namespace newRBS.ViewModels
             MoveLayerUpCommand = new RelayCommand(() => _MoveLayerUpCommand(), () => true);
             MoveLayerDownCommand = new RelayCommand(() => _MoveLayerDownCommand(), () => true);
 
-            AddElementCommand = new RelayCommand(() => _AddElementCommand(), () => true);
+            AddElementCommand = new RelayCommand(() => _AddLayerElementCommand(), () => true);
             RemoveElementCommand = new RelayCommand(() => _RemoveElementCommand(), () => true);
 
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
@@ -125,6 +118,30 @@ namespace newRBS.ViewModels
             LayersViewSource = new CollectionViewSource();
             LayersViewSource.Source = Layers;
             LayersViewSource.SortDescriptions.Add(new SortDescription("LayerIndex", ListSortDirection.Ascending));
+
+            Isotopes = new ObservableCollection<Isotope>();
+            Elements = new ObservableCollection<Element>(Database.Elements.ToList());
+        }
+
+        private void FillLayerElements()
+        {
+            LayerElements.Clear();
+
+            if (_SelectedLayer != null)
+                if (_SelectedLayer.LayerElements != null)
+                    foreach (LayerElement layerElement in _SelectedLayer.LayerElements)
+                    {
+                        LayerElements.Add(layerElement);
+                    }
+        }
+
+        private void FillIsotopes()
+        {
+            Console.WriteLine("asfd");
+            Isotopes.Clear();
+
+            foreach (Isotope i in SelectedElement.Isotopes)
+                Isotopes.Add(i);
         }
 
         public void _AddMaterialCommand()
@@ -144,7 +161,7 @@ namespace newRBS.ViewModels
         {
             if (SelectedMaterial == null) return;
 
-            Database.Elements.DeleteAllOnSubmit(Database.Elements.Where(x => x.MaterialID == SelectedMaterial.MaterialID));
+            Database.LayerElements.DeleteAllOnSubmit(Database.LayerElements.Where(x => x.MaterialID == SelectedMaterial.MaterialID));
             Database.Layers.DeleteAllOnSubmit(Database.Layers.Where(x => x.MaterialID == SelectedMaterial.MaterialID));
             Database.Materials.DeleteOnSubmit(SelectedMaterial);
             Materials.Remove(SelectedMaterial);
@@ -178,7 +195,7 @@ namespace newRBS.ViewModels
             foreach (var layer in LayersToDecreaseIndex)
                 layer.LayerIndex--;
 
-            Database.Elements.DeleteAllOnSubmit(Database.Elements.Where(x => x.LayerID == SelectedLayer.LayerID));
+            Database.LayerElements.DeleteAllOnSubmit(Database.LayerElements.Where(x => x.LayerID == SelectedLayer.LayerID));
 
             Database.Layers.DeleteOnSubmit(SelectedLayer);
 
@@ -220,25 +237,26 @@ namespace newRBS.ViewModels
             SelectedLayer = selectedLayer;
         }
 
-        public void _AddElementCommand()
+        public void _AddLayerElementCommand()
         {
             if (SelectedLayer == null) return;
+            Console.WriteLine("asf");
             //if (SelectedLayer.LayerID == 0) { MessageBox.Show("Save the new layer before adding elements!"); return; }
 
-            Element newElement = new Element { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID, ElementName = "", StoichiometricFactor = 1, AtomicNumber = 0, MassNumber = 0 };
+            LayerElement newLayerElement = new LayerElement { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID, StoichiometricFactor = 1 };
 
-            Elements.Add(newElement);
+            LayerElements.Add(newLayerElement);
 
-            SelectedLayer.Elements.Add(newElement);
-            SelectedMaterial.Elements.Add(newElement);
+            SelectedLayer.LayerElements.Add(newLayerElement);
+            SelectedMaterial.LayerElements.Add(newLayerElement);
         }
 
         public void _RemoveElementCommand()
         {
-            if (SelectedLayer == null || SelectedElement == null) return;
+            if (SelectedLayer == null || SelectedLayerElement == null) return;
 
-            Database.Elements.DeleteOnSubmit(SelectedElement);
-            Elements.Remove(SelectedElement);
+            Database.LayerElements.DeleteOnSubmit(SelectedLayerElement);
+            LayerElements.Remove(SelectedLayerElement);
         }
 
         public void _SaveCommand()

@@ -26,11 +26,15 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
 
-                        <Label Content="Channel:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                        <TextBox Text="{Binding Channel}" Grid.Column="1" Grid.Row="1" Margin="3"/>
+                        <Label Content="Channel:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                        <TextBox Text="{Binding Channel}" Grid.Column="1" Grid.Row="0" Margin="3"/>
 
-                        <Label Content="Element:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
-                        <ComboBox ItemsSource="{Binding Elements}" DisplayMemberPath="DisplayName" SelectedItem="{Binding SelectedElement}" Grid.Column="1" Grid.Row="2" Margin="3" MinWidth="110"/>
+                        <Label Content="Element:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                        <ComboBox ItemsSource="{Binding ElementList}" DisplayMemberPath="DisplayName" SelectedItem="{Binding SelectedElement, Mode=TwoWay}" Grid.Column="1" Grid.Row="1" Margin="3" MinWidth="110"/>
+
+                        <Label Content="Isotope:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                        <ComboBox ItemsSource="{Binding IsotopeList}" DisplayMemberPath="IsotopeDisplayName" SelectedItem="{Binding SelectedIsotope}" Grid.Column="1" Grid.Row="2" Margin="3" MinWidth="150"/>
+
                     </Grid>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="Add to list" Command="{Binding AddToListCommand}" Margin="3" Padding="3"/>
@@ -67,11 +71,13 @@
                         </DataGrid.RowStyle>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Channel" Binding="{Binding Channel}"/>
-                            <DataGridTextColumn Header="Element" Binding="{Binding Element.ShortName}"/>
+                            <DataGridTextColumn Header="Isotope" Binding="{Binding Isotope.IsotopeDisplayName}"/>
+                            <DataGridTextColumn Header="Mass (u)" Binding="{Binding Isotope.Mass, StringFormat={}{0:0.00}}"/>
                             <DataGridTextColumn Header="Cal. Energy (keV)" Binding="{Binding CalibratedEnergy}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <ComboBox ItemsSource="{Binding FitType}" SelectedItem="{Binding SelectedFitType}" Margin="3" MinWidth="80"/>
                         <Button Content="Calculate Energy Calibration" Command="{Binding CalculateEnergyCalCommand}" Margin="3" Padding="3"/>
                     </StackPanel>
                 </StackPanel>

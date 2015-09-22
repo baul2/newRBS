@@ -1,25 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="newRBSadmin_db" Class="DatabaseDataContext" EntityBase="EntityBase" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=141.35.49.196,35877;Initial Catalog=newRBSadmin_db;User ID=newRBSadmin" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="newRBSadmin_dbConnectionString" Provider="System.Data.SqlClient" />
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="test_db" Class="DatabaseDataContext" EntityBase="EntityBase" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=SVRH;Initial Catalog=test_db;Persist Security Info=True;User ID=test" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="test_dbConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Elements" Member="Elements">
     <Type Name="Element">
       <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="LayerID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="ElementName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="StoichiometricFactor" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="AtomicNumber" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="MassNumber" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Association Name="Material_Element" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
-      <Association Name="Layer_Element" Member="Layer" ThisKey="LayerID" OtherKey="LayerID" Type="Layer" IsForeignKey="true" />
+      <Column Name="AtomicNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ShortName" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
+      <Column Name="LongName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Element_Isotope" Member="Isotopes" ThisKey="ElementID" OtherKey="ElementID" Type="Isotope" />
+      <Association Name="Element_LayerElement" Member="LayerElements" ThisKey="ElementID" OtherKey="ElementID" Type="LayerElement" />
     </Type>
   </Table>
-  <Table Name="dbo.Materials" Member="Materials">
-    <Type Name="Material">
-      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="MaterialName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
-      <Association Name="Material_Element" Member="Elements" ThisKey="MaterialID" OtherKey="MaterialID" Type="Element" />
-      <Association Name="Material_Layer" Member="Layers" ThisKey="MaterialID" OtherKey="MaterialID" Type="Layer" />
-      <Association Name="Material_Sample" Member="Samples" ThisKey="MaterialID" OtherKey="MaterialID" Type="Sample" />
+  <Table Name="dbo.Samples" Member="Samples">
+    <Type Name="Sample">
+      <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="SampleName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Sample_Measurement" Member="Measurements" ThisKey="SampleID" OtherKey="SampleID" Type="Measurement" />
+      <Association Name="Material_Sample" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Isotopes" Member="Isotopes">
+    <Type Name="Isotope">
+      <Column Name="IsotopeID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="AtomicNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MassNumber" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Mass" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Abundance" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Association Name="Isotope_Measurement" Member="Measurements" ThisKey="IsotopeID" OtherKey="IncomingIonIsotopeID" Type="Measurement" />
+      <Association Name="Isotope_LayerElement" Member="LayerElements" ThisKey="IsotopeID" OtherKey="IsotopeID" Type="LayerElement" />
+      <Association Name="Element_Isotope" Member="Element" ThisKey="ElementID" OtherKey="ElementID" Type="Element" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.Layers" Member="Layers">
@@ -30,17 +40,17 @@
       <Column Name="LayerName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
       <Column Name="Density" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Thickness" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Association Name="Layer_Element" Member="Elements" ThisKey="LayerID" OtherKey="LayerID" Type="Element" />
+      <Association Name="Layer_LayerElement" Member="LayerElements" ThisKey="LayerID" OtherKey="LayerID" Type="LayerElement" />
       <Association Name="Material_Layer" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
     </Type>
   </Table>
-  <Table Name="dbo.Samples" Member="Samples">
-    <Type Name="Sample">
-      <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="SampleName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="MaterialID" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Association Name="Sample_Measurement" Member="Measurements" ThisKey="SampleID" OtherKey="SampleID" Type="Measurement" />
-      <Association Name="Material_Sample" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
+  <Table Name="dbo.Materials" Member="Materials">
+    <Type Name="Material">
+      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="MaterialName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Association Name="Material_Sample" Member="Samples" ThisKey="MaterialID" OtherKey="MaterialID" Type="Sample" />
+      <Association Name="Material_Layer" Member="Layers" ThisKey="MaterialID" OtherKey="MaterialID" Type="Layer" />
+      <Association Name="Material_LayerElement" Member="LayerElements" ThisKey="MaterialID" OtherKey="MaterialID" Type="LayerElement" />
     </Type>
   </Table>
   <Table Name="dbo.Measurement_Project" Member="Measurement_Projects">
@@ -84,7 +94,7 @@
       <Column Name="EnergyCalLinear" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="EnergyCalQuadratic" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Chamber" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
-      <Column Name="IncomingIonAtomicNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="IncomingIonIsotopeID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="IncomingIonEnergy" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="IncomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="OutcomingIonAngle" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
@@ -94,7 +104,22 @@
       <Column Name="Phi" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="Theta" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Association Name="Measurement_Measurement_Project" Member="Measurement_Projects" ThisKey="MeasurementID" OtherKey="MeasurementID" Type="Measurement_Project" />
+      <Association Name="Isotope_Measurement" Member="Isotope" ThisKey="IncomingIonIsotopeID" OtherKey="IsotopeID" Type="Isotope" IsForeignKey="true" />
       <Association Name="Sample_Measurement" Member="Sample" ThisKey="SampleID" OtherKey="SampleID" Type="Sample" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.LayerElements" Member="LayerElements">
+    <Type Name="LayerElement">
+      <Column Name="LayerElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="LayerID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="IsotopeID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="StoichiometricFactor" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Association Name="Layer_LayerElement" Member="Layer" ThisKey="LayerID" OtherKey="LayerID" Type="Layer" IsForeignKey="true" />
+      <Association Name="Material_LayerElement" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
+      <Association Name="Element_LayerElement" Member="Element" ThisKey="ElementID" OtherKey="ElementID" Type="Element" IsForeignKey="true" />
+      <Association Name="Isotope_LayerElement" Member="Isotope" ThisKey="IsotopeID" OtherKey="IsotopeID" Type="Isotope" IsForeignKey="true" />
     </Type>
   </Table>
 </Database>

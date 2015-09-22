@@ -23,7 +23,7 @@
                 </GroupBox>
                 <GroupBox Header="Layers">
                     <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" x:Name="test">
                             <Button Content="Add" Command="{Binding AddLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Remove" Command="{Binding RemoveLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Move up" Command="{Binding MoveLayerUpCommand}" Margin="5" Padding="3" MinWidth="50"/>
@@ -61,13 +61,13 @@
                         </DataGrid>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Elements" MinHeight="250" >
+                <GroupBox Header="LayerElements" MinHeight="250" >
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Add" Command="{Binding AddElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Remove" Command="{Binding RemoveElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
                         </StackPanel>
-                        <DataGrid ItemsSource="{Binding Elements}" SelectedItem="{Binding SelectedElement, Mode=TwoWay}" 
+                        <DataGrid ItemsSource="{Binding LayerElements}" SelectedItem="{Binding SelectedLayerElement, Mode=TwoWay}" 
                                   MinWidth="300" CanUserAddRows="False" 
                                   AlternationCount="2" 
                                   HorizontalGridLinesBrush ="WhiteSmoke" 
@@ -91,10 +91,9 @@
                                 </Style>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ElementName" Binding="{Binding ElementName}"/>
+                                <DataGridComboBoxColumn Header="Element" ItemsSource="{Binding DataContext.Elements, Source={x:Reference test}}" DisplayMemberPath="ShortName" SelectedItemBinding="{Binding Element}"/>
+                                <DataGridComboBoxColumn Header="Isotope" ItemsSource="{Binding Element.Isotopes}" DisplayMemberPath="IsotopeDisplayName" SelectedItemBinding="{Binding Isotope}"/>
                                 <DataGridTextColumn Header="StoichiometricFactor" Binding="{Binding StoichiometricFactor}"/>
-                                <DataGridTextColumn Header="AtomicNumber" Binding="{Binding AtomicNumber}"/>
-                                <DataGridTextColumn Header="MassNumber" Binding="{Binding MassNumber}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
