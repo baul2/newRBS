@@ -330,12 +330,12 @@ namespace newRBS.ViewModels
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
-            if (updateSerie != null)
+            List<Series> updateSeries = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).ToList();
+            foreach (Series updateSerie in updateSeries)
             {
                 plotModel.Series.Remove(updateSerie);
-                PlotMeasurement(measurement);
             }
+            PlotMeasurement(measurement);
         }
 
         private void UpdateYAxisScale()

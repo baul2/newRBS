@@ -95,25 +95,27 @@
                                     <DataGridComboBoxColumn.ElementStyle>
                                         <Style TargetType="ComboBox">
                                             <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
-                                            <Setter Property="SelectedItem" Value="{Binding Path=Element, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedElement, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Style>
                                     </DataGridComboBoxColumn.ElementStyle>
                                     <DataGridComboBoxColumn.EditingElementStyle>
                                         <Style TargetType="ComboBox">
                                             <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
-                                            <Setter Property="SelectedItem" Value="{Binding Path=Element, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedElement, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Style>
                                     </DataGridComboBoxColumn.EditingElementStyle>
                                 </DataGridComboBoxColumn>
-                                <DataGridComboBoxColumn Header="Isotope" DisplayMemberPath="IsotopeDisplayName" SelectedItemBinding="{Binding Isotope, Mode=TwoWay}" MinWidth="100">
+                                <DataGridComboBoxColumn Header="Isotope" DisplayMemberPath="IsotopeDisplayName" MinWidth="100">
                                     <DataGridComboBoxColumn.ElementStyle>
                                         <Style TargetType="ComboBox">
                                             <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedIsotope, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Style>
                                     </DataGridComboBoxColumn.ElementStyle>
                                     <DataGridComboBoxColumn.EditingElementStyle>
                                         <Style TargetType="ComboBox">
                                             <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedIsotope, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Style>
                                     </DataGridComboBoxColumn.EditingElementStyle>
                                 </DataGridComboBoxColumn>

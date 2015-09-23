@@ -27,19 +27,19 @@ namespace newRBS.ViewModels
     {
         public ObservableCollection<Element> Elements { get; set; }
 
-        private Element _Element;
-        public Element Element
+        private Element _SelectedElement;
+        public Element SelectedElement
         {
-            get { return _Element; }
+            get { return _SelectedElement; }
             set
             {
-                _Element = value;
+                _SelectedElement = value;
 
                 Isotopes.Clear();
                 foreach (Isotope i in value.Isotopes.OrderBy(x => x.MassNumber))
                     Isotopes.Add(i);
 
-                Isotope = Isotopes.FirstOrDefault();
+                SelectedIsotope = Isotopes.FirstOrDefault();
 
                 RaisePropertyChanged();
             }
@@ -47,9 +47,9 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<Isotope> Isotopes { get; set; }
 
-        private Isotope _Isotope;
-        public Isotope Isotope
-        { get { return _Isotope; } set { _Isotope = value; LayerElement.Isotope = value; RaisePropertyChanged(); } }
+        private Isotope _SelectedIsotope;
+        public Isotope SelectedIsotope
+        { get { return _SelectedIsotope; } set { _SelectedIsotope = value; LayerElement.Isotope = value; RaisePropertyChanged(); } }
 
         public LayerElement LayerElement { get; set; }
 
@@ -62,9 +62,9 @@ namespace newRBS.ViewModels
             Isotopes = new ObservableCollection<Isotope>();
 
             if (layerElement.Isotope!=null)
-                Element = layerElement.Isotope.Element;
+                SelectedElement = layerElement.Isotope.Element;
 
-            Isotope = initialIsotope;
+            SelectedIsotope = initialIsotope;
         }
     }
 

@@ -112,13 +112,13 @@ namespace newRBS.ViewModels
                 {
                     Console.WriteLine("Try to add element: {0}", layerElement.Isotope.Element.ShortName);
                     DataSimpleMaterial newSimpleMaterial = new DataSimpleMaterial();
-                    newSimpleMaterial.AtomicNoInitialTarget = (int)layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.AtomicNoInitialTarget = layerElement.Isotope.AtomicNumber;
                     newSimpleMaterial.MassNoInitialTarget = (int)layerElement.Isotope.Mass;
                     newSimpleMaterial.LayerBegin = layerStart;
                     newSimpleMaterial.LayerEnd = layerStart + layer.Thickness;
                     newSimpleMaterial.AtomicDensity = CalculateAtomicDensity(layer, layerElement);
                     newSimpleMaterial.QValue = 0.0;
-                    newSimpleMaterial.AtomicNoRemainTarget = (int)layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.AtomicNoRemainTarget = layerElement.Isotope.AtomicNumber;
                     newSimpleMaterial.MassNoRemainTarget = (int)layerElement.Isotope.Mass;
                     newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.Isotope.AtomicNumber;
                     newSimpleMaterial.MassNoDetIon = (int)SelectedMeasurement.Isotope.Mass;
