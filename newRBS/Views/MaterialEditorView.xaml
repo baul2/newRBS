@@ -91,9 +91,33 @@
                                 </Style>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridComboBoxColumn Header="Element" ItemsSource="{Binding DataContext.Elements, Source={x:Reference test}}" DisplayMemberPath="ShortName" SelectedItemBinding="{Binding Element}"/>
-                                <DataGridComboBoxColumn Header="Isotope" ItemsSource="{Binding Element.Isotopes}" DisplayMemberPath="IsotopeDisplayName" SelectedItemBinding="{Binding Isotope}"/>
-                                <DataGridTextColumn Header="StoichiometricFactor" Binding="{Binding StoichiometricFactor}"/>
+                                <DataGridComboBoxColumn Header="Element" DisplayMemberPath="DisplayName" MinWidth="100">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=Element, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=Element, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
+                                <DataGridComboBoxColumn Header="Isotope" DisplayMemberPath="IsotopeDisplayName" SelectedItemBinding="{Binding Isotope, Mode=TwoWay}" MinWidth="100">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
+                                <DataGridTextColumn Header="StoichiometricFactor" Binding="{Binding LayerElement.StoichiometricFactor}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

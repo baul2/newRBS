@@ -85,7 +85,7 @@
         <classShapeMoniker Id="bee049f1-77f7-4e3b-99cd-3af1a3ff2272" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9.25 : 4.22199625651042); (9.05208083333333 : 4.22199625651042 : JumpStart); (8.88541416666667 : 4.22199625651042 : JumpEnd); (8.55208333333333 : 4.22199625651042 : JumpStart); (8.38541666666667 : 4.22199625651042 : JumpEnd); (7.29605305806884 : 4.22199625651042 : JumpStart); (7.12938639140218 : 4.22199625651042 : JumpEnd); (4.14583333333333 : 4.22199625651042 : JumpStart); (3.97916666666667 : 4.22199625651042 : JumpEnd); (2.5 : 4.22199625651042)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(9.25 : 4.22199625651042); (8.55208333333333 : 4.22199625651042 : JumpStart); (8.38541666666667 : 4.22199625651042 : JumpEnd); (7.29605305806884 : 4.22199625651042 : JumpStart); (7.12938639140218 : 4.22199625651042 : JumpEnd); (4.14583333333333 : 4.22199625651042 : JumpStart); (3.97916666666667 : 4.22199625651042 : JumpEnd); (2.5 : 4.22199625651042)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/DatabaseDataContext/Isotope/Isotope_Measurement" />
       <nodes>
         <classShapeMoniker Id="13039f22-b927-484f-bd6d-2c0caa5e3cfe" />
@@ -99,38 +99,31 @@
         <classShapeMoniker Id="3578f146-868a-4a13-8826-45c5c2c4e899" />
       </nodes>
     </associationConnector>
-    <classShape Id="41ffb521-deec-46eb-9fcf-a09d3db8be6b" absoluteBounds="8.75, 0.5, 2, 1.9631982421875">
+    <classShape Id="9b896a19-dce1-4bc5-8001-d99cdf829d92" absoluteBounds="9, 0.75, 2, 1.7708968098958331">
       <DataClassMoniker Name="/DatabaseDataContext/LayerElement" />
       <nestedChildShapes>
-        <elementListCompartment Id="13f6e5c1-de1d-431a-ad32-e2999cbcc278" absoluteBounds="8.765, 0.96, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="e77275b1-1d22-4345-82b8-ed2e3ac0c03a" absoluteBounds="9.015, 1.21, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(8.46875 : 4.625); (8.46875 : 2.10984537760417); (8.75 : 2.10984537760417)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.46875 : 4.625); (8.46875 : 2.13869466145833); (9 : 2.13869466145833)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DatabaseDataContext/Layer/Layer_LayerElement" />
       <nodes>
         <classShapeMoniker Id="b0c24902-ac4a-4749-a338-127c609eb87c" />
-        <classShapeMoniker Id="41ffb521-deec-46eb-9fcf-a09d3db8be6b" />
+        <classShapeMoniker Id="9b896a19-dce1-4bc5-8001-d99cdf829d92" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.375 : 1.09699625651042); (8.75 : 1.09699625651042)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.375 : 1.22199625651042); (9 : 1.22199625651042)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DatabaseDataContext/Material/Material_LayerElement" />
       <nodes>
         <classShapeMoniker Id="592dc657-a5b5-4cf3-b2a6-f0f8b7dab545" />
-        <classShapeMoniker Id="41ffb521-deec-46eb-9fcf-a09d3db8be6b" />
+        <classShapeMoniker Id="9b896a19-dce1-4bc5-8001-d99cdf829d92" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9.25 : 6.28929768880208); (8.9687475 : 6.28929768880208); (8.9687475 : 2.4631982421875)]" fixedFrom="Algorithm" fixedTo="Algorithm">
-      <AssociationMoniker Name="/DatabaseDataContext/Element/Element_LayerElement" />
-      <nodes>
-        <classShapeMoniker Id="c417c331-9248-4242-8b03-517ef3725f7f" />
-        <classShapeMoniker Id="41ffb521-deec-46eb-9fcf-a09d3db8be6b" />
-      </nodes>
-    </associationConnector>
-    <associationConnector edgePoints="[(10 : 3); (10 : 2.4631982421875)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(10.125 : 3); (10.125 : 2.52089680989583)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DatabaseDataContext/Isotope/Isotope_LayerElement" />
       <nodes>
         <classShapeMoniker Id="13039f22-b927-484f-bd6d-2c0caa5e3cfe" />
-        <classShapeMoniker Id="41ffb521-deec-46eb-9fcf-a09d3db8be6b" />
+        <classShapeMoniker Id="9b896a19-dce1-4bc5-8001-d99cdf829d92" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>

@@ -23,6 +23,51 @@ using System.Reflection;
 
 namespace newRBS.ViewModels
 {
+    public class LayerElementListItem : ViewModelBase
+    {
+        public ObservableCollection<Element> Elements { get; set; }
+
+        private Element _Element;
+        public Element Element
+        {
+            get { return _Element; }
+            set
+            {
+                _Element = value;
+
+                Isotopes.Clear();
+                foreach (Isotope i in value.Isotopes.OrderBy(x => x.MassNumber))
+                    Isotopes.Add(i);
+
+                Isotope = Isotopes.FirstOrDefault();
+
+                RaisePropertyChanged();
+            }
+        }
+
+        public ObservableCollection<Isotope> Isotopes { get; set; }
+
+        private Isotope _Isotope;
+        public Isotope Isotope
+        { get { return _Isotope; } set { _Isotope = value; LayerElement.Isotope = value; RaisePropertyChanged(); } }
+
+        public LayerElement LayerElement { get; set; }
+
+        public LayerElementListItem(DatabaseDataContext database, LayerElement layerElement)
+        {
+            Isotope initialIsotope = layerElement.Isotope;
+            LayerElement = layerElement;
+
+            Elements = new ObservableCollection<Element>(database.Elements.ToList());
+            Isotopes = new ObservableCollection<Isotope>();
+
+            if (layerElement.Isotope!=null)
+                Element = layerElement.Isotope.Element;
+
+            Isotope = initialIsotope;
+        }
+    }
+
     public class MaterialEditorViewModel : ViewModelBase
     {
         public ICommand AddMaterialCommand { get; set; }
@@ -78,19 +123,11 @@ namespace newRBS.ViewModels
 
         public CollectionViewSource LayersViewSource { get; set; }
 
-        public ObservableCollection<LayerElement> LayerElements { get; set; }
+        public ObservableCollection<LayerElementListItem> LayerElements { get; set; }
 
-        private LayerElement _SelectedLayerElement;
-        public LayerElement SelectedLayerElement
+        private LayerElementListItem _SelectedLayerElement;
+        public LayerElementListItem SelectedLayerElement
         { get { return _SelectedLayerElement; } set { _SelectedLayerElement = value; RaisePropertyChanged(); } }
-
-        public ObservableCollection<Element> Elements { get; set; }
-
-        private Element _SelectedElement;
-        public Element SelectedElement
-        { get { return _SelectedElement; } set { _SelectedElement = value; FillIsotopes(); RaisePropertyChanged(); } }
-
-        public ObservableCollection<Isotope> Isotopes { get; set; }
 
         public MaterialEditorViewModel()
         {
@@ -98,7 +135,7 @@ namespace newRBS.ViewModels
 
             Materials = new ObservableCollection<Material>(Database.Materials.Where(x => x.MaterialName != "(undefined)").ToList());
             Layers = new ObservableCollection<Layer>();
-            LayerElements = new ObservableCollection<LayerElement>();
+            LayerElements = new ObservableCollection<LayerElementListItem>();
 
             AddMaterialCommand = new RelayCommand(() => _AddMaterialCommand(), () => true);
             RemoveMaterialCommand = new RelayCommand(() => _RemoveMaterialCommand(), () => true);
@@ -118,9 +155,6 @@ namespace newRBS.ViewModels
             LayersViewSource = new CollectionViewSource();
             LayersViewSource.Source = Layers;
             LayersViewSource.SortDescriptions.Add(new SortDescription("LayerIndex", ListSortDirection.Ascending));
-
-            Isotopes = new ObservableCollection<Isotope>();
-            Elements = new ObservableCollection<Element>(Database.Elements.ToList());
         }
 
         private void FillLayerElements()
@@ -131,17 +165,9 @@ namespace newRBS.ViewModels
                 if (_SelectedLayer.LayerElements != null)
                     foreach (LayerElement layerElement in _SelectedLayer.LayerElements)
                     {
-                        LayerElements.Add(layerElement);
+                        var item = new LayerElementListItem(Database, layerElement);
+                        LayerElements.Add(item);
                     }
-        }
-
-        private void FillIsotopes()
-        {
-            Console.WriteLine("asfd");
-            Isotopes.Clear();
-
-            foreach (Isotope i in SelectedElement.Isotopes)
-                Isotopes.Add(i);
         }
 
         public void _AddMaterialCommand()
@@ -240,12 +266,10 @@ namespace newRBS.ViewModels
         public void _AddLayerElementCommand()
         {
             if (SelectedLayer == null) return;
-            Console.WriteLine("asf");
-            //if (SelectedLayer.LayerID == 0) { MessageBox.Show("Save the new layer before adding elements!"); return; }
 
             LayerElement newLayerElement = new LayerElement { MaterialID = SelectedMaterial.MaterialID, LayerID = SelectedLayer.LayerID, StoichiometricFactor = 1 };
 
-            LayerElements.Add(newLayerElement);
+            LayerElements.Add(new LayerElementListItem(Database, newLayerElement));
 
             SelectedLayer.LayerElements.Add(newLayerElement);
             SelectedMaterial.LayerElements.Add(newLayerElement);
@@ -255,7 +279,7 @@ namespace newRBS.ViewModels
         {
             if (SelectedLayer == null || SelectedLayerElement == null) return;
 
-            Database.LayerElements.DeleteOnSubmit(SelectedLayerElement);
+            Database.LayerElements.DeleteOnSubmit(SelectedLayerElement.LayerElement);
             LayerElements.Remove(SelectedLayerElement);
         }
 

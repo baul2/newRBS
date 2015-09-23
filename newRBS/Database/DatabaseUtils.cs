@@ -349,7 +349,7 @@ namespace newRBS.Database
                                         case "":
                                             { break; }
                                         default:
-                                            { spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
+                                            { Console.WriteLine(line); spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
                                     }
                                 }
                             }

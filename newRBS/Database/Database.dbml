@@ -7,7 +7,6 @@
       <Column Name="ShortName" Type="System.String" DbType="NVarChar(10) NOT NULL" CanBeNull="false" />
       <Column Name="LongName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
       <Association Name="Element_Isotope" Member="Isotopes" ThisKey="ElementID" OtherKey="ElementID" Type="Isotope" />
-      <Association Name="Element_LayerElement" Member="LayerElements" ThisKey="ElementID" OtherKey="ElementID" Type="LayerElement" />
     </Type>
   </Table>
   <Table Name="dbo.Samples" Member="Samples">
@@ -113,12 +112,10 @@
       <Column Name="LayerElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="LayerID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="MaterialID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="IsotopeID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="StoichiometricFactor" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Association Name="Layer_LayerElement" Member="Layer" ThisKey="LayerID" OtherKey="LayerID" Type="Layer" IsForeignKey="true" />
       <Association Name="Material_LayerElement" Member="Material" ThisKey="MaterialID" OtherKey="MaterialID" Type="Material" IsForeignKey="true" />
-      <Association Name="Element_LayerElement" Member="Element" ThisKey="ElementID" OtherKey="ElementID" Type="Element" IsForeignKey="true" />
       <Association Name="Isotope_LayerElement" Member="Isotope" ThisKey="IsotopeID" OtherKey="IsotopeID" Type="Isotope" IsForeignKey="true" />
     </Type>
   </Table>

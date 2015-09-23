@@ -178,8 +178,6 @@ namespace newRBS.Database
 		
 		private EntitySet<Isotope> _Isotopes;
 		
-		private EntitySet<LayerElement> _LayerElements;
-		
     #region Definitionen der Erweiterungsmethoden
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -197,7 +195,6 @@ namespace newRBS.Database
 		public Element()
 		{
 			this._Isotopes = new EntitySet<Isotope>(new Action<Isotope>(this.attach_Isotopes), new Action<Isotope>(this.detach_Isotopes));
-			this._LayerElements = new EntitySet<LayerElement>(new Action<LayerElement>(this.attach_LayerElements), new Action<LayerElement>(this.detach_LayerElements));
 			OnCreated();
 		}
 		
@@ -294,19 +291,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Element_LayerElement", Storage="_LayerElements", ThisKey="ElementID", OtherKey="ElementID")]
-		public EntitySet<LayerElement> LayerElements
-		{
-			get
-			{
-				return this._LayerElements;
-			}
-			set
-			{
-				this._LayerElements.Assign(value);
-			}
-		}
-		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -334,18 +318,6 @@ namespace newRBS.Database
 		}
 		
 		private void detach_Isotopes(Isotope entity)
-		{
-			this.SendPropertyChanging();
-			entity.Element = null;
-		}
-		
-		private void attach_LayerElements(LayerElement entity)
-		{
-			this.SendPropertyChanging();
-			entity.Element = this;
-		}
-		
-		private void detach_LayerElements(LayerElement entity)
 		{
 			this.SendPropertyChanging();
 			entity.Element = null;
@@ -2465,8 +2437,6 @@ namespace newRBS.Database
 		
 		private int _MaterialID;
 		
-		private int _ElementID;
-		
 		private int _IsotopeID;
 		
 		private double _StoichiometricFactor;
@@ -2474,8 +2444,6 @@ namespace newRBS.Database
 		private EntityRef<Layer> _Layer;
 		
 		private EntityRef<Material> _Material;
-		
-		private EntityRef<Element> _Element;
 		
 		private EntityRef<Isotope> _Isotope;
 		
@@ -2489,8 +2457,6 @@ namespace newRBS.Database
     partial void OnLayerIDChanged();
     partial void OnMaterialIDChanging(int value);
     partial void OnMaterialIDChanged();
-    partial void OnElementIDChanging(int value);
-    partial void OnElementIDChanged();
     partial void OnIsotopeIDChanging(int value);
     partial void OnIsotopeIDChanged();
     partial void OnStoichiometricFactorChanging(double value);
@@ -2501,7 +2467,6 @@ namespace newRBS.Database
 		{
 			this._Layer = default(EntityRef<Layer>);
 			this._Material = default(EntityRef<Material>);
-			this._Element = default(EntityRef<Element>);
 			this._Isotope = default(EntityRef<Isotope>);
 			OnCreated();
 		}
@@ -2570,30 +2535,6 @@ namespace newRBS.Database
 					this._MaterialID = value;
 					this.SendPropertyChanged("MaterialID");
 					this.OnMaterialIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ElementID", DbType="Int NOT NULL")]
-		public int ElementID
-		{
-			get
-			{
-				return this._ElementID;
-			}
-			set
-			{
-				if ((this._ElementID != value))
-				{
-					if (this._Element.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnElementIDChanging(value);
-					this.SendPropertyChanging();
-					this._ElementID = value;
-					this.SendPropertyChanged("ElementID");
-					this.OnElementIDChanged();
 				}
 			}
 		}
@@ -2706,40 +2647,6 @@ namespace newRBS.Database
 						this._MaterialID = default(int);
 					}
 					this.SendPropertyChanged("Material");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Element_LayerElement", Storage="_Element", ThisKey="ElementID", OtherKey="ElementID", IsForeignKey=true)]
-		public Element Element
-		{
-			get
-			{
-				return this._Element.Entity;
-			}
-			set
-			{
-				Element previousValue = this._Element.Entity;
-				if (((previousValue != value) 
-							|| (this._Element.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Element.Entity = null;
-						previousValue.LayerElements.Remove(this);
-					}
-					this._Element.Entity = value;
-					if ((value != null))
-					{
-						value.LayerElements.Add(this);
-						this._ElementID = value.ElementID;
-					}
-					else
-					{
-						this._ElementID = default(int);
-					}
-					this.SendPropertyChanged("Element");
 				}
 			}
 		}
