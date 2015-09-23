@@ -84,6 +84,7 @@
     <Type Name="Measurement">
       <Column Name="MeasurementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="MeasurementName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="IsTestMeasurement" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
       <Column Name="Channel" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="SampleID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="SampleRemark" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />

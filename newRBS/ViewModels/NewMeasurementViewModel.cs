@@ -39,7 +39,7 @@ namespace newRBS.ViewModels
         public ObservableCollection<CheckedListItem<int>> Channels_30 { get; set; }
 
         private Measurement _Measurement;
-        public Measurement Measurement
+        public Measurement NewMeasurement
         {
             get { return _Measurement; }
             set { _Measurement = value; RaisePropertyChanged(); }
@@ -88,7 +88,7 @@ namespace newRBS.ViewModels
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
-            Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
+            NewMeasurement = Database.Measurements.Where(y=>y.MeasurementName!= "TestMeasurement").OrderByDescending(x => x.StartTime).First();
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
@@ -102,7 +102,7 @@ namespace newRBS.ViewModels
                 Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
                 if (!Samples.Contains(newSample))
                     Samples.Add(newSample);
-                Measurement.Sample = newSample;
+                NewMeasurement.Sample = newSample;
             }
         }
 
@@ -110,23 +110,27 @@ namespace newRBS.ViewModels
         {
             DialogResult = false;
 
-            int SampleID = Measurement.SampleID;
-            MyGlobals.GenericDetach<Measurement>(Measurement);
+            int IncomingIonIsotopeID =NewMeasurement.IncomingIonIsotopeID;
+            int SampleID = NewMeasurement.SampleID;
+
+            MyGlobals.GenericDetach<Measurement>(NewMeasurement);
+
+            NewMeasurement.IsTestMeasurement = false;
 
             switch (SelectedChamberTabIndex)
             {
                 case 0: // -10° chamber
                     {
-                        Measurement.Chamber = "-10°";
+                        NewMeasurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
+                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
                         break;
                     }
                 case 1: // -30° chamber
                     {
-                        Measurement.Chamber = "-30°";
+                        NewMeasurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
+                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
                         break;
                     }
             }

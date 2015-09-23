@@ -32,6 +32,7 @@ namespace newRBS.ViewModels
     public class MainViewModel : ViewModelBase
     {
         public ICommand NewMeasurementCommand { get; set; }
+        public ICommand NewTestMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
 
         public ICommand ChannelConfigurationCommand { get; set; }
@@ -65,6 +66,7 @@ namespace newRBS.ViewModels
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program started");
 
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
+            NewTestMeasurementCommand = new RelayCommand(() => _NewTestMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
 
             ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
@@ -90,49 +92,6 @@ namespace newRBS.ViewModels
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Middle, PlotCommands.PointsOnlyTrack);
-
-            FillPeriodicSystem();
-        }
-
-        public void FillPeriodicSystem()
-        {
-            string line;
-            string[] lineParts;
-            using (DatabaseDataContext Database = MyGlobals.Database)
-            {
-                using (TextReader textReader = new StreamReader("Elements.txt"))
-                {
-                    while ((line = textReader.ReadLine()) != null)
-                    {
-                        //lineParts = line.Split(' ');
-                        //    Database.Element newElement = new Database.Element { AtomicNumber = int.Parse(lineParts[0]), LongName = lineParts[2], ShortName = lineParts[3] };
-                        //Isotope newIsotope = new Isotope { AtomicNumber = int.Parse(lineParts[0]), Mass = double.Parse(lineParts[1], CultureInfo.InvariantCulture), MassNumber = 0, Element = Database.Elements.FirstOrDefault(x => x.AtomicNumber == int.Parse(lineParts[0])) };
-                        //    newElement.Isotopes.Add(newIsotope);
-                        //    Database.Elements.InsertOnSubmit(newElement);
-                        //    Console.WriteLine(newElement.ShortName);
-                        //Database.Isotopes.InsertOnSubmit(newIsotope);
-                    }
-                }
-
-                using (TextReader textReader = new StreamReader("Isotopes.txt"))
-                {
-                    //while ((line = textReader.ReadLine()) != null)
-                    // {
-                    //     lineParts = line.Split(' ');
-                    //     Database.Element element = Database.Elements.FirstOrDefault(x => x.ShortName == lineParts[0]);
-                    //     Isotope newIsotope = new Isotope { AtomicNumber = element.AtomicNumber, MassNumber = int.Parse(lineParts[1]), Mass = double.Parse(lineParts[2], CultureInfo.InvariantCulture), Abundance = double.Parse(lineParts[3], CultureInfo.InvariantCulture),Element=element };
-
-                    //                        Console.WriteLine(newIsotope.AtomicNumber);
-                    //                      Database.Isotopes.InsertOnSubmit(newIsotope);
-                    //}
-                }
-                //var temp = Database.Isotopes.Where(x => x.AtomicNumber < 8).OrderBy(y=>y.MassNumber).OrderBy(z=>z.AtomicNumber);
-
-                //foreach (var t in temp)
-                //    Console.WriteLine(t.AtomicNumber +" "+t.MassNumber);
-
-                //Database.SubmitChanges();
-            }
         }
 
         /// <summary>
@@ -147,14 +106,34 @@ namespace newRBS.ViewModels
         }
 
         /// <summary>
+        /// Function that starts a new test measurement.
+        /// </summary>
+        public void _NewTestMeasurementCommand()
+        {
+            Views.Utils.ChannelDialog channelDialog = new Views.Utils.ChannelDialog();
+            if (channelDialog.ShowDialog() == true)
+            {
+                Measurement measurement = new Measurement();
+                measurement.IsTestMeasurement = true;
+                measurement.MeasurementName = "TestMeasurement";
+                int SampleID,IncomingIonIsotopeID;
+                using (DatabaseDataContext Database = MyGlobals.Database)
+                {
+                    SampleID = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)").SampleID;
+                    IncomingIonIsotopeID = Database.Isotopes.FirstOrDefault(x => x.MassNumber == 1).IsotopeID;
+                }
+                SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().StartAcquisitions(new List<int> { channelDialog.SelectedChannel }, measurement, SampleID, IncomingIonIsotopeID);
+            }
+        }
+
+        /// <summary>
         /// Function that stops the current acquisition.
         /// </summary>
         public void _StopMeasurementCommand()
         {
             if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
             {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-                measureSpectra.StopAcquisitions();
+                SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().StopAcquisitions();
             }
         }
 
@@ -360,6 +339,12 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _CloseProgramCommand()
         {
+            using (DatabaseDataContext Database = MyGlobals.Database)
+            {
+                // Delete test measurements
+                DatabaseUtils.DeleteMeasurements(Database.Measurements.Where(x => x.IsTestMeasurement == true).Select(y => y.MeasurementID).ToList());
+            }
+
             if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
             {
                 Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();

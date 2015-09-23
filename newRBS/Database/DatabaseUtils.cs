@@ -356,6 +356,7 @@ namespace newRBS.Database
 
                             for (int i = 0; i < numSpectra; i++)
                             {
+                                newMeasurements[i].IsTestMeasurement = false;
                                 newMeasurements[i].SpectrumY = spectraY[i].ToArray();
                                 newMeasurements[i].NumOfChannels = spectraY[i].Count();
                                 newMeasurements[i].Orientation = "(undefined)";

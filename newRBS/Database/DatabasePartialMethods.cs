@@ -141,6 +141,14 @@ namespace newRBS.Database
     /// </remarks>
     public partial class Measurement
     {
+        partial void OnCreated()
+        {
+            IsTestMeasurement = false;
+            StopType = "Manual";
+            Orientation = "(undefiened)";
+            Chamber = "(undefiened)";
+        }
+
         /// <summary>
         /// Function that is called whenever a <see cref="Measurement"/> instance is inserted/updated/deleted. It calls the corresponding functions in <see cref="DatabaseUtils"/>.
         /// </summary>

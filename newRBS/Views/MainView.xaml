@@ -22,7 +22,8 @@
                 <MenuItem Header="Close" Command="{Binding CloseProgramCommand}"/>
             </MenuItem>
             <MenuItem Header="Measurement">
-                <MenuItem Header="Start Acquisition" Command="{Binding NMeasurementCommand}"/>
+                <MenuItem Header="Start Acquisition" Command="{Binding NewMeasurementCommand}"/>
+                <MenuItem Header="Start Test Acquisition" Command="{Binding NewTestMeasurementCommand}"/>
                 <MenuItem Header="Stop Acquisition" Command="{Binding StopMeasurementCommand}"/>
                 <MenuItem Header="Configure Channels" Command="{Binding ChannelConfigurationCommand}"/>
                 <Separator/>
@@ -47,6 +48,9 @@
             <ToolBar>
                 <Button Command="{Binding NewMeasurementCommand}" ToolTip="Start Acquisition">
                     <Image Source="/Images/129.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding NewTestMeasurementCommand}" ToolTip="Start Test Acquisition">
+                    <Image Source="/Images/10.png" Height="24"/>
                 </Button>
                 <Button Command="{Binding StopMeasurementCommand}" ToolTip="Stop Acquisition">
                     <Image Source="/Images/17.png" Height="24"/>

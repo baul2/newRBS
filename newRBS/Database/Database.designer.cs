@@ -1800,6 +1800,8 @@ namespace newRBS.Database
 		
 		private string _MeasurementName;
 		
+		private bool _IsTestMeasurement;
+		
 		private int _Channel;
 		
 		private int _SampleID;
@@ -1876,6 +1878,8 @@ namespace newRBS.Database
     partial void OnMeasurementIDChanged();
     partial void OnMeasurementNameChanging(string value);
     partial void OnMeasurementNameChanged();
+    partial void OnIsTestMeasurementChanging(bool value);
+    partial void OnIsTestMeasurementChanged();
     partial void OnChannelChanging(int value);
     partial void OnChannelChanged();
     partial void OnSampleIDChanging(int value);
@@ -1984,6 +1988,26 @@ namespace newRBS.Database
 					this._MeasurementName = value;
 					this.SendPropertyChanged("MeasurementName");
 					this.OnMeasurementNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsTestMeasurement", DbType="Bit NOT NULL")]
+		public bool IsTestMeasurement
+		{
+			get
+			{
+				return this._IsTestMeasurement;
+			}
+			set
+			{
+				if ((this._IsTestMeasurement != value))
+				{
+					this.OnIsTestMeasurementChanging(value);
+					this.SendPropertyChanging();
+					this._IsTestMeasurement = value;
+					this.SendPropertyChanged("IsTestMeasurement");
+					this.OnIsTestMeasurementChanged();
 				}
 			}
 		}

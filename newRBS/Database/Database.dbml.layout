@@ -99,16 +99,16 @@
         <classShapeMoniker Id="bc97fb75-63d1-4fd0-b892-2abe2222ab20" />
       </nodes>
     </associationConnector>
-    <classShape Id="2ba73456-0621-40b2-9e1b-a3277d4c5855" absoluteBounds="0.5, 0.5, 2, 7.1553369140625">
+    <classShape Id="0e5d403e-ddd0-4d2c-ace7-ebba6693b0b1" absoluteBounds="0.5, 0.5, 2, 7.3476383463541657">
       <DataClassMoniker Name="/DatabaseDataContext/Measurement" />
       <nestedChildShapes>
-        <elementListCompartment Id="ddf8e05d-0b4b-4814-a77c-977299e19061" absoluteBounds="0.51500000000000012, 0.96, 1.9700000000000002, 6.5953369140625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="eaf21587-35da-4f30-94e5-7db3d69ee303" absoluteBounds="0.51500000000000012, 0.96, 1.9700000000000002, 6.7876383463541661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <associationConnector edgePoints="[(2.5 : 2.98159912109375); (4.19855981352674 : 2.98159912109375 : JumpStart); (4.36522648019341 : 2.98159912109375 : JumpEnd); (8.625 : 2.98159912109375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DatabaseDataContext/Measurement/Measurement_Measurement_Project" />
       <nodes>
-        <classShapeMoniker Id="2ba73456-0621-40b2-9e1b-a3277d4c5855" />
+        <classShapeMoniker Id="0e5d403e-ddd0-4d2c-ace7-ebba6693b0b1" />
         <classShapeMoniker Id="9ef90383-ae20-44aa-ad51-fc37be133369" />
       </nodes>
     </associationConnector>
@@ -116,14 +116,14 @@
       <AssociationMoniker Name="/DatabaseDataContext/Isotope/Isotope_Measurement" />
       <nodes>
         <classShapeMoniker Id="f4670978-0d4b-417d-ab32-766664f97d55" />
-        <classShapeMoniker Id="2ba73456-0621-40b2-9e1b-a3277d4c5855" />
+        <classShapeMoniker Id="0e5d403e-ddd0-4d2c-ace7-ebba6693b0b1" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(3.25 : 6.69314697265625); (2.5 : 6.69314697265625)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/DatabaseDataContext/Sample/Sample_Measurement" />
       <nodes>
         <classShapeMoniker Id="9eeb5663-c694-4059-a960-c834bf7be94a" />
-        <classShapeMoniker Id="2ba73456-0621-40b2-9e1b-a3277d4c5855" />
+        <classShapeMoniker Id="0e5d403e-ddd0-4d2c-ace7-ebba6693b0b1" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>
