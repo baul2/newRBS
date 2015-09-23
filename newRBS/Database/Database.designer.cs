@@ -22,7 +22,7 @@ namespace newRBS.Database
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="test_db")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="newRBSadmin_db")]
 	public partial class DatabaseDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -51,16 +51,16 @@ namespace newRBS.Database
     partial void InsertProject(Project instance);
     partial void UpdateProject(Project instance);
     partial void DeleteProject(Project instance);
-    partial void InsertMeasurement(Measurement instance);
-    partial void UpdateMeasurement(Measurement instance);
-    partial void DeleteMeasurement(Measurement instance);
     partial void InsertLayerElement(LayerElement instance);
     partial void UpdateLayerElement(LayerElement instance);
     partial void DeleteLayerElement(LayerElement instance);
+    partial void InsertMeasurement(Measurement instance);
+    partial void UpdateMeasurement(Measurement instance);
+    partial void DeleteMeasurement(Measurement instance);
     #endregion
 		
 		public DatabaseDataContext() : 
-				base(global::newRBS.Properties.Settings.Default.test_dbConnectionString, mappingSource)
+				base(global::newRBS.Properties.Settings.Default.newRBSadmin_dbConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
@@ -145,19 +145,19 @@ namespace newRBS.Database
 			}
 		}
 		
-		public System.Data.Linq.Table<Measurement> Measurements
-		{
-			get
-			{
-				return this.GetTable<Measurement>();
-			}
-		}
-		
 		public System.Data.Linq.Table<LayerElement> LayerElements
 		{
 			get
 			{
 				return this.GetTable<LayerElement>();
+			}
+		}
+		
+		public System.Data.Linq.Table<Measurement> Measurements
+		{
+			get
+			{
+				return this.GetTable<Measurement>();
 			}
 		}
 	}
@@ -515,15 +515,15 @@ namespace newRBS.Database
 		
 		private int _AtomicNumber;
 		
-		private System.Nullable<int> _MassNumber;
+		private int _MassNumber;
 		
 		private double _Mass;
 		
 		private System.Nullable<double> _Abundance;
 		
-		private EntitySet<Measurement> _Measurements;
-		
 		private EntitySet<LayerElement> _LayerElements;
+		
+		private EntitySet<Measurement> _Measurements;
 		
 		private EntityRef<Element> _Element;
 		
@@ -537,7 +537,7 @@ namespace newRBS.Database
     partial void OnElementIDChanged();
     partial void OnAtomicNumberChanging(int value);
     partial void OnAtomicNumberChanged();
-    partial void OnMassNumberChanging(System.Nullable<int> value);
+    partial void OnMassNumberChanging(int value);
     partial void OnMassNumberChanged();
     partial void OnMassChanging(double value);
     partial void OnMassChanged();
@@ -547,8 +547,8 @@ namespace newRBS.Database
 		
 		public Isotope()
 		{
-			this._Measurements = new EntitySet<Measurement>(new Action<Measurement>(this.attach_Measurements), new Action<Measurement>(this.detach_Measurements));
 			this._LayerElements = new EntitySet<LayerElement>(new Action<LayerElement>(this.attach_LayerElements), new Action<LayerElement>(this.detach_LayerElements));
+			this._Measurements = new EntitySet<Measurement>(new Action<Measurement>(this.attach_Measurements), new Action<Measurement>(this.detach_Measurements));
 			this._Element = default(EntityRef<Element>);
 			OnCreated();
 		}
@@ -617,8 +617,8 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MassNumber", DbType="Int")]
-		public System.Nullable<int> MassNumber
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MassNumber", DbType="Int NOT NULL")]
+		public int MassNumber
 		{
 			get
 			{
@@ -677,19 +677,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Isotope_Measurement", Storage="_Measurements", ThisKey="IsotopeID", OtherKey="IncomingIonIsotopeID")]
-		public EntitySet<Measurement> Measurements
-		{
-			get
-			{
-				return this._Measurements;
-			}
-			set
-			{
-				this._Measurements.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Isotope_LayerElement", Storage="_LayerElements", ThisKey="IsotopeID", OtherKey="IsotopeID")]
 		public EntitySet<LayerElement> LayerElements
 		{
@@ -700,6 +687,19 @@ namespace newRBS.Database
 			set
 			{
 				this._LayerElements.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Isotope_Measurement", Storage="_Measurements", ThisKey="IsotopeID", OtherKey="IncomingIonIsotopeID")]
+		public EntitySet<Measurement> Measurements
+		{
+			get
+			{
+				return this._Measurements;
+			}
+			set
+			{
+				this._Measurements.Assign(value);
 			}
 		}
 		
@@ -757,18 +757,6 @@ namespace newRBS.Database
 			}
 		}
 		
-		private void attach_Measurements(Measurement entity)
-		{
-			this.SendPropertyChanging();
-			entity.Isotope = this;
-		}
-		
-		private void detach_Measurements(Measurement entity)
-		{
-			this.SendPropertyChanging();
-			entity.Isotope = null;
-		}
-		
 		private void attach_LayerElements(LayerElement entity)
 		{
 			this.SendPropertyChanging();
@@ -776,6 +764,18 @@ namespace newRBS.Database
 		}
 		
 		private void detach_LayerElements(LayerElement entity)
+		{
+			this.SendPropertyChanging();
+			entity.Isotope = null;
+		}
+		
+		private void attach_Measurements(Measurement entity)
+		{
+			this.SendPropertyChanging();
+			entity.Isotope = this;
+		}
+		
+		private void detach_Measurements(Measurement entity)
 		{
 			this.SendPropertyChanging();
 			entity.Isotope = null;
@@ -1509,6 +1509,287 @@ namespace newRBS.Database
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LayerElements")]
+	public partial class LayerElement : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _LayerElementID;
+		
+		private int _LayerID;
+		
+		private int _MaterialID;
+		
+		private int _IsotopeID;
+		
+		private double _StoichiometricFactor;
+		
+		private EntityRef<Layer> _Layer;
+		
+		private EntityRef<Material> _Material;
+		
+		private EntityRef<Isotope> _Isotope;
+		
+    #region Definitionen der Erweiterungsmethoden
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnLayerElementIDChanging(int value);
+    partial void OnLayerElementIDChanged();
+    partial void OnLayerIDChanging(int value);
+    partial void OnLayerIDChanged();
+    partial void OnMaterialIDChanging(int value);
+    partial void OnMaterialIDChanged();
+    partial void OnIsotopeIDChanging(int value);
+    partial void OnIsotopeIDChanged();
+    partial void OnStoichiometricFactorChanging(double value);
+    partial void OnStoichiometricFactorChanged();
+    #endregion
+		
+		public LayerElement()
+		{
+			this._Layer = default(EntityRef<Layer>);
+			this._Material = default(EntityRef<Material>);
+			this._Isotope = default(EntityRef<Isotope>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LayerElementID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int LayerElementID
+		{
+			get
+			{
+				return this._LayerElementID;
+			}
+			set
+			{
+				if ((this._LayerElementID != value))
+				{
+					this.OnLayerElementIDChanging(value);
+					this.SendPropertyChanging();
+					this._LayerElementID = value;
+					this.SendPropertyChanged("LayerElementID");
+					this.OnLayerElementIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LayerID", DbType="Int NOT NULL")]
+		public int LayerID
+		{
+			get
+			{
+				return this._LayerID;
+			}
+			set
+			{
+				if ((this._LayerID != value))
+				{
+					if (this._Layer.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnLayerIDChanging(value);
+					this.SendPropertyChanging();
+					this._LayerID = value;
+					this.SendPropertyChanged("LayerID");
+					this.OnLayerIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MaterialID", DbType="Int NOT NULL")]
+		public int MaterialID
+		{
+			get
+			{
+				return this._MaterialID;
+			}
+			set
+			{
+				if ((this._MaterialID != value))
+				{
+					if (this._Material.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnMaterialIDChanging(value);
+					this.SendPropertyChanging();
+					this._MaterialID = value;
+					this.SendPropertyChanged("MaterialID");
+					this.OnMaterialIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsotopeID", DbType="Int NOT NULL")]
+		public int IsotopeID
+		{
+			get
+			{
+				return this._IsotopeID;
+			}
+			set
+			{
+				if ((this._IsotopeID != value))
+				{
+					if (this._Isotope.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnIsotopeIDChanging(value);
+					this.SendPropertyChanging();
+					this._IsotopeID = value;
+					this.SendPropertyChanged("IsotopeID");
+					this.OnIsotopeIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StoichiometricFactor", DbType="Float NOT NULL")]
+		public double StoichiometricFactor
+		{
+			get
+			{
+				return this._StoichiometricFactor;
+			}
+			set
+			{
+				if ((this._StoichiometricFactor != value))
+				{
+					this.OnStoichiometricFactorChanging(value);
+					this.SendPropertyChanging();
+					this._StoichiometricFactor = value;
+					this.SendPropertyChanged("StoichiometricFactor");
+					this.OnStoichiometricFactorChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Layer_LayerElement", Storage="_Layer", ThisKey="LayerID", OtherKey="LayerID", IsForeignKey=true)]
+		public Layer Layer
+		{
+			get
+			{
+				return this._Layer.Entity;
+			}
+			set
+			{
+				Layer previousValue = this._Layer.Entity;
+				if (((previousValue != value) 
+							|| (this._Layer.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Layer.Entity = null;
+						previousValue.LayerElements.Remove(this);
+					}
+					this._Layer.Entity = value;
+					if ((value != null))
+					{
+						value.LayerElements.Add(this);
+						this._LayerID = value.LayerID;
+					}
+					else
+					{
+						this._LayerID = default(int);
+					}
+					this.SendPropertyChanged("Layer");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Material_LayerElement", Storage="_Material", ThisKey="MaterialID", OtherKey="MaterialID", IsForeignKey=true)]
+		public Material Material
+		{
+			get
+			{
+				return this._Material.Entity;
+			}
+			set
+			{
+				Material previousValue = this._Material.Entity;
+				if (((previousValue != value) 
+							|| (this._Material.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Material.Entity = null;
+						previousValue.LayerElements.Remove(this);
+					}
+					this._Material.Entity = value;
+					if ((value != null))
+					{
+						value.LayerElements.Add(this);
+						this._MaterialID = value.MaterialID;
+					}
+					else
+					{
+						this._MaterialID = default(int);
+					}
+					this.SendPropertyChanged("Material");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Isotope_LayerElement", Storage="_Isotope", ThisKey="IsotopeID", OtherKey="IsotopeID", IsForeignKey=true)]
+		public Isotope Isotope
+		{
+			get
+			{
+				return this._Isotope.Entity;
+			}
+			set
+			{
+				Isotope previousValue = this._Isotope.Entity;
+				if (((previousValue != value) 
+							|| (this._Isotope.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Isotope.Entity = null;
+						previousValue.LayerElements.Remove(this);
+					}
+					this._Isotope.Entity = value;
+					if ((value != null))
+					{
+						value.LayerElements.Add(this);
+						this._IsotopeID = value.IsotopeID;
+					}
+					else
+					{
+						this._IsotopeID = default(int);
+					}
+					this.SendPropertyChanged("Isotope");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Measurements")]
 	public partial class Measurement : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -1539,7 +1820,9 @@ namespace newRBS.Database
 		
 		private System.Data.Linq.Binary _SpectrumYByte;
 		
-		private System.Data.Linq.Binary _SpectrumYCalculatedByte;
+		private System.Data.Linq.Binary _SpectrumYModifiedByte;
+		
+		private System.Data.Linq.Binary _SpectrumYSimulatedByte;
 		
 		private string _StopType;
 		
@@ -1613,8 +1896,10 @@ namespace newRBS.Database
     partial void OnNumOfChannelsChanged();
     partial void OnSpectrumYByteChanging(System.Data.Linq.Binary value);
     partial void OnSpectrumYByteChanged();
-    partial void OnSpectrumYCalculatedByteChanging(System.Data.Linq.Binary value);
-    partial void OnSpectrumYCalculatedByteChanged();
+    partial void OnSpectrumYModifiedByteChanging(System.Data.Linq.Binary value);
+    partial void OnSpectrumYModifiedByteChanged();
+    partial void OnSpectrumYSimulatedByteChanging(System.Data.Linq.Binary value);
+    partial void OnSpectrumYSimulatedByteChanged();
     partial void OnStopTypeChanging(string value);
     partial void OnStopTypeChanged();
     partial void OnStopValueChanging(double value);
@@ -1907,22 +2192,42 @@ namespace newRBS.Database
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SpectrumYCalculatedByte", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
-		public System.Data.Linq.Binary SpectrumYCalculatedByte
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SpectrumYModifiedByte", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary SpectrumYModifiedByte
 		{
 			get
 			{
-				return this._SpectrumYCalculatedByte;
+				return this._SpectrumYModifiedByte;
 			}
 			set
 			{
-				if ((this._SpectrumYCalculatedByte != value))
+				if ((this._SpectrumYModifiedByte != value))
 				{
-					this.OnSpectrumYCalculatedByteChanging(value);
+					this.OnSpectrumYModifiedByteChanging(value);
 					this.SendPropertyChanging();
-					this._SpectrumYCalculatedByte = value;
-					this.SendPropertyChanged("SpectrumYCalculatedByte");
-					this.OnSpectrumYCalculatedByteChanged();
+					this._SpectrumYModifiedByte = value;
+					this.SendPropertyChanged("SpectrumYModifiedByte");
+					this.OnSpectrumYModifiedByteChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SpectrumYSimulatedByte", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary SpectrumYSimulatedByte
+		{
+			get
+			{
+				return this._SpectrumYSimulatedByte;
+			}
+			set
+			{
+				if ((this._SpectrumYSimulatedByte != value))
+				{
+					this.OnSpectrumYSimulatedByteChanging(value);
+					this.SendPropertyChanging();
+					this._SpectrumYSimulatedByte = value;
+					this.SendPropertyChanged("SpectrumYSimulatedByte");
+					this.OnSpectrumYSimulatedByteChanged();
 				}
 			}
 		}
@@ -2422,287 +2727,6 @@ namespace newRBS.Database
 		{
 			this.SendPropertyChanging();
 			entity.Measurement = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LayerElements")]
-	public partial class LayerElement : EntityBase, INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _LayerElementID;
-		
-		private int _LayerID;
-		
-		private int _MaterialID;
-		
-		private int _IsotopeID;
-		
-		private double _StoichiometricFactor;
-		
-		private EntityRef<Layer> _Layer;
-		
-		private EntityRef<Material> _Material;
-		
-		private EntityRef<Isotope> _Isotope;
-		
-    #region Definitionen der Erweiterungsmethoden
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnLayerElementIDChanging(int value);
-    partial void OnLayerElementIDChanged();
-    partial void OnLayerIDChanging(int value);
-    partial void OnLayerIDChanged();
-    partial void OnMaterialIDChanging(int value);
-    partial void OnMaterialIDChanged();
-    partial void OnIsotopeIDChanging(int value);
-    partial void OnIsotopeIDChanged();
-    partial void OnStoichiometricFactorChanging(double value);
-    partial void OnStoichiometricFactorChanged();
-    #endregion
-		
-		public LayerElement()
-		{
-			this._Layer = default(EntityRef<Layer>);
-			this._Material = default(EntityRef<Material>);
-			this._Isotope = default(EntityRef<Isotope>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LayerElementID", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int LayerElementID
-		{
-			get
-			{
-				return this._LayerElementID;
-			}
-			set
-			{
-				if ((this._LayerElementID != value))
-				{
-					this.OnLayerElementIDChanging(value);
-					this.SendPropertyChanging();
-					this._LayerElementID = value;
-					this.SendPropertyChanged("LayerElementID");
-					this.OnLayerElementIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LayerID", DbType="Int NOT NULL")]
-		public int LayerID
-		{
-			get
-			{
-				return this._LayerID;
-			}
-			set
-			{
-				if ((this._LayerID != value))
-				{
-					if (this._Layer.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnLayerIDChanging(value);
-					this.SendPropertyChanging();
-					this._LayerID = value;
-					this.SendPropertyChanged("LayerID");
-					this.OnLayerIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MaterialID", DbType="Int NOT NULL")]
-		public int MaterialID
-		{
-			get
-			{
-				return this._MaterialID;
-			}
-			set
-			{
-				if ((this._MaterialID != value))
-				{
-					if (this._Material.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnMaterialIDChanging(value);
-					this.SendPropertyChanging();
-					this._MaterialID = value;
-					this.SendPropertyChanged("MaterialID");
-					this.OnMaterialIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsotopeID", DbType="Int NOT NULL")]
-		public int IsotopeID
-		{
-			get
-			{
-				return this._IsotopeID;
-			}
-			set
-			{
-				if ((this._IsotopeID != value))
-				{
-					if (this._Isotope.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnIsotopeIDChanging(value);
-					this.SendPropertyChanging();
-					this._IsotopeID = value;
-					this.SendPropertyChanged("IsotopeID");
-					this.OnIsotopeIDChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StoichiometricFactor", DbType="Float NOT NULL")]
-		public double StoichiometricFactor
-		{
-			get
-			{
-				return this._StoichiometricFactor;
-			}
-			set
-			{
-				if ((this._StoichiometricFactor != value))
-				{
-					this.OnStoichiometricFactorChanging(value);
-					this.SendPropertyChanging();
-					this._StoichiometricFactor = value;
-					this.SendPropertyChanged("StoichiometricFactor");
-					this.OnStoichiometricFactorChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Layer_LayerElement", Storage="_Layer", ThisKey="LayerID", OtherKey="LayerID", IsForeignKey=true)]
-		public Layer Layer
-		{
-			get
-			{
-				return this._Layer.Entity;
-			}
-			set
-			{
-				Layer previousValue = this._Layer.Entity;
-				if (((previousValue != value) 
-							|| (this._Layer.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Layer.Entity = null;
-						previousValue.LayerElements.Remove(this);
-					}
-					this._Layer.Entity = value;
-					if ((value != null))
-					{
-						value.LayerElements.Add(this);
-						this._LayerID = value.LayerID;
-					}
-					else
-					{
-						this._LayerID = default(int);
-					}
-					this.SendPropertyChanged("Layer");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Material_LayerElement", Storage="_Material", ThisKey="MaterialID", OtherKey="MaterialID", IsForeignKey=true)]
-		public Material Material
-		{
-			get
-			{
-				return this._Material.Entity;
-			}
-			set
-			{
-				Material previousValue = this._Material.Entity;
-				if (((previousValue != value) 
-							|| (this._Material.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Material.Entity = null;
-						previousValue.LayerElements.Remove(this);
-					}
-					this._Material.Entity = value;
-					if ((value != null))
-					{
-						value.LayerElements.Add(this);
-						this._MaterialID = value.MaterialID;
-					}
-					else
-					{
-						this._MaterialID = default(int);
-					}
-					this.SendPropertyChanged("Material");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Isotope_LayerElement", Storage="_Isotope", ThisKey="IsotopeID", OtherKey="IsotopeID", IsForeignKey=true)]
-		public Isotope Isotope
-		{
-			get
-			{
-				return this._Isotope.Entity;
-			}
-			set
-			{
-				Isotope previousValue = this._Isotope.Entity;
-				if (((previousValue != value) 
-							|| (this._Isotope.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Isotope.Entity = null;
-						previousValue.LayerElements.Remove(this);
-					}
-					this._Isotope.Entity = value;
-					if ((value != null))
-					{
-						value.LayerElements.Add(this);
-						this._IsotopeID = value.IsotopeID;
-					}
-					else
-					{
-						this._IsotopeID = default(int);
-					}
-					this.SendPropertyChanged("Isotope");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
 		}
 	}
 }

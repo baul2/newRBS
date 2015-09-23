@@ -216,7 +216,7 @@ namespace newRBS.ViewModels
 
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
-            int[] spectrumYCalculated = measurement.SpectrumYCalculated;
+            int[] spectrumYCalculated = measurement.SpectrumYSimulated;
 
             if (spectrumYCalculated == null || ShowSimulatedSpectra == false)
             {
@@ -320,7 +320,7 @@ namespace newRBS.ViewModels
                     }
             }
             plotModel.Series.Add(MeassuredPlot);
-            if (measurement.SpectrumYCalculated != null && ShowSimulatedSpectra == true)
+            if (measurement.SpectrumYSimulated != null && ShowSimulatedSpectra == true)
                 plotModel.Series.Add(SimulatedPlot);
             plotModel.InvalidatePlot(true);
         }

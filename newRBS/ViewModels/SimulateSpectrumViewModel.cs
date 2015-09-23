@@ -141,7 +141,7 @@ namespace newRBS.ViewModels
             for (int i = 0; i < SelectedMeasurement.NumOfChannels; i++)
                 spectrumYCalc[i] = (int)resultMatrix[2, i];
 
-            SelectedMeasurement.SpectrumYCalculated = spectrumYCalc;
+            SelectedMeasurement.SpectrumYSimulated = spectrumYCalc;
 
             Database.SubmitChanges();
         }

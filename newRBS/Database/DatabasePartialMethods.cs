@@ -190,20 +190,37 @@ namespace newRBS.Database
             }
         }
 
-        public int[] SpectrumYCalculated
+        public int[] SpectrumYModified
         {
             get
             {
-                if (SpectrumYCalculatedByte == null) return null;
-                int[] intArray = new int[SpectrumYCalculatedByte.Length / sizeof(int)];
-                Buffer.BlockCopy(SpectrumYCalculatedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                if (SpectrumYModifiedByte== null) return null;
+                int[] intArray = new int[SpectrumYModifiedByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYModifiedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
                 return intArray;
             }
             set
             {
                 byte[] byteArray = new byte[value.Length * sizeof(int)];
                 Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
-                SpectrumYCalculatedByte = byteArray;
+                SpectrumYModifiedByte = byteArray;
+            }
+        }
+
+        public int[] SpectrumYSimulated
+        {
+            get
+            {
+                if (SpectrumYSimulatedByte == null) return null;
+                int[] intArray = new int[SpectrumYSimulatedByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYSimulatedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                return intArray;
+            }
+            set
+            {
+                byte[] byteArray = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
+                SpectrumYSimulatedByte = byteArray;
             }
         }
 
