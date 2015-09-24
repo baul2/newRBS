@@ -30,33 +30,33 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Content="Measurement name:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="0"/>
-                <TextBox Text="{Binding Measurement.MeasurementName, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
+                <TextBox Text="{Binding NewMeasurement.MeasurementName, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="0" />
 
                 <Label Content="Sample:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="1"/>
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1">
-                    <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding Measurement.Sample, Mode=TwoWay}" Margin="3" MinWidth="80"/>
+                    <ComboBox ItemsSource="{Binding Samples}" DisplayMemberPath="SampleName" SelectedItem="{Binding NewMeasurement.Sample, Mode=TwoWay}" Margin="3" MinWidth="80"/>
                     <Button Content="New" Command="{Binding NewSampleCommand}" Margin="3"/>
                 </StackPanel>
                 <Label Content="Sample Remark:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="1"/>
-                <TextBox Text="{Binding Measurement.SampleRemark, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="1" MinWidth="80"/>
+                <TextBox Text="{Binding NewMeasurement.SampleRemark, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="1" MinWidth="80"/>
 
                 <Label Content="Orientation:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="2"/>
-                <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding Measurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
+                <ComboBox ItemsSource="{Binding Orientations}" SelectedItem="{Binding NewMeasurement.Orientation, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="2" />
 
                 <Label Content="Ion:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="3"/>
-                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="ShortDisplayName" SelectedValuePath="IsotopeID" SelectedValue="{Binding Measurement.IncomingIonIsotopeID, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
+                <ComboBox ItemsSource="{Binding Ions}" DisplayMemberPath="ShortDisplayName" SelectedValuePath="IsotopeID" SelectedValue="{Binding NewMeasurement.IncomingIonIsotopeID, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="3" />
                 <Label Content="Ion Energy (keV):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="3"/>
-                <TextBox Text="{Binding Measurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
+                <TextBox Text="{Binding NewMeasurement.IncomingIonEnergy, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="3" />
 
                 <Label Content="Ion Out Angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="4"/>
-                <TextBox Text="{Binding Measurement.OutcomingIonAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="4" />
+                <TextBox Text="{Binding NewMeasurement.OutcomingIonAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="1" Grid.Row="4" />
                 <Label Content="Solid Angle (°):" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="4"/>
-                <TextBox Text="{Binding Measurement.SolidAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="4" />
+                <TextBox Text="{Binding NewMeasurement.SolidAngle, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="4" />
 
                 <Label Content="Stop Type:" HorizontalAlignment="Right" Margin="3" Grid.Column="0" Grid.Row="7"/>
-                <ComboBox ItemsSource="{Binding StopTypes}" SelectedItem="{Binding Measurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="7" />
+                <ComboBox ItemsSource="{Binding StopTypes}" SelectedItem="{Binding NewMeasurement.StopType, Mode=TwoWay}" Margin="3" Grid.Column="1" Grid.Row="7" />
                 <Label Content="Stop Value:" HorizontalAlignment="Right" Margin="3" Grid.Column="2" Grid.Row="7"/>
-                <TextBox Text="{Binding Measurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7" />
+                <TextBox Text="{Binding NewMeasurement.StopValue, Mode=TwoWay}" VerticalContentAlignment="Center" Margin="3" Grid.Column="3" Grid.Row="7" />
             </Grid>
         </GroupBox>
         <TabControl SelectedIndex="{Binding SelectedChamberTabIndex}">

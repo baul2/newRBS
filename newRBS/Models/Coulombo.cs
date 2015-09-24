@@ -33,7 +33,7 @@ namespace newRBS.Models
             Init(PortName, BaudRate, parity, DataBits, stopBits, CoulomboID);
         }
 
-        private void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
+        public void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
         {
             //"COM3,9600,None,8,Two,94"
             IMess = (char)int.Parse(CoulomboID, System.Globalization.NumberStyles.HexNumber);

@@ -12,16 +12,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Data;
 
 namespace newRBS.Views
 {
-    /// <summary>
-    /// Interaction logic for SpectraListView.xaml
-    /// </summary>
-    public partial class SpectraListView : UserControl
+    public partial class MeasurementListView : UserControl
     {
-        public SpectraListView()
+        public MeasurementListView()
         {
             InitializeComponent();
         }

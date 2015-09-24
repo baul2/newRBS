@@ -56,7 +56,7 @@ namespace newRBS.Models
         /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Database.Measurement"/> in the database. 
         /// </summary>
         /// <param name="SelectedChannels">The channel numbers to start the acquisitions.</param>
-        public void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID)
+        public void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID, int IncomingIonIsotopeID)
         {
             List<int> IDs = new List<int>();
 
@@ -66,6 +66,9 @@ namespace newRBS.Models
             {
                 foreach (int channel in SelectedChannels)
                 {
+                    // Delete test measurements
+                    DatabaseUtils.DeleteMeasurements(Database.Measurements.Where(x => x.IsTestMeasurement == true).Select(y=>y.MeasurementID).ToList());
+
                     cAEN_x730.StartAcquisition(channel);
 
                     if (NewMeasurement.StopType == "ChopperCounts")
@@ -89,6 +92,7 @@ namespace newRBS.Models
                     NewMeasurement.Channel = channel;
                     NewMeasurement.StartTime = DateTime.Now;
                     NewMeasurement.Sample = Database.Samples.Single(x => x.SampleID == SampleID);
+                    NewMeasurement.Isotope = Database.Isotopes.FirstOrDefault(x => x.IsotopeID == IncomingIonIsotopeID);
                     NewMeasurement.CurrentDuration = new DateTime(2000, 01, 01);
                     NewMeasurement.CurrentCharge = 0;
                     NewMeasurement.CurrentCounts = 0;
@@ -166,7 +170,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
         /// <param name="Channel">Channel to read the spectrum from.</param>
-        private void MeasureSpectraWorker(int MeasurementID, int Channel)
+        public void MeasureSpectraWorker(int MeasurementID, int Channel)
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
             long sum = newSpectrumY.Sum();

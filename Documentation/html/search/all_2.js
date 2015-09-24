@@ -8,10 +8,12 @@ var searchData=
   ['caendpp_5fpha_5fanalogprobe2_5ft',['CAENDPP_PHA_AnalogProbe2_t',['../namespacenew_r_b_s_1_1_models.html#a9830daffc74a9e0af99e84ee112c2a00',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fdigitalprobe1_5ft',['CAENDPP_PHA_DigitalProbe1_t',['../namespacenew_r_b_s_1_1_models.html#ac905f67dc1daa4411e28bfb814398692',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fdigitalprobe2_5ft',['CAENDPP_PHA_DigitalProbe2_t',['../namespacenew_r_b_s_1_1_models.html#af79064155aa968b8576948ec2adac011',1,'newRBS::Models']]],
+  ['changefilter',['ChangeFilter',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#ab0ab1e184cc5cae7b7af067390bc9662',1,'newRBS::ViewModels::MeasurementListViewModel']]],
   ['channelconfigurationviewmodel',['ChannelConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_channel_configuration_view_model.html#ad2257ca23e9830bd24be395f9114a0d9',1,'newRBS::ViewModels::ChannelConfigurationViewModel']]],
   ['channelconfigurationviewmodel',['ChannelConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_channel_configuration_view_model.html',1,'newRBS::ViewModels']]],
   ['channelparams',['ChannelParams',['../classnew_r_b_s_1_1_models_1_1_channel_params.html',1,'newRBS::Models']]],
   ['checkedlistitem',['CheckedListItem',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_checked_list_item.html',1,'newRBS::ViewModels::Utils']]],
+  ['clearplot',['ClearPlot',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#aa3266864b4401d3daa30b4d634b2a62b',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
   ['close',['Close',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a54b2e19959355321ac3e0f95f06ff2c7',1,'newRBS::Models::CAEN_x730']]],
   ['connparam',['ConnParam',['../structnew_r_b_s_1_1_models_1_1_conn_param.html',1,'newRBS::Models']]]
 ];

@@ -1,0 +1,40 @@
+﻿<Window x:Class="newRBS.Views.Utils.ChannelDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:newRBS.Views.Utils"
+        mc:Ignorable="d"
+        Title="ChannelDialog" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" MinWidth="250" MinHeight="80"
+        ContentRendered="Window_ContentRendered"
+        Loaded="Window_Loaded">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Content="Select the channel for the test measurement:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+                <ComboBox x:Name="ChannelCombo" Grid.Column="1" Grid.Row="0" Margin="5" Padding="2" MinWidth="50">
+                    <ComboBoxItem Content="0" IsSelected="True"/>
+                    <ComboBoxItem Content="1"/>
+                    <ComboBoxItem Content="2"/>
+                    <ComboBoxItem Content="3"/>
+                    <ComboBoxItem Content="4"/>
+                    <ComboBoxItem Content="5"/>
+                    <ComboBoxItem Content="6"/>
+                    <ComboBoxItem Content="7"/>
+                </ComboBox>
+            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button IsDefault="True" Name="btnDialogOk" Click="btnDialogOk_Click" MinWidth="60" Margin="5">_Ok</Button>
+                <Button IsCancel="True" MinWidth="60" Margin="5">_Cancel</Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

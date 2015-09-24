@@ -246,6 +246,9 @@
     <Compile Include="Views\Utils\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Utils\ChannelDialog.xaml.cs">
+      <DependentUpon>ChannelDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Utils\NewLogInDialog .xaml.cs">
       <DependentUpon>NewLogInDialog .xaml</DependentUpon>
     </Compile>
@@ -326,6 +329,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Utils\ChannelDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\Utils\NewLogInDialog .xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -400,6 +407,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\10.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -29,6 +29,9 @@ namespace newRBS.ViewModels
         public AsyncObservableCollection<FilterClass> Items { get; set; }
     }
 
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MeasurementFilterView"/>. They filter the database by date/sample/project... and send the obtained <see cref="Measurement.MeasurementID"/>s as events.
+    /// </summary>
     public class MeasurementFilterViewModel : ViewModelBase
     {
         public delegate void EventHandlerFilter(List<int> MeasurementIDList);
@@ -68,12 +71,18 @@ namespace newRBS.ViewModels
         public string VisButtonContent
         { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// The list of available filter types.
+        /// </summary>
         public AsyncObservableCollection<string> filterTypeList { get; set; }
 
         private int _filterTypeIndex;
         public int filterTypeIndex
         { get { return _filterTypeIndex; } set { _filterTypeIndex = value; FillFilterList(filterTypeList[value]); } }
 
+        /// <summary>
+        /// The currently selected filter.
+        /// </summary>
         public FilterClass selectedFilter { get; set; }
 
         public RelayCommand<TreeViewHelper.DependencyPropertyEventArgs> SelectedItemChanged { get; set; }
@@ -88,11 +97,17 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// The ItemsSource of the TreeView. It contains the available filters (<see cref="FilterClass"/>).
+        /// </summary>
         public TreeViewModel filterTree { get; set; }
 
         public ObservableCollection<Project> Projects { get; set; }
 
         private Project _SelectedProject;
+        /// <summary>
+        /// The currently selected <see cref="Project"/>.
+        /// </summary>
         public Project SelectedProject
         {
             get { return _SelectedProject; }
@@ -108,22 +123,9 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void ClearFilterTreeSelectedItem()
-        {
-            foreach (var s in filterTree.Items)
-            {
-                if (s.IsSelected == true) s.IsSelected = false;
-                if (s.Children != null)
-                    foreach (var u in s.Children)
-                    {
-                        if (u.IsSelected == true) u.IsSelected = false;
-                        if (u.Children != null)
-                            foreach (var t in u.Children)
-                                if (t.IsSelected == true) t.IsSelected = false;
-                    }
-            }
-        }
-
+        /// <summary>
+        /// Constructor of the class. It sets up the Commands and initiate the <see cref="filterTypeList"/> and <see cref="filterTree"/>.
+        /// </summary>
         public MeasurementFilterViewModel()
         {
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
@@ -142,9 +144,14 @@ namespace newRBS.ViewModels
 
             SelectedItemChanged = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
 
+            Projects = new ObservableCollection<Project>();
+
             Init();
         }
 
+        /// <summary>
+        /// Function that resets the <see cref="filterTypeList"/> and fills the list of <see cref="Project"/>s.
+        /// </summary>
         public void Init()
         {
             filterTypeIndex = 1;
@@ -152,16 +159,44 @@ namespace newRBS.ViewModels
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Projects = new ObservableCollection<Project>(Database.Projects.ToList());
+                Projects.Clear();
+                foreach (var project in Database.Projects.ToList())
+                    Projects.Add(project);
             }
         }
 
-        private void _ExpandFilterList()
+        /// <summary>
+        /// Function that iterates over all entries in <see cref="filterTree"/> and sets their 'IsSelected' property to false.
+        /// </summary>
+        public void ClearFilterTreeSelectedItem()
+        {
+            foreach (var s in filterTree.Items)
+            {
+                if (s.IsSelected == true) s.IsSelected = false;
+                if (s.Children != null)
+                    foreach (var u in s.Children)
+                    {
+                        if (u.IsSelected == true) u.IsSelected = false;
+                        if (u.Children != null)
+                            foreach (var t in u.Children)
+                                if (t.IsSelected == true) t.IsSelected = false;
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Function that expand/collaps the filter panel.
+        /// </summary>
+        public void _ExpandFilterList()
         {
             measurementFilterPanelVis = !measurementFilterPanelVis;
         }
 
-        private void FillFilterList(string filterType)
+        /// <summary>
+        /// Function that populates the filter tree with the selected filterType from the <see cref="filterTypeList"/>.
+        /// </summary>
+        /// <param name="filterType">The string of the selected filterType.</param>
+        public void FillFilterList(string filterType)
         {
             trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filterType: '" + filterType + "'");
 
@@ -251,6 +286,10 @@ namespace newRBS.ViewModels
             if (EventNewFilter != null) EventNewFilter(new List<int>());
         }
 
+        /// <summary>
+        /// Function that sends an event containing a list of <see cref="Measurement.MeasurementID"/>s generated from the selected filter.
+        /// </summary>
+        /// <param name="filter">The filter which has been selected in the <see cref="filterTree"/>.</param>
         public void NewFilterSelected(FilterClass filter)
         {
             if (selectedFilter == null) return;
@@ -310,7 +349,11 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void SelectProject(Project project)
+        /// <summary>
+        /// Function that sends an event containing a list of <see cref="Measurement.MeasurementID"/>s generated from the selected <see cref="Project"/>.
+        /// </summary>
+        /// <param name="project">The <see cref="Project"/> which has been selected.</param>
+        public void SelectProject(Project project)
         {
             if (project == null) return;
 
@@ -324,7 +367,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _NewProjectCommand()
+        /// <summary>
+        /// Function that adds a new <see cref="Project"/> to the <see cref="Projects"/> list.
+        /// </summary>
+        public void _NewProjectCommand()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new project name:", "");
             if (inputDialog.ShowDialog() == true)
@@ -340,7 +386,10 @@ namespace newRBS.ViewModels
                     }
         }
 
-        private void _RenameProjectCommand()
+        /// <summary>
+        /// Function that renames the selected <see cref="Project"/>.
+        /// </summary>
+        public void _RenameProjectCommand()
         {
             if (SelectedProject == null) return;
 
@@ -362,7 +411,10 @@ namespace newRBS.ViewModels
                 }
         }
 
-        private void _DeleteProjectCommand()
+        /// <summary>
+        /// Function that deletes the selected <see cref="Project"/>.
+        /// </summary>
+        public void _DeleteProjectCommand()
         {
             if (SelectedProject == null) return;
 
@@ -385,7 +437,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _AddMeasurementCommand()
+        /// <summary>
+        /// Function that adds the selected <see cref="Measurement"/>s to a specified <see cref="Project"/>.
+        /// </summary>
+        public void _AddMeasurementCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
 
@@ -411,7 +466,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _RemoveMeasurementCommand()
+        /// <summary>
+        /// Function that removes the selected <see cref="Measurement"/>s from the selected <see cref="Project"/>.
+        /// </summary>
+        public void _RemoveMeasurementCommand()
         {
             if (SelectedProject == null) return;
 

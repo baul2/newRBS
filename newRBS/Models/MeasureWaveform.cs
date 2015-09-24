@@ -126,7 +126,7 @@ namespace newRBS.Models
         /// Function that gets the new <see cref="Waveform"/>s from <see cref="CAEN_x730.GetWaveform(int)"/> and sends it with an event.
         /// </summary>
         /// <param name="Channel">Number of the channel to get the waveforms.</param>
-        private void MeasureWaveformWorker(int Channel)
+        public void MeasureWaveformWorker(int Channel)
         {
             waveform = cAEN_x730.GetWaveform(Channel);
             trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureWaveformWorker Channel = " + Channel);

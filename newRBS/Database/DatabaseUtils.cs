@@ -349,13 +349,14 @@ namespace newRBS.Database
                                         case "":
                                             { break; }
                                         default:
-                                            { spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
+                                            { Console.WriteLine(line); spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
                                     }
                                 }
                             }
 
                             for (int i = 0; i < numSpectra; i++)
                             {
+                                newMeasurements[i].IsTestMeasurement = false;
                                 newMeasurements[i].SpectrumY = spectraY[i].ToArray();
                                 newMeasurements[i].NumOfChannels = spectraY[i].Count();
                                 newMeasurements[i].Orientation = "(undefined)";

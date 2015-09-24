@@ -26,6 +26,9 @@ using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MeasurementPlotView"/>. They plot the selected <see cref="Measurement"/>s.
+    /// </summary>
     public class MeasurementPlotViewModel : ViewModelBase
     {
         public ICommand ExpandConfigPanel { get; set; }
@@ -52,6 +55,9 @@ namespace newRBS.ViewModels
         public string VisButtonContent
         { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// List of <see cref="Measurement.MeasurementID"/> of the plottet <see cref="Measurement"/>s.
+        /// </summary>
         private List<int> MeasurementIDList;
 
         public PlotModel plotModel { get; set; }
@@ -86,6 +92,9 @@ namespace newRBS.ViewModels
         public bool ShowSimulatedSpectra
         { get { return _ShowSimulatedSpectra; } set { _ShowSimulatedSpectra = value; RaisePropertyChanged(); UpdateAllPlots(); } }
 
+        /// <summary>
+        /// Constructor of the class. Hooks up to events, sets up commands and initialises variables.
+        /// </summary>
         public MeasurementPlotViewModel()
         {
             // Hooking up to events from DatabaseUtils 
@@ -131,12 +140,18 @@ namespace newRBS.ViewModels
             LegendCaptions = new List<string> { "Measurement IDs", "Measurement names", "Sample names", "Sample remarks", "Sample names + remarks" };
         }
 
-        private void _ExpandConfigPanel()
+        /// <summary>
+        /// Function that toggles the ConfigPanel visibility.
+        /// </summary>
+        public void _ExpandConfigPanel()
         {
             ConfigPanelVis = !ConfigPanelVis;
         }
 
-        private void SetUpModel()
+        /// <summary>
+        /// Function that sets up the <see cref="Model"/> of the <see cref="OxyPlot"/>.
+        /// </summary>
+        public void SetUpModel()
         {
             plotModel.LegendOrientation = LegendOrientation.Vertical;
             plotModel.LegendPlacement = LegendPlacement.Inside;
@@ -151,7 +166,11 @@ namespace newRBS.ViewModels
             UpdateYAxisTitle();
         }
 
-        private void MeasurementToPlot(Measurement measurement)
+        /// <summary>
+        /// Function that is executed whenever a <see cref="Measurement"/> has to be plotted.
+        /// </summary>
+        /// <param name="measurement"><see cref="Measurement"/> to be plotted.</param>
+        public void MeasurementToPlot(Measurement measurement)
         {
             if (MeasurementIDList.Contains(measurement.MeasurementID)) return;
 
@@ -159,7 +178,11 @@ namespace newRBS.ViewModels
             PlotMeasurement(measurement);
         }
 
-        private void MeasurementNotToPlot(Measurement measurement)
+        /// <summary>
+        /// Function that is executed whenever a <see cref="Measurement"/> has not to be plotted.
+        /// </summary>
+        /// <param name="measurement"><see cref="Measurement"/> not to be plotted.</param>
+        public void MeasurementNotToPlot(Measurement measurement)
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
@@ -180,6 +203,10 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that cleas the <see cref="plotModel"/>.
+        /// </summary>
+        /// <param name="dump"></param>
         public void ClearPlot(List<int> dump)
         {
             plotModel.Series.Clear();
@@ -187,7 +214,11 @@ namespace newRBS.ViewModels
             plotModel.InvalidatePlot(true);
         }
 
-        private void PlotMeasurement(Measurement measurement)
+        /// <summary>
+        /// Function that plots a <see cref="Measurement"/> to the <see cref="plotModel"/>.
+        /// </summary>
+        /// <param name="measurement"><see cref="Measurement"/> to be plotted.</param>
+        public void PlotMeasurement(Measurement measurement)
         {
             if (SelectedDataBindingInterval > 0 && measurement.EnergyCalLinear > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
@@ -216,7 +247,7 @@ namespace newRBS.ViewModels
 
             float[] spectrumX = measurement.SpectrumXCal;
             int[] spectrumY = measurement.SpectrumY;
-            int[] spectrumYCalculated = measurement.SpectrumYCalculated;
+            int[] spectrumYCalculated = measurement.SpectrumYSimulated;
 
             if (spectrumYCalculated == null || ShowSimulatedSpectra == false)
             {
@@ -320,25 +351,32 @@ namespace newRBS.ViewModels
                     }
             }
             plotModel.Series.Add(MeassuredPlot);
-            if (measurement.SpectrumYCalculated != null && ShowSimulatedSpectra == true)
+            if (measurement.SpectrumYSimulated != null && ShowSimulatedSpectra == true)
                 plotModel.Series.Add(SimulatedPlot);
             plotModel.InvalidatePlot(true);
         }
 
-        private void UpdatePlot(Measurement measurement)
+        /// <summary>
+        /// Function that is executed whenever a <see cref="Measurement"/> was updated. It updates the corresponding plot in <see cref="plotModel"/>.
+        /// </summary>
+        /// <param name="measurement"></param>
+        public void UpdatePlot(Measurement measurement)
         {
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            Series updateSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
-            if (updateSerie != null)
+            List<Series> updateSeries = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).ToList();
+            foreach (Series updateSerie in updateSeries)
             {
                 plotModel.Series.Remove(updateSerie);
-                PlotMeasurement(measurement);
             }
+            PlotMeasurement(measurement);
         }
 
-        private void UpdateYAxisScale()
+        /// <summary>
+        /// Function that sets the y-axis of the plot to either 'linear' or 'logarithmic'.
+        /// </summary>
+        public void UpdateYAxisScale()
         {
             switch (SelectedYAxisScale)
             {
@@ -359,7 +397,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void UpdateYAxisTitle()
+        /// <summary>
+        /// Function that sets the y-axis title to either 'Counts per channel' or 'Counts per interval'.
+        /// </summary>
+        public void UpdateYAxisTitle()
         {
             switch (SelectedDataBindingInterval)
             {
@@ -376,6 +417,11 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that determines the title of a <see cref="Measurement"/> plot according to the <see cref="SelectedLegendCaption"/>.
+        /// </summary>
+        /// <param name="measurement"><see cref="Measurement"/> for which the title is determined.</param>
+        /// <returns></returns>
         private string GetMeasurementTitle(Measurement measurement)
         {
             if (measurement == null) return "";
@@ -397,7 +443,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void UpdateLegend()
+        /// <summary>
+        /// Function that updates the plot titles.
+        /// </summary>
+        public void UpdateLegend()
         {
             foreach (var plot in plotModel.Series)
             {
@@ -405,7 +454,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void UpdateAllPlots()
+        /// <summary>
+        /// Function that redraws the whole plot.
+        /// </summary>
+        public void UpdateAllPlots()
         {
             if (MeasurementIDList.Count() == 0) return;
 
