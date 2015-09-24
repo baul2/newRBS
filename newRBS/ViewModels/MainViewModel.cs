@@ -272,6 +272,9 @@ namespace newRBS.ViewModels
             simulateSpectrumView.ShowDialog();
         }
 
+        /// <summary>
+        /// Function that starts a new <see cref="CalculateViewModel"/> instance and binds it to a <see cref="Views.CalculateView"/> instance.
+        /// </summary>
         public void _CalculateCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();

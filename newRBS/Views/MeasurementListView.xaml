@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="newRBS.Views.SpectraListView"
+﻿<UserControl x:Class="newRBS.Views.MeasurementListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -16,7 +16,7 @@
     <DataGrid 
         ItemsSource="{Binding MeasurementListViewSource.View}" 
         SelectedValuePath="Measurement.MeasurementID"
-        SelectedValue="{Binding SelectedMeasurementID, Mode=TwoWay}"
+        SelectedValue="{Binding DoubleClickedMeasurementID, Mode=TwoWay}"
         AutoGenerateColumns="False"
         CanUserAddRows="False"
         AlternationCount="2"

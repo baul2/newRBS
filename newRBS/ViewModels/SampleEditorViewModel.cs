@@ -23,6 +23,9 @@ using System.Reflection;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.SampleEditorView"/>. They show a list of all available <see cref="Sample"/>s and their corresponding <see cref="Material"/>s.
+    /// </summary>
     public class SampleEditorViewModel : ViewModelBase
     {
         public ICommand AddSampleCommand { get; set; }
@@ -41,24 +44,33 @@ namespace newRBS.ViewModels
 
         private DatabaseDataContext Database;
 
+        /// <summary>
+        /// List of all <see cref="Sample"/>s.
+        /// </summary>
         public ObservableCollection<Sample> Samples { get; set; }
         private Sample _SelectedSample;
         public Sample SelectedSample
         {
             get { return _SelectedSample; }
-            set { _SelectedSample = value; SelectedSampleChanged(); RaisePropertyChanged(); }
+            set { _SelectedSample = value; NewSelectedSample(); RaisePropertyChanged(); }
         }
 
+        /// <summary>
+        /// List of all <see cref="Material"/>s.
+        /// </summary>
         public ObservableCollection<Material> Materials { get; set; }
         private Material _SelectedMaterials;
         public Material SelectedMaterial
         {
             get { return _SelectedMaterials; }
-            set { _SelectedMaterials = value; SelectedMaterialChanged(); RaisePropertyChanged(); }
+            set { _SelectedMaterials = value; NewSelectedMaterial(); RaisePropertyChanged(); }
         }
 
         public ObservableCollection<string> Layers { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up commands and initializes variables.
+        /// </summary>
         public SampleEditorViewModel()
         {
             Database = MyGlobals.Database;
@@ -80,13 +92,19 @@ namespace newRBS.ViewModels
             SelectedSample = Samples.FirstOrDefault();
         }
 
-        public void SelectedSampleChanged()
+        /// <summary>
+        /// Function that is executed whenever a new <see cref="Sample"/> is selected. It updates the selected <see cref="Material"/>.
+        /// </summary>
+        public void NewSelectedSample()
         {
             if (SelectedSample != null)
                 SelectedMaterial = Materials.FirstOrDefault(x => x.MaterialID == SelectedSample.MaterialID);
         }
 
-        public void SelectedMaterialChanged()
+        /// <summary>
+        /// Function that is executed whenever a new <see cref="Material"/> is selected. It updates the <see cref="Material"/> of the selected <see cref="Sample"/>.
+        /// </summary>
+        public void NewSelectedMaterial()
         {
             if (SelectedSample == null || SelectedMaterial == null) return;
 
@@ -104,6 +122,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that adds a new <see cref="Sample"/>.
+        /// </summary>
         public void _AddSampleCommand()
         {
             int? newSampleID = DatabaseUtils.AddNewSample();
@@ -115,6 +136,9 @@ namespace newRBS.ViewModels
             SelectedSample = newSample;
         }
 
+        /// <summary>
+        /// Function that removes the selected <see cref="Sample"/>.
+        /// </summary>
         public void _RemoveSampleCommand()
         {
             var measurements = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID);
@@ -125,6 +149,9 @@ namespace newRBS.ViewModels
             Samples.Remove(SelectedSample);
         }
 
+        /// <summary>
+        /// Function that renames the selected <see cref="Sample"/>.
+        /// </summary>
         public void _RenameSampleCommand()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", SelectedSample.SampleName);
@@ -134,6 +161,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that saves the changes to the database.
+        /// </summary>
         public void _SaveCommand()
         {
             Database.SubmitChanges();
@@ -143,6 +173,9 @@ namespace newRBS.ViewModels
             DialogResult = false;
         }
 
+        /// <summary>
+        /// Function that discard the changes and closes the window.
+        /// </summary>
         public void _CancelCommand()
         {
             DialogResult = false;

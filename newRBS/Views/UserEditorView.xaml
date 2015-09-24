@@ -13,6 +13,7 @@
             <StackPanel Orientation="Horizontal">
                 <Button Content="Add user" Command="{Binding AddUserCommand}" Padding="3" Margin="5"/>
                 <Button Content="Remove user" Command="{Binding RemoveUserCommand}" Padding="3" Margin="5"/>
+                <Button Content="Download database" Command="{Binding DownloadDatabaseCommand}" Padding="3" Margin="5"/>
             </StackPanel>
             <DataGrid 
                 ItemsSource="{Binding Users}" 

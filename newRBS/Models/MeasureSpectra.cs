@@ -170,7 +170,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
         /// <param name="Channel">Channel to read the spectrum from.</param>
-        private void MeasureSpectraWorker(int MeasurementID, int Channel)
+        public void MeasureSpectraWorker(int MeasurementID, int Channel)
         {
             int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
             long sum = newSpectrumY.Sum();

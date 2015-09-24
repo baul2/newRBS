@@ -137,7 +137,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that configures the OxyPlot <see cref="PlotModel"/> <see cref="WaveformPlot"/>.
         /// </summary>
-        private void SetUpModel()
+        public void SetUpModel()
         {
             WaveformPlot.LegendOrientation = LegendOrientation.Vertical;
             WaveformPlot.LegendPlacement = LegendPlacement.Inside;
@@ -173,7 +173,7 @@ namespace newRBS.ViewModels
         /// Updates the y-data of the four line plots in <see cref="WaveformPlot"/> with the data of in <see cref="Models.Waveform"/> instance.
         /// </summary>
         /// <param name="Waveform">A <see cref="Models.Waveform"/> containing the data for the four waveform plots.</param>
-        private void WaveformUpdate(Models.Waveform Waveform)
+        public void WaveformUpdate(Models.Waveform Waveform)
         {
             double x;
 
@@ -199,7 +199,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that starts the waveform acquisition for the <see cref="selectedChannel"/>.
         /// </summary>
-        private void _StartCommand()
+        public void _StartCommand()
         {
             WaveformPlot.Series[0].Title = selectedAP1;
             WaveformPlot.Series[1].Title = selectedAP2;
@@ -217,7 +217,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that stops the waveform acquisition.
         /// </summary>
-        private void _StopCommand()
+        public void _StopCommand()
         {
             measureWaveform.StopAcquisition();
         }
@@ -225,7 +225,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that opens a save file dialog and saves the current <see cref="Models.Waveform"/> as an ASCII file.
         /// </summary>
-        private void _SaveWaveformCommand()
+        public void _SaveWaveformCommand()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "ASCII file (*.dat)|*.dat";
@@ -255,7 +255,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that sends the <see cref="channelParams"/> and the <see cref="selectedChannel"/> to <see cref="MeasureWaveform.SetChannelConfig"/>
         /// </summary>
-        private void _SendToDeviceCommand()
+        public void _SendToDeviceCommand()
         {
             measureWaveform.SetChannelConfig(_selectedChannel, channelParams);
         }
@@ -263,7 +263,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that saves the current <see cref="channelParams"/> instance to an '.xml' file.
         /// </summary>
-        private void _SaveToFileCommand()
+        public void _SaveToFileCommand()
         {
             XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
 
@@ -282,7 +282,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that loads the current <see cref="channelParams"/> instance from an '.xml' file.
         /// </summary>
-        private void _LoadFromFileCommand()
+        public void _LoadFromFileCommand()
         {
             XmlSerializer SerializerObj = new XmlSerializer(typeof(Models.ChannelParams));
 

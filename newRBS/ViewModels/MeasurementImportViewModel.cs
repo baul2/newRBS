@@ -27,6 +27,9 @@ using System.Reflection;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MeasurementImportView"/>. They import <see cref="Measurement"/>s from either '.xml' or '.dat' files and add them to the database.
+    /// </summary>
     public class MeasurementImportViewModel : ViewModelBase
     {
         public ICommand AddCurrentMeasurementCommand { get; set; }
@@ -42,11 +45,17 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// The list of loaded <see cref="Measurement"/>s.
+        /// </summary>
         public ObservableCollection<Measurement> newMeausurements { get; set; }
 
         public MeasurementInfoClass MeasurementInfo { get; set; }
 
         private Measurement _selectedMeasurement = new Measurement();
+        /// <summary>
+        /// The currently selected <see cref="Measurement"/>.
+        /// </summary>
         public Measurement selectedMeasurement
         {
             get { return _selectedMeasurement; }
@@ -65,6 +74,10 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<int> UpdatePlot { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands an initializes the variables.
+        /// </summary>
+        /// <param name="FileName">The name of the file containing the <see cref="Measurement"/>s to import.</param>
         public MeasurementImportViewModel(string FileName)
         {
             AddCurrentMeasurementCommand = new RelayCommand(() => _AddCurrentMeasurementCommand(), () => true);
@@ -83,7 +96,11 @@ namespace newRBS.ViewModels
             LoadMeasurements(FileName);
         }
 
-        private void LoadMeasurements(string FileName)
+        /// <summary>
+        /// Function that loads the <see cref="Measurement"/>s from the given file (via <see cref="DatabaseUtils.LoadMeasurementsFromFile(string)"/>).
+        /// </summary>
+        /// <param name="FileName">The name of the file containing the <see cref="Measurement"/>s to import.</param>
+        public void LoadMeasurements(string FileName)
         {
             List<Measurement> importedMeasurements = DatabaseUtils.LoadMeasurementsFromFile(FileName);
 
@@ -100,7 +117,10 @@ namespace newRBS.ViewModels
             selectedMeasurement = newMeausurements.First();
         }
 
-        private void NewSelectedMeasurement()
+        /// <summary>
+        /// Function that is executed when the selected <see cref="Measurement"/> changes. It loads the <see cref="Measurement"/> parameters and updates the plot.
+        /// </summary>
+        public void NewSelectedMeasurement()
         {
             // Updating the grid data
             MeasurementInfo.Measurement = selectedMeasurement;
@@ -118,7 +138,9 @@ namespace newRBS.ViewModels
             UpdatePlot.Add(1);
         }
 
-
+        /// <summary>
+        /// Function that adds the currently selected <see cref="Measurement"/> to the database.
+        /// </summary>
         public void _AddCurrentMeasurementCommand()
         {
             Database.Measurements.InsertOnSubmit(selectedMeasurement);
@@ -141,6 +163,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that adds all <see cref="Measurement"/>s to the database and closes the window.
+        /// </summary>
         public void _AddAllMeasurementsCommand()
         {
             Database.Measurements.InsertAllOnSubmit(newMeausurements.ToList());
@@ -152,6 +177,9 @@ namespace newRBS.ViewModels
             _DialogResult = null;
         }
 
+        /// <summary>
+        /// Function that closes the window.
+        /// </summary>
         public void _CancelCommand()
         {
             DialogResult = false;

@@ -21,9 +21,11 @@ using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="Models.MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
+    /// </summary>
     public class NewMeasurementViewModel : ViewModelBase
     {
-        private Models.MeasureSpectra measureSpectra;
         private DatabaseDataContext Database;
 
         public ICommand NewSampleCommand { get; set; }
@@ -39,6 +41,9 @@ namespace newRBS.ViewModels
         public ObservableCollection<CheckedListItem<int>> Channels_30 { get; set; }
 
         private Measurement _Measurement;
+        /// <summary>
+        /// <see cref="Measurement"/> that stores the parameters of the new Measurement.
+        /// </summary>
         public Measurement NewMeasurement
         {
             get { return _Measurement; }
@@ -65,9 +70,11 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<string> VariableParameters { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up commands and initializes variables.
+        /// </summary>
         public NewMeasurementViewModel()
         {
-            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
             Database = MyGlobals.Database;
 
             NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
@@ -93,8 +100,10 @@ namespace newRBS.ViewModels
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
 
-
-        private void _NewSampleCommand()
+        /// <summary>
+        /// Function that inserts a new <see cref="Sample"/>.
+        /// </summary>
+        public void _NewSampleCommand()
         {
             int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)
@@ -106,8 +115,13 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _StartMeasurementCommand()
+        /// <summary>
+        /// Function that starts the measurement.
+        /// </summary>
+        public void _StartMeasurementCommand()
         {
+            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+
             DialogResult = false;
 
             int IncomingIonIsotopeID =NewMeasurement.IncomingIonIsotopeID;
@@ -136,7 +150,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _CancelCommand()
+        /// <summary>
+        /// Function that cancels the new measurement and closes the window.
+        /// </summary>
+        public void _CancelCommand()
         {
             DialogResult = false;
             _DialogResult = null;

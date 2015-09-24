@@ -23,6 +23,9 @@ using System.Reflection;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// A helper class for items in a Datagrid, containing a list of all <see cref="Element"/>s and a corresponging list of <see cref="Isotope"/>s.
+    /// </summary>
     public class LayerElementListItem : ViewModelBase
     {
         public ObservableCollection<Element> Elements { get; set; }
@@ -68,6 +71,9 @@ namespace newRBS.ViewModels
         }
     }
 
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MaterialEditorView"/>. They are used to populate materials with <see cref="Layer"/>s and <see cref="LayerElement"/>s.
+    /// </summary>
     public class MaterialEditorViewModel : ViewModelBase
     {
         public ICommand AddMaterialCommand { get; set; }
@@ -129,6 +135,9 @@ namespace newRBS.ViewModels
         public LayerElementListItem SelectedLayerElement
         { get { return _SelectedLayerElement; } set { _SelectedLayerElement = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// Constructor of the class.
+        /// </summary>
         public MaterialEditorViewModel()
         {
             Database = MyGlobals.Database;
@@ -147,7 +156,7 @@ namespace newRBS.ViewModels
             MoveLayerDownCommand = new RelayCommand(() => _MoveLayerDownCommand(), () => true);
 
             AddElementCommand = new RelayCommand(() => _AddLayerElementCommand(), () => true);
-            RemoveElementCommand = new RelayCommand(() => _RemoveElementCommand(), () => true);
+            RemoveElementCommand = new RelayCommand(() => _RemoveLayerElementCommand(), () => true);
 
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
             CancelCommand = new RelayCommand(() => _CancelCommand(), () => true);
@@ -157,7 +166,10 @@ namespace newRBS.ViewModels
             LayersViewSource.SortDescriptions.Add(new SortDescription("LayerIndex", ListSortDirection.Ascending));
         }
 
-        private void FillLayerElements()
+        /// <summary>
+        /// Function that is executed when a new <see cref="Layer"/> is selected and loads the corresponging <see cref="LayerElement"/>s.
+        /// </summary>
+        public void FillLayerElements()
         {
             LayerElements.Clear();
 
@@ -170,6 +182,9 @@ namespace newRBS.ViewModels
                     }
         }
 
+        /// <summary>
+        /// Function that adds a new <see cref="Material"/>.
+        /// </summary>
         public void _AddMaterialCommand()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", "new Material");
@@ -183,6 +198,9 @@ namespace newRBS.ViewModels
             }
         }
 
+        /// <summary>
+        /// Function that removes the selected <see cref="Material"/>.
+        /// </summary>
         public void _RemoveMaterialCommand()
         {
             if (SelectedMaterial == null) return;
@@ -195,6 +213,9 @@ namespace newRBS.ViewModels
             SelectedMaterial = null;
         }
 
+        /// <summary>
+        /// Function that renames the selected <see cref="Material"/>.
+        /// </summary>
         public void _RenameMaterialCommand()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new material name:", SelectedMaterial.MaterialName);
@@ -202,6 +223,9 @@ namespace newRBS.ViewModels
                 SelectedMaterial.MaterialName = inputDialog.Answer;
         }
 
+        /// <summary>
+        /// Function that adds a new <see cref="Layer"/> to the selected <see cref="Material"/>.
+        /// </summary>
         public void _AddLayerCommand()
         {
             if (SelectedMaterial == null) return;
@@ -213,6 +237,9 @@ namespace newRBS.ViewModels
             SelectedMaterial.Layers.Add(newLayer);
         }
 
+        /// <summary>
+        /// Function that removes the selected <see cref="Layer"/>.
+        /// </summary>
         public void _RemoveLayerCommand()
         {
             if (SelectedMaterial == null || SelectedLayer == null) return;
@@ -229,6 +256,9 @@ namespace newRBS.ViewModels
             SelectedLayer = null;
         }
 
+        /// <summary>
+        /// Function that moves the selected <see cref="Layer"/> towards the surface of the <see cref="Material"/>.
+        /// </summary>
         public void _MoveLayerUpCommand()
         {
             if (SelectedLayer.LayerIndex == 0) return;
@@ -246,6 +276,9 @@ namespace newRBS.ViewModels
             SelectedLayer = selectedLayer;
         }
 
+        /// <summary>
+        /// Function that moves the selected <see cref="Layer"/> away from the surface of the <see cref="Material"/>.
+        /// </summary>
         public void _MoveLayerDownCommand()
         {
             if (SelectedLayer.LayerIndex == SelectedMaterial.Layers.Count() - 1) return;
@@ -263,6 +296,9 @@ namespace newRBS.ViewModels
             SelectedLayer = selectedLayer;
         }
 
+        /// <summary>
+        /// Function that adds a new <see cref="LayerElement"/> to the selected <see cref="Layer"/>.
+        /// </summary>
         public void _AddLayerElementCommand()
         {
             if (SelectedLayer == null) return;
@@ -275,7 +311,10 @@ namespace newRBS.ViewModels
             SelectedMaterial.LayerElements.Add(newLayerElement);
         }
 
-        public void _RemoveElementCommand()
+        /// <summary>
+        /// Function that removes a <see cref="LayerElement"/> from the selected <see cref="Layer"/>.
+        /// </summary>
+        public void _RemoveLayerElementCommand()
         {
             if (SelectedLayer == null || SelectedLayerElement == null) return;
 
@@ -283,6 +322,9 @@ namespace newRBS.ViewModels
             LayerElements.Remove(SelectedLayerElement);
         }
 
+        /// <summary>
+        /// Function that saves the performed changes to the database and closes the window.
+        /// </summary>
         public void _SaveCommand()
         {
             Database.SubmitChanges();
@@ -292,6 +334,9 @@ namespace newRBS.ViewModels
             DialogResult = false;
         }
 
+        /// <summary>
+        /// Function that closes the window without saving the changes.
+        /// </summary>
         public void _CancelCommand()
         {
             DialogResult = false;

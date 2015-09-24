@@ -21,9 +21,6 @@ using newRBS.Database;
 
 namespace newRBS.Views.Utils
 {
-    /// <summary>
-    /// Interaktionslogik für ProjectSelector.xaml
-    /// </summary>
     public partial class ProjectSelector : Window
     {
         public ObservableCollection<Project> Projects { get; set; }

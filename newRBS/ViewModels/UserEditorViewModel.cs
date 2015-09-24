@@ -23,9 +23,13 @@ using newRBS.ViewModels.Utils;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that contains user data
+    /// </summary>
     public class MyUser : ViewModelBase
     {
         public string UserName { get; set; }
@@ -33,10 +37,14 @@ namespace newRBS.ViewModels
         public string Database { get; set; }
     }
 
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.UserEditorView"/>. They can add or remove users and their corresponding databases.
+    /// </summary>
     public class UserEditorViewModel : ViewModelBase
     {
         public ICommand AddUserCommand { get; set; }
         public ICommand RemoveUserCommand { get; set; }
+        public ICommand DownloadDatabaseCommand { get; set; }
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
@@ -45,6 +53,9 @@ namespace newRBS.ViewModels
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// List of <see cref="MyUser"/> for the datagrid.
+        /// </summary>
         public ObservableCollection<MyUser> Users { get; set; }
 
         private MyUser _SelectedUser;
@@ -59,10 +70,15 @@ namespace newRBS.ViewModels
 
         private Views.Utils.LogIn AdminLogIn;
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands, variables and the sql-connection.
+        /// </summary>
+        /// <param name="adminLogIn">Login data of the admin account.</param>
         public UserEditorViewModel(Views.Utils.LogIn adminLogIn)
         {
             AddUserCommand = new RelayCommand(() => _AddUserCommand(), () => true);
             RemoveUserCommand = new RelayCommand(() => _RemoveUserCommand(), () => true);
+            DownloadDatabaseCommand = new RelayCommand(() => _BackupDatabaseCommand(), () => true);
 
             AdminLogIn = adminLogIn;
 
@@ -90,6 +106,9 @@ namespace newRBS.ViewModels
             FillUserList();
         }
 
+        /// <summary>
+        /// Funtion that retrieves the users from the database and fills <see cref="Users"/>.
+        /// </summary>
         public void FillUserList()
         {
             Users.Clear();
@@ -118,7 +137,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _AddUserCommand()
+        /// <summary>
+        /// Function that adds a new user with a new database (copied from admin account).
+        /// </summary>
+        public void _AddUserCommand()
         {
             Views.Utils.NewLogInDialog newLogInDialog = new Views.Utils.NewLogInDialog("Please enter the new user login data!");
 
@@ -172,7 +194,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _RemoveUserCommand()
+        /// <summary>
+        /// Function that removes a user and the corresponding database.
+        /// </summary>
+        public void _RemoveUserCommand()
         {
             if (SelectedUser == null) return;
 
@@ -208,6 +233,56 @@ namespace newRBS.ViewModels
                     sqlConnection.Close();
                 }
             }
+        }
+
+        /// <summary>
+        /// Function that performes a backup of the 'test_db' database. Needs still more work.
+        /// </summary>
+        public void _BackupDatabaseCommand()
+        {
+            string script = "USE test_db; GO BACKUP DATABASE test_db TO DISK = 'test_db.Bak' WITH FORMAT, MEDIANAME = 'Z_SQLServerBackups', NAME = 'Full Backup of test_db'; GO ";
+
+            try
+            {
+                sqlConnection.Open();
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = sqlConnection;
+
+                    var scripts = script.Split(new string[] { " GO " }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var splitScript in scripts)
+                    {
+                        Console.WriteLine(splitScript);
+                        command.CommandText = splitScript;
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Function that splits a 'Microsoft SQL Server Management Studio' script in individual sql commands.
+        /// </summary>
+        /// <param name="sqlScript">Script that has to be splitted at every 'GO'.</param>
+        /// <returns>List of sql commands.</returns>
+        private static IEnumerable<string> SplitSqlStatements(string sqlScript)
+        {
+            // Split by "GO" statements
+            var statements = Regex.Split(
+                    sqlScript,
+                    @"^\s*GO\s* ($ | \-\- .*$)",
+                    RegexOptions.Multiline |
+                    RegexOptions.IgnorePatternWhitespace |
+                    RegexOptions.IgnoreCase);
+
+            // Remove empties, trim, and return
+            return statements
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim(' ', '\r', '\n'));
         }
     }
 }

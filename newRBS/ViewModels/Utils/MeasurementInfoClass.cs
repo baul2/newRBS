@@ -70,7 +70,7 @@ namespace newRBS.ViewModels.Utils
         /// <summary>
         /// Function that creates a new <see cref="Sample"/> instance and attaches it the the current <see cref="Measurement"/>.
         /// </summary>
-        private void _NewSampleCommand()
+        public void _NewSampleCommand()
         {
             int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)

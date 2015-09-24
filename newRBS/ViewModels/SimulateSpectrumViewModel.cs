@@ -23,6 +23,9 @@ using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.SimulateSpectrumView"/>. They calculate the simulate spectra (<see cref="Measurement.SpectrumYSimulated"/>) based on the corresponding <see cref="Sample.Material"/>.
+    /// </summary>
     public class SimulateSpectrumViewModel : ViewModelBase
     {
         private bool? _DialogResult;
@@ -34,14 +37,24 @@ namespace newRBS.ViewModels
 
         private DatabaseDataContext Database;
 
+        /// <summary>
+        /// The selected <see cref="Measurement"/>.
+        /// </summary>
         public Measurement SelectedMeasurement { get; set; }
 
         public Sample SelectedSample { get; set; }
 
         public Material SelectedMaterial { get; set; }
 
+        /// <summary>
+        /// The ion fluence of the simulation.
+        /// </summary>
         public double IonFluence { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up commands, initializes variables and checks whether a <see cref="Sample"/> and <see cref="Material"/> belongs to the <see cref="SelectedMeasurement"/>.
+        /// </summary>
+        /// <param name="MeasurementID"></param>
         public SimulateSpectrumViewModel(int MeasurementID)
         {
             StartSimulationCommand = new RelayCommand(() => _StartSimulationCommand(), () => true);
@@ -62,6 +75,12 @@ namespace newRBS.ViewModels
             IonFluence = 1E14;
         }
 
+        /// <summary>
+        /// Function that calculates the atomic density of an <see cref="LayerElement"/> inside a <see cref="Layer"/>.
+        /// </summary>
+        /// <param name="layer">The <see cref="Layer"/> containing the <see cref="LayerElement"/>.</param>
+        /// <param name="layerElement">The <see cref="LayerElement"/> which atomic density is calulated.</param>
+        /// <returns></returns>
         private double CalculateAtomicDensity(Layer layer, LayerElement layerElement)
         {
             double MassOfMolecule = 0;
@@ -77,7 +96,10 @@ namespace newRBS.ViewModels
             return AtomicDensityOfElement;
         }
 
-        private void _StartSimulationCommand()
+        /// <summary>
+        /// Function that populates <see cref="DataSimpleMeasurement"/> and <see cref="DataSimpleMeasurement"/> and start the simulation.
+        /// </summary>
+        public void _StartSimulationCommand()
         {
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
             simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.Isotope.AtomicNumber;
@@ -146,7 +168,10 @@ namespace newRBS.ViewModels
             Database.SubmitChanges();
         }
 
-        private void _CancelCommand()
+        /// <summary>
+        /// Function that closes the window.
+        /// </summary>
+        public void _CancelCommand()
         {
             DialogResult = false;
         }

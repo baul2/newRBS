@@ -93,8 +93,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="250"/>
                 </Grid.RowDefinitions>
-                <local:SpectraPlotView Grid.Row="0"/>
-                <local:SpectraListView Grid.Row="1"/>
+                <local:MeasurementPlotView Grid.Row="0"/>
+                <local:MeasurementListView Grid.Row="1"/>
                 <GridSplitter Height="7" HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Top" ResizeDirection="Rows" ShowsPreview="False" Grid.Row="1"/>
             </Grid>
         </Border>

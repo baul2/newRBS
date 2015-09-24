@@ -152,7 +152,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that configures the plot of the selected <see cref="Measurement"/>s.
         /// </summary>
-        private void SetUpModel()
+        public void SetUpModel()
         {
             SelectedMeasurementsPlot.LegendOrientation = LegendOrientation.Vertical;
             SelectedMeasurementsPlot.LegendPlacement = LegendPlacement.Inside;
@@ -174,7 +174,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that plots all selected <see cref="Measurement"/>s over their channel number.
         /// </summary>
-        private void PlotMeasurements()
+        public void PlotMeasurements()
         {
             foreach (Measurement measurement in selectedMeasurements)
             {
@@ -200,7 +200,10 @@ namespace newRBS.ViewModels
             SelectedMeasurementsPlot.InvalidatePlot(true);
         }
 
-        private void SelectedElementChanged()
+        /// <summary>
+        /// Function that updates the IsotopeList when another Element is selected
+        /// </summary>
+        public void SelectedElementChanged()
         {
             IsotopeList.Clear();
             foreach (var i in SelectedElement.Isotopes.OrderBy(x => x.MassNumber))
@@ -213,7 +216,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that adds the selected channel and element to the <see cref="EnergyCalList"/>.
         /// </summary>
-        private void _AddToListCommand()
+        public void _AddToListCommand()
         {
             if (Channel == 0) return;
             if (EnergyCalList.FirstOrDefault(x => x.Isotope == SelectedIsotope) != null) return;
@@ -225,7 +228,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that clears the <see cref="EnergyCalList"/>.
         /// </summary>
-        private void _ClearListCommand()
+        public void _ClearListCommand()
         {
             EnergyCalList.Clear();
         }
@@ -233,7 +236,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that calculates the energy calibration using the items in <see cref="EnergyCalList"/>. The results are displayed in the view.
         /// </summary>
-        private void _CalculateEnergyCalCommand()
+        public void _CalculateEnergyCalCommand()
         {
             if (EnergyCalList.Count() < 1)
             { MessageBox.Show("Add at least one point to the list!", "Error"); return; }
@@ -276,7 +279,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that saves the values of <see cref="ECalOffset"/> and <see cref="ECalLinear"/> in the selected measurements and closes the dialog.
         /// </summary>
-        private void _SaveEnergyCalCommand()
+        public void _SaveEnergyCalCommand()
         {
             if (ECalOffset == null || ECalLinear == null || ECalQuadratic == null) return;
             if (ECalOffset == 0 && ECalLinear == 0 && ECalQuadratic == 0) return;
@@ -298,7 +301,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that cancels the dialog.
         /// </summary>
-        private void _CancelCalCommand()
+        public void _CancelCalCommand()
         {
             DialogResult = false;
         }
