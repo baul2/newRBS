@@ -79,7 +79,7 @@ namespace newRBS.ViewModels
 
         public List<NameValueClass> DataBindingIntervals { get; set; }
 
-        private int _SelectedDataBindingInterval = 0;
+        private int _SelectedDataBindingInterval = 2;
         public int SelectedDataBindingInterval
         { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); } }
 

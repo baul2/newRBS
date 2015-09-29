@@ -83,6 +83,10 @@
                 Binding="{Binding Measurement.CurrentCharge, StringFormat={}{0:0.00}}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
+                Header="ChopperCounts" 
+                Binding="{Binding Measurement.CurrentChopperCounts}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
                 Header="Progress" 
                 Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"
                 IsReadOnly="True"/>
