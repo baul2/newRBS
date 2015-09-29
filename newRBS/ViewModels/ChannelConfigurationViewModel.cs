@@ -27,6 +27,7 @@ using System.IO;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Reflection;
+using System.Timers;
 
 namespace newRBS.ViewModels
 {
@@ -36,6 +37,7 @@ namespace newRBS.ViewModels
     public class ChannelConfigurationViewModel : ViewModelBase
     {
         private Models.MeasureWaveform measureWaveform;
+        private Models.CAEN_x730 cAEN_x730;
 
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
@@ -45,6 +47,12 @@ namespace newRBS.ViewModels
         public ICommand SaveToFileCommand { get; set; }
         public ICommand LoadFromFileCommand { get; set; }
 
+        public ICommand StartChopperCommand { get; set; }
+        public ICommand StopChopperCommand { get; set; }
+
+        public ICommand SetAsLeftBorderCommand { get; set; }
+        public ICommand SetAsRightBorderCommand { get; set; }
+
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
@@ -52,6 +60,8 @@ namespace newRBS.ViewModels
         /// Contains all the plot data and the plot style of the OxyPlot in <see cref="Views.ChannelConfigurationView"/>.
         /// </summary>
         public PlotModel WaveformPlot { get; set; }
+
+        public PlotModel ChopperPlot { get; set; }
 
         private bool? _DialogResult;
         public bool? DialogResult
@@ -71,10 +81,12 @@ namespace newRBS.ViewModels
             set { _channelParams = value; RaisePropertyChanged(); }
         }
 
-        private string _selectedAP1; public string selectedAP1 { get { return _selectedAP1; } set { _selectedAP1 = value; RaisePropertyChanged(); } }
-        private string _selectedAP2; public string selectedAP2 { get { return _selectedAP2; } set { _selectedAP2 = value; RaisePropertyChanged(); } }
-        private string _selectedDP1; public string selectedDP1 { get { return _selectedDP1; } set { _selectedDP1 = value; RaisePropertyChanged(); } }
-        private string _selectedDP2; public string selectedDP2 { get { return _selectedDP2; } set { _selectedDP2 = value; RaisePropertyChanged(); } }
+        private string _selectedAP1; public string selectedAP1 { get { return _selectedAP1; } set { _selectedAP1 = value; RaisePropertyChanged(); RestartMeasurement(); } }
+        private string _selectedAP2; public string selectedAP2 { get { return _selectedAP2; } set { _selectedAP2 = value; RaisePropertyChanged(); RestartMeasurement(); } }
+        private string _selectedDP1; public string selectedDP1 { get { return _selectedDP1; } set { _selectedDP1 = value; RaisePropertyChanged(); RestartMeasurement(); } }
+        private string _selectedDP2; public string selectedDP2 { get { return _selectedDP2; } set { _selectedDP2 = value; RaisePropertyChanged(); RestartMeasurement(); } }
+
+        private bool _AUTOTrigger; public bool AUTOTrigger { get { return _AUTOTrigger; } set { _AUTOTrigger = value; RaisePropertyChanged(); RestartMeasurement(); } }
 
         private int _selectedChannel;
         public int selectedChannel
@@ -90,6 +102,11 @@ namespace newRBS.ViewModels
         public ObservableCollection<NameValueClass> BaselineMean { get; set; }
         public ObservableCollection<NameValueClass> PeakMean { get; set; }
 
+        private System.Timers.Timer ChopperTimer;
+
+        private int _SelectedChannelNumber=0;
+        public int SelectedChannelNumber { get { return _SelectedChannelNumber; } set { _SelectedChannelNumber = value; Console.WriteLine("sdfa"); RaisePropertyChanged(); } }
+
         /// <summary>
         /// Constructor of the class. Sets up the commands, hooks up to events and sets the collections and selected items of the view.
         /// </summary>
@@ -103,7 +120,14 @@ namespace newRBS.ViewModels
             SaveToFileCommand = new RelayCommand(() => _SaveToFileCommand(), () => true);
             LoadFromFileCommand = new RelayCommand(() => _LoadFromFileCommand(), () => true);
 
+            StartChopperCommand = new RelayCommand(() => _StartChopperCommand(), () => true);
+            StopChopperCommand = new RelayCommand(() => _StopChopperCommand(), () => true);
+
+            SetAsLeftBorderCommand = new RelayCommand(() => _SetAsLeftBorderCommand(), () => true);
+            SetAsRightBorderCommand = new RelayCommand(() => _SetAsRightBorderCommand(), () => true);
+
             measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
+            cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
 
             // Hooking up to events from MeasureWaveform
             measureWaveform.EventWaveform += new Models.MeasureWaveform.EventHandlerWaveform(WaveformUpdate);
@@ -131,13 +155,16 @@ namespace newRBS.ViewModels
             channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
 
             WaveformPlot = new PlotModel();
-            SetUpModel();
+            ChopperPlot = new PlotModel();
+
+            SetUpWaveformModel();
+            SetUpChopperModel();
         }
 
         /// <summary>
         /// Function that configures the OxyPlot <see cref="PlotModel"/> <see cref="WaveformPlot"/>.
         /// </summary>
-        public void SetUpModel()
+        public void SetUpWaveformModel()
         {
             WaveformPlot.LegendOrientation = LegendOrientation.Vertical;
             WaveformPlot.LegendPlacement = LegendPlacement.Inside;
@@ -167,6 +194,33 @@ namespace newRBS.ViewModels
             WaveformPlot.Series.Add(AP2Series);
             WaveformPlot.Series.Add(DP1Series);
             WaveformPlot.Series.Add(DP2Series);
+        }
+
+        /// <summary>
+        /// Function that configures the OxyPlot <see cref="PlotModel"/> <see cref="ChopperPlot"/>.
+        /// </summary>
+        public void SetUpChopperModel()
+        {
+            var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Channel", TitleFontSize = 16, AxisTitleDistance = 8, Minimum = 0 };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, Title = "Counts", TitleFontSize = 16, AxisTitleDistance = 12, Minimum = 0, AbsoluteMinimum = 0 };
+
+            ChopperPlot.Axes.Add(xAxis);
+            ChopperPlot.Axes.Add(yAxis);
+            ChopperPlot.MouseUp += (s, e) =>
+            {
+                var XY = Axis.InverseTransform(e.Position, xAxis, yAxis);
+                SelectedChannelNumber = (int)Math.Round(XY.X);
+            };
+
+            var areaSeries = new AreaSeries
+            {
+                StrokeThickness = 2,
+                MarkerSize = 3,
+                CanTrackerInterpolatePoints = false,
+                Smooth = false,
+            };
+
+            ChopperPlot.Series.Add(areaSeries);
         }
 
         /// <summary>
@@ -210,7 +264,8 @@ namespace newRBS.ViewModels
             Models.CAENDPP_PHA_AnalogProbe2_t AP2 = (Models.CAENDPP_PHA_AnalogProbe2_t)Enum.Parse(typeof(Models.CAENDPP_PHA_AnalogProbe2_t), selectedAP2, true);
             Models.CAENDPP_PHA_DigitalProbe1_t DP1 = (Models.CAENDPP_PHA_DigitalProbe1_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe1_t), selectedDP1, true);
             Models.CAENDPP_PHA_DigitalProbe2_t DP2 = (Models.CAENDPP_PHA_DigitalProbe2_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe2_t), selectedDP2, true);
-            measureWaveform.SetWaveformConfig(AP1, AP2, DP1, DP2, false);
+
+            measureWaveform.SetWaveformConfig(AP1, AP2, DP1, DP2, AUTOTrigger);
             measureWaveform.StartAcquisition(selectedChannel);
         }
 
@@ -220,6 +275,18 @@ namespace newRBS.ViewModels
         public void _StopCommand()
         {
             measureWaveform.StopAcquisition();
+        }
+
+        /// <summary>
+        /// Function that restarts the waveform acquisition when the probes or AUTOTrigger changed.
+        /// </summary>
+        public void RestartMeasurement()
+        {
+            if (measureWaveform.activeChannels.Count() > 0)
+            {
+                _StopCommand();
+                _StartCommand();
+            }
         }
 
         /// <summary>
@@ -296,6 +363,64 @@ namespace newRBS.ViewModels
 
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration read from file");
             }
+        }
+
+        public void _StartChopperCommand()
+        {
+            cAEN_x730.StartAcquisition(7);
+
+            ChopperTimer = new System.Timers.Timer(1000);
+            ChopperTimer.Elapsed += delegate { ChopperWorker(); };
+            ChopperTimer.Start();
+        }
+
+        public void _StopChopperCommand()
+        {
+            ChopperTimer.Stop();
+            cAEN_x730.StopAcquisition(7);
+        }
+
+        public void ChopperWorker()
+        {
+            int[] ChopperSpectrum = cAEN_x730.GetHistogram(7);
+
+            var areaSeries = (AreaSeries)ChopperPlot.Series.FirstOrDefault();
+
+            areaSeries.Points.Clear();
+            areaSeries.Points2.Clear();
+
+            for (int i = 0; i < ChopperSpectrum.Count(); i++)
+            {
+                areaSeries.Points.Add(new DataPoint(i, ChopperSpectrum[i]));
+                areaSeries.Points2.Add(new DataPoint(i, 0));
+            }
+
+            ChopperPlot.Annotations.Clear();
+
+            var yAxis = ChopperPlot.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left);
+
+            var IntegrationInterval = new RectangleAnnotation
+            {
+                MinimumY = 0,
+                MaximumY = 10000,
+                MinimumX = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperStartChannel,
+                MaximumX = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperEndChannel,
+                Fill = OxyColor.FromAColor(20, OxyColors.Blue),
+            };
+
+            ChopperPlot.Annotations.Add(IntegrationInterval);
+
+            ChopperPlot.InvalidatePlot(true);
+        }
+
+        public void _SetAsLeftBorderCommand()
+        {
+            SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperStartChannel = SelectedChannelNumber;
+        }
+
+        public void _SetAsRightBorderCommand()
+        {
+            SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperEndChannel = SelectedChannelNumber;
         }
     }
 }

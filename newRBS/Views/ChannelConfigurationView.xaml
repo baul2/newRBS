@@ -10,164 +10,196 @@
         mc:Ignorable="d"
         Title="ChannelConfigurationView" Height="800" Width="1200" WindowStartupLocation="CenterScreen"
         xc:DialogCloser.DialogResult="{Binding DialogResult}">
-    <DockPanel>
-        <ToolBarTray DockPanel.Dock="Top">
-            <ToolBar>
-                <Button ToolTip="Start Acquisition" Command="{Binding StartCommand}">
-                    <Image Source="/Images/129.png" Height="24"/>
-                </Button>
-                <Button ToolTip="Stop Acquisition" Command="{Binding StopCommand}">
-                    <Image Source="/Images/17.png" Height="24"/>
-                </Button>
-                <Button ToolTip="Save Waveform" Command="{Binding SaveWaveformCommand}">
-                    <Image Source="/Images/31.png" Height="24"/>
-                </Button>
-            </ToolBar>
-        </ToolBarTray>
-        <Border DockPanel.Dock="Left">
-            <GroupBox>
-                <StackPanel Orientation="Vertical">
-                    <GroupBox Header="Display">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <Label Content="Analog Probe 1:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
-                            <ComboBox ItemsSource="{Binding AP1Items}" SelectedItem="{Binding selectedAP1, Mode=TwoWay}" Grid.Column="1" Grid.Row="0"/>
-
-                            <Label Content="Analog Probe 2:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                            <ComboBox ItemsSource="{Binding AP2Items}" SelectedItem="{Binding selectedAP2, Mode=TwoWay}" Grid.Column="1" Grid.Row="1"/>
-
-                            <Label Content="Digital Probe 1:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
-                            <ComboBox ItemsSource="{Binding DP1Items}" SelectedItem="{Binding selectedDP1, Mode=TwoWay}" Grid.Column="1" Grid.Row="2"/>
-
-                            <Label Content="Digital Probe 2:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="3"/>
-                            <ComboBox ItemsSource="{Binding DP2Items}" SelectedItem="{Binding selectedDP2, Mode=TwoWay}" Grid.Column="1" Grid.Row="3"/>
-
-                        </Grid>
-                    </GroupBox>
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <Label Content="Channel:" HorizontalAlignment="Right"/>
-                        <ComboBox ItemsSource="{Binding channels}" SelectedItem="{Binding selectedChannel, Mode=TwoWay}"/>
-                    </StackPanel>
-                    <GroupBox Header="Channel Configuration">
+    <TabControl>
+        <TabItem Header="Channel Configuration">
+            <DockPanel>
+                <ToolBarTray DockPanel.Dock="Top">
+                    <ToolBar>
+                        <Button ToolTip="Start Acquisition" Command="{Binding StartCommand}">
+                            <Image Source="/Images/129.png" Height="24"/>
+                        </Button>
+                        <Button ToolTip="Stop Acquisition" Command="{Binding StopCommand}">
+                            <Image Source="/Images/17.png" Height="24"/>
+                        </Button>
+                        <Button ToolTip="Save Waveform" Command="{Binding SaveWaveformCommand}">
+                            <Image Source="/Images/31.png" Height="24"/>
+                        </Button>
+                    </ToolBar>
+                </ToolBarTray>
+                <Border DockPanel.Dock="Left">
+                    <GroupBox>
                         <StackPanel Orientation="Vertical">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Label Content="Input range:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
-                                <ComboBox x:Name="InputRange" ItemsSource="{Binding InputRange}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.InputRange, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0"/>
-                                <Label Content="Vpp" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="0"/>
+                            <GroupBox Header="Display">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                <Label Content="DCoffset:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                                <TextBox x:Name="DCoffset" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.DCoffset}" Grid.Column="1" Grid.Row="1"/>
-                                <Label Content="mV" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="1"/>
+                                    <Label Content="Analog Probe 1:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                                    <ComboBox ItemsSource="{Binding AP1Items}" SelectedItem="{Binding selectedAP1, Mode=TwoWay}" Grid.Column="1" Grid.Row="0"/>
 
-                                <Label Content="Decimation:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
-                                <ComboBox x:Name="Decimation" ItemsSource="{Binding Decimation}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.InputSignalDecimation, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2"/>
-                                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="2"/>
+                                    <Label Content="Analog Probe 2:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                                    <ComboBox ItemsSource="{Binding AP2Items}" SelectedItem="{Binding selectedAP2, Mode=TwoWay}" Grid.Column="1" Grid.Row="1"/>
 
-                                <Label Content="Digital probe gain:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="3"/>
-                                <ComboBox x:Name="DigitalProbeGain" ItemsSource="{Binding DigitalProbeGain}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.DigitalGain, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="3"/>
+                                    <Label Content="Digital Probe 1:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                                    <ComboBox ItemsSource="{Binding DP1Items}" SelectedItem="{Binding selectedDP1, Mode=TwoWay}" Grid.Column="1" Grid.Row="2"/>
 
-                                <Label Content="" Height="10" Grid.Column="0" Grid.Row="4"/>
+                                    <Label Content="Digital Probe 2:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="3"/>
+                                    <ComboBox ItemsSource="{Binding DP2Items}" SelectedItem="{Binding selectedDP2, Mode=TwoWay}" Grid.Column="1" Grid.Row="3"/>
 
-                                <Label Content="Trigger threshold:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="5"/>
-                                <TextBox x:Name="TriggerThreshold" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TriggerThreshold}" Grid.Column="1" Grid.Row="5"/>
-                                <Label Content="(0...16383)" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="5"/>
-
-                                <Label Content="Trigger filter smoothing:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="6"/>
-                                <ComboBox x:Name="TriggerFilterSmoothing" ItemsSource="{Binding TriggerFilterSmoothing}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.TriggerFilterSmoothingFactor, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="6"/>
-                                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="6"/>
-
-                                <Label Content="Trigger hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="7"/>
-                                <TextBox x:Name="TriggerHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TriggerHoldOff}" Grid.Column="1" Grid.Row="7"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="7"/>
-
-                                <Label Content="Input signal rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="8"/>
-                                <TextBox x:Name="InputSignalRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.InputSignalRiseTime}" Grid.Column="1" Grid.Row="8"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="8"/>
-
-                                <Label Content="" Height="10" Grid.Column="0" Grid.Row="9"/>
-
-                                <Label Content="Baseline mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="10"/>
-                                <ComboBox x:Name="BaselineMean" ItemsSource="{Binding BaselineMean}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.NumSamplesBaselineMean, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="10"/>
-                                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="10"/>
-
-                                <Label Content="Trapezoid rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="11"/>
-                                <TextBox x:Name="TrapezoidRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidRiseTime}" Grid.Column="1" Grid.Row="11"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="11"/>
-
-                                <Label Content="Signal decay time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="12"/>
-                                <TextBox x:Name="SignalDecayTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.InputSignalDecayTime}" Grid.Column="1" Grid.Row="12"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="12"/>
-
-                                <Label Content="Trapezoid flat top time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="13"/>
-                                <TextBox x:Name="TrapezoidFlatTopTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidFlatTopTime}" Grid.Column="1" Grid.Row="13"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="13"/>
-
-                                <Label Content="Flat top delay:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="14"/>
-                                <TextBox x:Name="FlatTopDelay" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidPeakingDelay}" Grid.Column="1" Grid.Row="14"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="14"/>
-
-                                <Label Content="" Height="10" Grid.Column="0" Grid.Row="15"/>
-
-                                <Label Content="Peak mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="16"/>
-                                <ComboBox x:Name="PeakMean" ItemsSource="{Binding PeakMean}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.NumSamplesPeakMean, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="16"/>
-                                <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="16"/>
-
-                                <Label Content="Base line hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="17"/>
-                                <TextBox x:Name="BaseLineHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.BaseLineHoldOff}" Grid.Column="1" Grid.Row="17"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="17"/>
-
-                                <Label Content="Peak hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="18"/>
-                                <TextBox x:Name="PeakHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.PeakHoldOff}" Grid.Column="1" Grid.Row="18"/>
-                                <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="18"/>
-                            </Grid>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Content="Send to device" Command="{Binding SendToDeviceCommand}" Margin="5" Padding="5"/>
-                                <Button Content="Save to file" Command="{Binding SaveToFileCommand}" Margin="5" Padding="5"/>
-                                <Button Content="Load from file" Command="{Binding LoadFromFileCommand}" Margin="5" Padding="5"/>
+                                    <Label Content="AUTO Tigger (software):" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="4"/>
+                                    <CheckBox IsChecked="{Binding AUTOTrigger, Mode=TwoWay}" VerticalAlignment="Center" Grid.Column="1" Grid.Row="4"/>
+                                </Grid>
+                            </GroupBox>
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <Label Content="Channel:" HorizontalAlignment="Right"/>
+                                <ComboBox ItemsSource="{Binding channels}" SelectedItem="{Binding selectedChannel, Mode=TwoWay}"/>
                             </StackPanel>
+                            <GroupBox Header="Channel Configuration">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Input range:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                                        <ComboBox x:Name="InputRange" ItemsSource="{Binding InputRange}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.InputRange, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="0"/>
+                                        <Label Content="Vpp" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="0"/>
+
+                                        <Label Content="DCoffset:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                                        <TextBox x:Name="DCoffset" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.DCoffset}" Grid.Column="1" Grid.Row="1"/>
+                                        <Label Content="mV" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="1"/>
+
+                                        <Label Content="Decimation:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                                        <ComboBox x:Name="Decimation" ItemsSource="{Binding Decimation}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.InputSignalDecimation, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2"/>
+                                        <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="2"/>
+
+                                        <Label Content="Digital probe gain:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="3"/>
+                                        <ComboBox x:Name="DigitalProbeGain" ItemsSource="{Binding DigitalProbeGain}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.DigitalGain, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="3"/>
+
+                                        <Label Content="" Height="10" Grid.Column="0" Grid.Row="4"/>
+
+                                        <Label Content="Trigger threshold:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="5"/>
+                                        <TextBox x:Name="TriggerThreshold" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TriggerThreshold}" Grid.Column="1" Grid.Row="5"/>
+                                        <Label Content="(0...16383)" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="5"/>
+
+                                        <Label Content="Trigger filter smoothing:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="6"/>
+                                        <ComboBox x:Name="TriggerFilterSmoothing" ItemsSource="{Binding TriggerFilterSmoothing}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.TriggerFilterSmoothingFactor, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="6"/>
+                                        <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="6"/>
+
+                                        <Label Content="Trigger hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="7"/>
+                                        <TextBox x:Name="TriggerHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TriggerHoldOff}" Grid.Column="1" Grid.Row="7"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="7"/>
+
+                                        <Label Content="Input signal rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="8"/>
+                                        <TextBox x:Name="InputSignalRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.InputSignalRiseTime}" Grid.Column="1" Grid.Row="8"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="8"/>
+
+                                        <Label Content="" Height="10" Grid.Column="0" Grid.Row="9"/>
+
+                                        <Label Content="Baseline mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="10"/>
+                                        <ComboBox x:Name="BaselineMean" ItemsSource="{Binding BaselineMean}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.NumSamplesBaselineMean, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="10"/>
+                                        <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="10"/>
+
+                                        <Label Content="Trapezoid rise time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="11"/>
+                                        <TextBox x:Name="TrapezoidRiseTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidRiseTime}" Grid.Column="1" Grid.Row="11"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="11"/>
+
+                                        <Label Content="Signal decay time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="12"/>
+                                        <TextBox x:Name="SignalDecayTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.InputSignalDecayTime}" Grid.Column="1" Grid.Row="12"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="12"/>
+
+                                        <Label Content="Trapezoid flat top time:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="13"/>
+                                        <TextBox x:Name="TrapezoidFlatTopTime" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidFlatTopTime}" Grid.Column="1" Grid.Row="13"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="13"/>
+
+                                        <Label Content="Flat top delay:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="14"/>
+                                        <TextBox x:Name="FlatTopDelay" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.TrapezoidPeakingDelay}" Grid.Column="1" Grid.Row="14"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="14"/>
+
+                                        <Label Content="" Height="10" Grid.Column="0" Grid.Row="15"/>
+
+                                        <Label Content="Peak mean:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="16"/>
+                                        <ComboBox x:Name="PeakMean" ItemsSource="{Binding PeakMean}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding channelParams.NumSamplesPeakMean, Mode=TwoWay}" Width="60" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="16"/>
+                                        <Label Content="samples" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="16"/>
+
+                                        <Label Content="Base line hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="17"/>
+                                        <TextBox x:Name="BaseLineHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.BaseLineHoldOff}" Grid.Column="1" Grid.Row="17"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="17"/>
+
+                                        <Label Content="Peak hold off:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="18"/>
+                                        <TextBox x:Name="PeakHoldOff" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Text="{Binding channelParams.PeakHoldOff}" Grid.Column="1" Grid.Row="18"/>
+                                        <Label Content="ns" HorizontalAlignment="Left" Grid.Column="3" Grid.Row="18"/>
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="Send to device" Command="{Binding SendToDeviceCommand}" Margin="5" Padding="5"/>
+                                        <Button Content="Save to file" Command="{Binding SaveToFileCommand}" Margin="5" Padding="5"/>
+                                        <Button Content="Load from file" Command="{Binding LoadFromFileCommand}" Margin="5" Padding="5"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
                         </StackPanel>
                     </GroupBox>
-                </StackPanel>
-            </GroupBox>
-        </Border>
-        <Border>
-            <oxy:PlotView x:Name="Plot1" Title="A Graph" Model="{Binding WaveformPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
-        </Border>
-    </DockPanel>
+                </Border>
+                <Border>
+                    <oxy:PlotView Model="{Binding WaveformPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
+                </Border>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Chopper Configuration">
+            <DockPanel>
+                <ToolBarTray DockPanel.Dock="Top">
+                    <ToolBar>
+                        <Button ToolTip="Start Acquisition" Command="{Binding StartChopperCommand}">
+                            <Image Source="/Images/129.png" Height="24"/>
+                        </Button>
+                        <Button ToolTip="Stop Acquisition" Command="{Binding StopChopperCommand}">
+                            <Image Source="/Images/17.png" Height="24"/>
+                        </Button>
+                    </ToolBar>
+                </ToolBarTray>
+                <Border DockPanel.Dock="Bottom">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Selected Channel:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding SelectedChannelNumber}" MinWidth="50" Margin="3"/>
+                        <Button Content="Set as Left Border" Command="{Binding SetAsLeftBorderCommand}" Margin="3" Padding="3"/>
+                        <Button Content="Set as Right Border" Command="{Binding SetAsRightBorderCommand}" Margin="3" Padding="3"/>
+                    </StackPanel>
+                </Border>
+                <Border>
+                    <oxy:PlotView Model="{Binding ChopperPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
+                </Border>
+            </DockPanel>
+        </TabItem>
+    </TabControl>
 </Window>

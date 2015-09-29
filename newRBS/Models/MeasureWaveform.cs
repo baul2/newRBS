@@ -128,8 +128,10 @@ namespace newRBS.Models
         /// <param name="Channel">Number of the channel to get the waveforms.</param>
         public void MeasureWaveformWorker(int Channel)
         {
+            waveformTimer.Enabled = false;
             waveform = cAEN_x730.GetWaveform(Channel);
             trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureWaveformWorker Channel = " + Channel);
+            waveformTimer.Enabled = true;
             if (EventWaveform != null) { EventWaveform(waveform); }
         }
     }
