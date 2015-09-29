@@ -24,8 +24,8 @@ namespace newRBS.Models
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public int ChopperStartChannel = 1000;
-        public int ChopperEndChannel = 2000;
+        public int ChopperStartChannel = 920;
+        public int ChopperEndChannel = 980;
 
         private Timer[] MeasureSpectraTimer = new Timer[8];
 
@@ -71,7 +71,7 @@ namespace newRBS.Models
 
                     cAEN_x730.StartAcquisition(channel);
 
-                    if (NewMeasurement.StopType == "ChopperCounts")
+                    //if (NewMeasurement.StopType == "ChopperCounts")
                     {
                         cAEN_x730.StartAcquisition(7); // Start chopper
                     }
@@ -117,7 +117,7 @@ namespace newRBS.Models
                     activeChannels.Add(channel, NewMeasurement.MeasurementID);
 
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + NewMeasurement.MeasurementID + " started on channel " + NewMeasurement.Channel);
-                    MeasureSpectraTimer[channel] = new Timer(500);
+                    MeasureSpectraTimer[channel] = new Timer(1000);
                     MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(NewMeasurement.MeasurementID, channel); };
                     MeasureSpectraTimer[channel].Start();
                 }
@@ -157,7 +157,7 @@ namespace newRBS.Models
 
                     DatabaseUtils.ExportMeasurements(new List<int> { MeasurementToStop.MeasurementID }, path + file);
 
-                    if (MeasurementToStop.StopType == "ChopperCounts")
+                    //if (MeasurementToStop.StopType == "ChopperCounts")
                         cAEN_x730.StopAcquisition(7);
 
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToStop.MeasurementID + " stopped (channel " + MeasurementToStop.Channel + ")");
@@ -192,7 +192,7 @@ namespace newRBS.Models
                 MeasurementToUpdate.CurrentCounts = sum;
                 MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
 
-                if (MeasurementToUpdate.StopType == "ChopperCounts")
+                //if (MeasurementToUpdate.StopType == "ChopperCounts")
                 {
                     MeasurementToUpdate.CurrentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum();
                     Console.WriteLine("CurrentChopperCounts: " + MeasurementToUpdate.CurrentChopperCounts);

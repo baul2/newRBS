@@ -157,7 +157,10 @@ namespace newRBS.Database
         {
             base.OnSaved(changeAction);
 
-            int temp = this.Sample.SampleID; // Nessesary to load the sample entity before sending the Measurement instance
+            // Load the sample/isotope/element entity before sending the Measurement instance
+            Sample tempSample = this.Sample;  
+            Isotope tempIsotope = this.Isotope;
+            Element tempElement = this.Isotope.Element;
 
             switch (changeAction)
             {

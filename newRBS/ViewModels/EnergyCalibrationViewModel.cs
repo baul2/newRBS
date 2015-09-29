@@ -103,7 +103,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Constructor of the class. Sets up the commands, collections and selected items of the view.
         /// </summary>
-        public EnergyCalibrationViewModel(List<Measurement> SelectedMeasurements)
+        public EnergyCalibrationViewModel(List<int> SelectedMeasurementIDs)
         {
             AddToListCommand = new RelayCommand(() => _AddToListCommand(), () => true);
             ClearListCommand = new RelayCommand(() => _ClearListCommand(), () => true);
@@ -121,7 +121,7 @@ namespace newRBS.ViewModels
 
             SelectedElement = ElementList.FirstOrDefault();
 
-            selectedMeasurements = SelectedMeasurements;
+            selectedMeasurements = Database.Measurements.Where(x=> SelectedMeasurementIDs.Contains(x.MeasurementID)).ToList();
 
             EnergyCalList = new ObservableCollection<EnergyCalListItem>();
 
@@ -244,7 +244,7 @@ namespace newRBS.ViewModels
             Measurement m = selectedMeasurements[0];
 
             foreach (EnergyCalListItem e in EnergyCalList)
-                e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * KineFak(m.Isotope.Mass, e.Isotope.Mass, m.OutcomingIonAngle), 1);
+                e.CalibratedEnergy = Math.Round(m.IncomingIonEnergy * MyGlobals.KineFak(m.Isotope.Mass, e.Isotope.Mass, m.OutcomingIonAngle), 1);
 
             ECalOffset = 0;
             ECalLinear = 0;
@@ -304,22 +304,6 @@ namespace newRBS.ViewModels
         public void _CancelCalCommand()
         {
             DialogResult = false;
-        }
-
-        /// <summary>
-        /// Function that calculates the kinematic factor k.
-        /// </summary>
-        /// <param name="IncomingIonMass">Mass of the incoming ion in [u].</param>
-        /// <param name="TargetAtomMass">Mass of the target atom in [u].</param>
-        /// <param name="ThetaDegree">Angle of the scatterin process in [°].</param>
-        /// <returns></returns>
-        private double KineFak(double IncomingIonMass, double TargetAtomMass, double ThetaDegree)
-        {
-            double Theta = ThetaDegree / 360.0 * 2.0 * Math.PI;
-
-            double k = Math.Pow((Math.Pow(1.0 - Math.Pow(IncomingIonMass * Math.Sin(Theta) / TargetAtomMass, 2.0), 0.5) + IncomingIonMass * Math.Cos(Theta) / TargetAtomMass) / (1.0 + IncomingIonMass / TargetAtomMass), 2.0);
-
-            return k;
         }
     }
 }

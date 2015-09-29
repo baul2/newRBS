@@ -120,5 +120,21 @@ namespace newRBS
                 }
             }
         }
+
+        /// <summary>
+        /// Function that calculates the kinematic factor k.
+        /// </summary>
+        /// <param name="IncomingIonMass">Mass of the incoming ion in [u].</param>
+        /// <param name="TargetAtomMass">Mass of the target atom in [u].</param>
+        /// <param name="ThetaDegree">Angle of the scatterin process in [°].</param>
+        /// <returns></returns>
+        public static double KineFak(double IncomingIonMass, double TargetAtomMass, double ThetaDegree)
+        {
+            double Theta = ThetaDegree / 360.0 * 2.0 * Math.PI;
+
+            double k = Math.Pow((Math.Pow(1.0 - Math.Pow(IncomingIonMass * Math.Sin(Theta) / TargetAtomMass, 2.0), 0.5) + IncomingIonMass * Math.Cos(Theta) / TargetAtomMass) / (1.0 + IncomingIonMass / TargetAtomMass), 2.0);
+
+            return k;
+        }
     }
 }

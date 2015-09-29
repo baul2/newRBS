@@ -302,7 +302,7 @@ namespace newRBS.ViewModels
             if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonIsotopeID).Distinct().ToList().Count > 1)
             { MessageBox.Show("Select only measurements with identical irradiation parameters!"); return; }
 
-            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements);
+            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements.Select(x=>x.MeasurementID).ToList());
             Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
             energyCalibrationView.DataContext = energyCalibrationViewModel;
             energyCalibrationView.ShowDialog();
@@ -342,12 +342,6 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _CloseProgramCommand()
         {
-            using (DatabaseDataContext Database = MyGlobals.Database)
-            {
-                // Delete test measurements
-                DatabaseUtils.DeleteMeasurements(Database.Measurements.Where(x => x.IsTestMeasurement == true).Select(y => y.MeasurementID).ToList());
-            }
-
             if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
             {
                 Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
@@ -355,19 +349,19 @@ namespace newRBS.ViewModels
                 if (measureSpectra.IsAcquiring() == true)
                 { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring"); MessageBox.Show("Can't close the program: Board is acquiring"); return; }
             }
-
+            
             if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
             {
                 SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
             }
-
+            
             if (SimpleIoc.Default.ContainsCreated<Models.Coulombo>() == true)
             {
                 SimpleIoc.Default.GetInstance<Models.Coulombo>().Close();
             }
-
+            
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");
-
+            
             Environment.Exit(0);
         }
     }

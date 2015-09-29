@@ -33,6 +33,17 @@ namespace newRBS.ViewModels
     {
         public ICommand ExpandConfigPanel { get; set; }
 
+        private RelayCommand<EventArgs> _plotSizeChangedCommand;
+        public RelayCommand<EventArgs> PlotSizeChangedCommand
+        {
+            get
+            {
+                return _plotSizeChangedCommand
+                  ?? (_plotSizeChangedCommand = new RelayCommand<EventArgs>(
+                    eventargs => { YAxisUpdated(); }));
+            }
+        }
+
         private bool _ConfigPanelVis = true;
         public bool ConfigPanelVis
         {
@@ -91,6 +102,10 @@ namespace newRBS.ViewModels
         private bool _ShowSimulatedSpectra = true;
         public bool ShowSimulatedSpectra
         { get { return _ShowSimulatedSpectra; } set { _ShowSimulatedSpectra = value; RaisePropertyChanged(); UpdateAllPlots(); } }
+
+        private bool _ShowElementPositions = false;
+        public bool ShowElementPositions
+        { get { return _ShowElementPositions; } set { _ShowElementPositions = value; RaisePropertyChanged(); UpdateElementPositions(); } }
 
         /// <summary>
         /// Constructor of the class. Hooks up to events, sets up commands and initialises variables.
@@ -161,6 +176,8 @@ namespace newRBS.ViewModels
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
+            yAxis.AxisChanged += (o, e) => YAxisUpdated();
+
             plotModel.Axes.Add(xAxis);
             plotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
@@ -471,6 +488,77 @@ namespace newRBS.ViewModels
                 {
                     PlotMeasurement(measurement);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Function that draws or clears the annotation for the element surface channel position.
+        /// </summary>
+        public void UpdateElementPositions()
+        {
+            if (ShowElementPositions == true)
+            {
+                var yAxis = plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left);
+                var xAxis = plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
+
+                double currentPixelPerXAxisUnit = plotModel.PlotArea.Width / (xAxis.ActualMaximum - xAxis.ActualMinimum);
+                double currentPixelPerYAxisUnit = plotModel.PlotArea.Height / (yAxis.ActualMaximum - yAxis.ActualMinimum);
+
+                double currentMax = yAxis.ActualMaximum;
+
+                using (DatabaseDataContext Database = MyGlobals.Database)
+                {
+                    Measurement measurement = Database.Measurements.FirstOrDefault(x => MeasurementIDList.Contains(x.MeasurementID));
+                    double lastXPosition = 0;
+
+                    var elements = Database.Isotopes
+                        .Where(x => x.MassNumber == 0)
+                        .ToList()
+                        .Select(x => new { ElementName = x.Element.ShortName, ElementEnergy = measurement.IncomingIonEnergy * MyGlobals.KineFak(measurement.Isotope.Mass, x.Mass, measurement.OutcomingIonAngle) })
+                        .OrderBy(x => x.ElementEnergy);
+
+                    foreach (var element in elements)
+                    {
+                        ArrowAnnotation arrowAnnotation = new ArrowAnnotation
+                        {
+                            StartPoint = new DataPoint(element.ElementEnergy, currentMax - 20 / currentPixelPerYAxisUnit),
+                            EndPoint = new DataPoint(element.ElementEnergy, currentMax - 40 / currentPixelPerYAxisUnit),
+                            HeadLength = 5,
+                            HeadWidth = 2,
+                            Color = OxyColor.FromHsv(0.7, 0.3, 1),
+                            Layer = AnnotationLayer.BelowSeries,
+                        };
+
+                        if (element.ElementEnergy * currentPixelPerXAxisUnit > lastXPosition + 20)
+                        {
+                            arrowAnnotation.Text = element.ElementName;
+                            arrowAnnotation.Color = OxyColor.FromHsv(0.7, 1, 1);
+                            arrowAnnotation.Layer = AnnotationLayer.AboveSeries;
+                            lastXPosition = element.ElementEnergy * currentPixelPerXAxisUnit;
+                        }
+                        plotModel.Annotations.Add(arrowAnnotation);
+                    }
+                }
+                plotModel.IsLegendVisible = false;
+            }
+            else
+            {
+                plotModel.Annotations.Clear();
+                plotModel.IsLegendVisible = true;
+            }
+            plotModel.InvalidatePlot(true);
+        }
+
+        /// <summary>
+        /// Function that is executed whenever the plot size or axis range is changed. It updates the element surface channel positions.
+        /// </summary>
+        public void YAxisUpdated()
+        {
+            if (ShowElementPositions == true)
+            {
+                plotModel.Annotations.Clear();
+
+                UpdateElementPositions();
             }
         }
     }
