@@ -21,5 +21,10 @@ namespace newRBS.Views
         {
             InitializeComponent();
         }
+
+        public void MySizeChanged(Object o, SizeChangedEventArgs e)
+        {
+            Console.WriteLine("Size changed");
+        }
     }
 }

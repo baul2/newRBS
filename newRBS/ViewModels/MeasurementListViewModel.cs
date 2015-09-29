@@ -179,18 +179,20 @@ namespace newRBS.ViewModels
         {
             MeasurementList.Clear();
 
-            List<Measurement> newMeasurementList = new List<Measurement>();
+            List<Measurement> measurements = new List<Measurement>();
             Sample tempSample;
             Isotope tempIsotope;
+            Element tempElement;
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                newMeasurementList = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
+                measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 
-                foreach (Measurement measurement in newMeasurementList)
+                foreach (Measurement measurement in measurements)
                 {
                     tempSample = measurement.Sample;
                     tempIsotope = measurement.Isotope;
+                    tempElement = measurement.Isotope.Element;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
                     MeasurementList.Add(new SelectableMeasurement() { Selected = false, Measurement = measurement });
                 }

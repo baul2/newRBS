@@ -15,7 +15,7 @@ namespace newRBS.Models
         int handle;
         int bID;
         CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
-        int waveformAutoTrigger = 1;
+        int waveformAutoTrigger;
         CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
         int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
         public List<int> ActiveChannels = new List<int>();
@@ -248,17 +248,19 @@ namespace newRBS.Models
             waveform.AcquisitionTime = DateTime.Now;
             waveform.AcquisitionChannel = channel;
 
-            for (int i = 0; i < 100; i++)
+            DateTime startDateTime = DateTime.Now;
+
+            while ((DateTime.Now - startDateTime).Milliseconds < 300)
             {
-                int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
-                if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return waveform; }
-                else
+                int ret = CAENDPP_GetWaveform(handle, channel, 1, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
+
+                if (ret != 0)
+                { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return waveform; }
+
+                if (waveform.NumSamples > 0)
                 {
-                    if (waveform.NumSamples > 0)
-                    {
-                        trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel " + channel);
-                        return waveform;
-                    }
+                    trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel " + channel);
+                    return waveform;
                 }
             }
             trace.Value.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel " + channel);

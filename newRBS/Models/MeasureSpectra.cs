@@ -10,9 +10,16 @@ using System.Diagnostics;
 using newRBS.Database;
 using System.Reflection;
 using System.IO;
+using System.Windows;
 
 namespace newRBS.Models
 {
+    public class ActiveChannel
+    {
+        public int Channel { get; set; }
+        public int MeasurementID { get; set; }
+    }
+
     /// <summary>
     /// Class responsible for simultaneous measurements of spectra on several channels. 
     /// </summary>
@@ -24,12 +31,12 @@ namespace newRBS.Models
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public int ChopperStartChannel = 1000;
-        public int ChopperEndChannel = 2000;
+        public int ChopperStartChannel;
+        public int ChopperEndChannel;
 
-        private Timer[] MeasureSpectraTimer = new Timer[8];
+        private Timer MeasureSpectraTimer;
 
-        private Dictionary<int, int> activeChannels = new Dictionary<int, int>(); // <Channel,ID>
+        private List<ActiveChannel> ActiveChannels = new List<ActiveChannel>(); // <Channel,ID>
 
         /// <summary>
         /// Constructor of the class. Gets a reference to the instance of <see cref="CAEN_x730"/> from <see cref="ViewModels.ViewModelLocator"/>.
@@ -37,7 +44,6 @@ namespace newRBS.Models
         public MeasureSpectra()
         {
             cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
-            coulombo = SimpleIoc.Default.GetInstance<Coulombo>();
         }
 
         /// <summary>
@@ -64,17 +70,36 @@ namespace newRBS.Models
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
+                // Delete test measurements
+                DatabaseUtils.DeleteMeasurements(Database.Measurements.Where(x => x.IsTestMeasurement == true).Select(y => y.MeasurementID).ToList());
+
+                switch (NewMeasurement.Chamber)
+                {
+                    case "-10°":
+                        {
+                            if (ChopperStartChannel == 0 || ChopperEndChannel == 0)
+                            {
+                                if (MessageBox.Show("Chopper start channel and/or end channel aren't configured!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                                    return;
+                            }
+                            cAEN_x730.StartAcquisition(7); // Start chopper
+                            break;
+                        }
+                    case "-30°":
+                        {
+                            coulombo = SimpleIoc.Default.GetInstance<Coulombo>();
+                            if (NewMeasurement.StopType == "Charge (µC)")
+                                coulombo.SetCharge(NewMeasurement.StopValue);
+                            else
+                                coulombo.SetCharge(9999);
+                            coulombo.Start();
+                            break;
+                        }
+                }
+
                 foreach (int channel in SelectedChannels)
                 {
-                    // Delete test measurements
-                    DatabaseUtils.DeleteMeasurements(Database.Measurements.Where(x => x.IsTestMeasurement == true).Select(y=>y.MeasurementID).ToList());
-
                     cAEN_x730.StartAcquisition(channel);
-
-                    if (NewMeasurement.StopType == "ChopperCounts")
-                    {
-                        cAEN_x730.StartAcquisition(7); // Start chopper
-                    }
 
                     var LastMeasurement = Database.Measurements.Where(x => x.Channel == channel).OrderByDescending(y => y.StartTime).FirstOrDefault();
                     if (LastMeasurement != null)
@@ -101,26 +126,17 @@ namespace newRBS.Models
                     NewMeasurement.SpectrumY = new int[] { 0 };
                     NewMeasurement.Runs = true;
 
-                    if (NewMeasurement.StopType == "Charge (µC)")
-                    {
-                        coulombo.SetCharge(NewMeasurement.StopValue);
-                    }
-                    else
-                    {
-                        coulombo.SetCharge(9999);
-                    }
-                    coulombo.Start();
-
                     Database.Measurements.InsertOnSubmit(NewMeasurement);
 
                     Database.SubmitChanges();
-                    activeChannels.Add(channel, NewMeasurement.MeasurementID);
+                    ActiveChannels.Add(new ActiveChannel { Channel = channel, MeasurementID = NewMeasurement.MeasurementID });
 
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + NewMeasurement.MeasurementID + " started on channel " + NewMeasurement.Channel);
-                    MeasureSpectraTimer[channel] = new Timer(500);
-                    MeasureSpectraTimer[channel].Elapsed += delegate { MeasureSpectraWorker(NewMeasurement.MeasurementID, channel); };
-                    MeasureSpectraTimer[channel].Start();
                 }
+
+                MeasureSpectraTimer = new Timer(1000);
+                MeasureSpectraTimer.Elapsed += delegate { MeasureSpectraWorker(); };
+                MeasureSpectraTimer.Start();
             }
         }
 
@@ -129,21 +145,26 @@ namespace newRBS.Models
         /// </summary>
         public void StopAcquisitions()
         {
-            foreach (int channel in activeChannels.Keys.ToList())
+            using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                int measurementID = activeChannels[channel];
-                cAEN_x730.StopAcquisition(channel);
+                MeasureSpectraTimer.Stop();
 
-                MeasureSpectraTimer[channel].Stop();
-
-                activeChannels.Remove(channel);
-
-                using (DatabaseDataContext Database = MyGlobals.Database)
+                switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
-                    Measurement MeasurementToStop = Database.Measurements.FirstOrDefault(x => x.MeasurementID == measurementID);
+                    case "-10°":
+                        { cAEN_x730.StopAcquisition(7); break; }
+                    case "-30°":
+                        { coulombo.Stop(); break; }
+                }
+
+                foreach (ActiveChannel activeChannel in ActiveChannels)
+                {
+                    Measurement MeasurementToStop = Database.Measurements.FirstOrDefault(x => x.MeasurementID == activeChannel.MeasurementID);
 
                     if (MeasurementToStop == null)
-                    { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = " + measurementID + " not found"); return; }
+                    { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = " + activeChannel.MeasurementID + " not found"); return; }
+
+                    cAEN_x730.StopAcquisition(activeChannel.Channel);
 
                     MeasurementToStop.Runs = false;
 
@@ -157,11 +178,10 @@ namespace newRBS.Models
 
                     DatabaseUtils.ExportMeasurements(new List<int> { MeasurementToStop.MeasurementID }, path + file);
 
-                    if (MeasurementToStop.StopType == "ChopperCounts")
-                        cAEN_x730.StopAcquisition(7);
-
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToStop.MeasurementID + " stopped (channel " + MeasurementToStop.Channel + ")");
                 }
+
+                ActiveChannels.Clear();
             }
         }
 
@@ -170,60 +190,95 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
         /// <param name="Channel">Channel to read the spectrum from.</param>
-        public void MeasureSpectraWorker(int MeasurementID, int Channel)
+        public void MeasureSpectraWorker()
         {
-            int[] newSpectrumY = cAEN_x730.GetHistogram(Channel);
-            long sum = newSpectrumY.Sum();
-            trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureSpectraWorker ID = " + MeasurementID + "; Counts = " + sum);
-
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
+                long currentChopperCounts = 0;
+                double currentCharge = 0;
+                double currentValue = 0;
 
-                if (MeasurementToUpdate == null)
-                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = " + MeasurementID + " not found"); return; }
-
-                if (newSpectrumY.Length != MeasurementToUpdate.NumOfChannels)
-                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
-
-                MeasurementToUpdate.SpectrumY = newSpectrumY;
-
-                MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
-                MeasurementToUpdate.CurrentCounts = sum;
-                MeasurementToUpdate.CurrentCharge = coulombo.GetCharge();
-
-                if (MeasurementToUpdate.StopType == "ChopperCounts")
+                switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
-                    MeasurementToUpdate.CurrentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum();
-                    Console.WriteLine("CurrentChopperCounts: " + MeasurementToUpdate.CurrentChopperCounts);
+                    case "-10°":
+                        { currentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum(); break; }
+                    case "-30°":
+                        { currentCharge = coulombo.GetCharge(); break; }
                 }
 
-                switch (MeasurementToUpdate.StopType)
+                foreach (ActiveChannel activeChannel in ActiveChannels)
                 {
-                    case "Manual":
-                        MeasurementToUpdate.Progress = 0; break;
-                    case "Duration (min)":
-                        MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / MeasurementToUpdate.StopValue; break;
-                    case "Charge (µC)":
-                        MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / MeasurementToUpdate.StopValue; break;
-                    case "Counts":
-                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; break;
-                    case "ChopperCounts":
-                        MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
-                }
+                    Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == activeChannel.MeasurementID);
 
-                if (MeasurementToUpdate.Progress > 0)
-                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+                    int[] newSpectrumY = cAEN_x730.GetHistogram(activeChannel.Channel);
+                    long sum = newSpectrumY.Sum();
+                    trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureSpectraWorker ID = " + activeChannel.MeasurementID + "; Counts = " + sum);
 
-                Database.SubmitChanges();
+                    if (MeasurementToUpdate == null)
+                    { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't update SpectrumY: Measurement with MeasurementID = " + activeChannel.MeasurementID + " not found"); return; }
 
-                if (MeasurementToUpdate.Progress >= 1)
-                {
-                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToUpdate.MeasurementID + " has been finished (Progress=1)");
-                    MeasurementToUpdate.Progress = 1;
-                    MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01);
+                    if (newSpectrumY.Length != MeasurementToUpdate.NumOfChannels)
+                    { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Length of spectrumY doesn't match"); return; }
+
+                    MeasurementToUpdate.SpectrumY = newSpectrumY;
+
+                    MeasurementToUpdate.CurrentDuration = new DateTime(2000, 01, 01) + (DateTime.Now - MeasurementToUpdate.StartTime);
+                    MeasurementToUpdate.CurrentCounts = sum;
+
+                    switch (MeasurementToUpdate.Chamber)
+                    {
+                        case "-10°":
+                            {
+                                MeasurementToUpdate.CurrentChopperCounts = currentChopperCounts;
+                                currentValue = currentChopperCounts;
+                                break;
+                            }
+                        case "-30°":
+                            {
+                                MeasurementToUpdate.CurrentCharge = currentCharge;
+                                currentValue = currentCharge;
+                                break;
+                            }
+                    }
+
+                    if (MyGlobals.Charge_CountsOverTime.Count() == 0)
+                    {
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = 0 });
+                    }
+
+                    if ((DateTime.Now - MyGlobals.Charge_CountsOverTime.LastOrDefault().Time).TotalSeconds >= MyGlobals.TimePlotIntervall)
+                    {
+                        double oldCounts = MyGlobals.Charge_CountsOverTime.Sum(x => x.Value);
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts)  });
+                    }
+
+                    switch (MeasurementToUpdate.StopType)
+                    {
+                        case "Manual":
+                            MeasurementToUpdate.Progress = 0; break;
+                        case "Duration (min)":
+                            MeasurementToUpdate.Progress = (MeasurementToUpdate.CurrentDuration - new DateTime(2000, 01, 01)).TotalMinutes / MeasurementToUpdate.StopValue; break;
+                        case "Charge (µC)":
+                            MeasurementToUpdate.Progress = MeasurementToUpdate.CurrentCharge / MeasurementToUpdate.StopValue; break;
+                        case "Counts":
+                            MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentCounts / MeasurementToUpdate.StopValue; break;
+                        case "ChopperCounts":
+                            MeasurementToUpdate.Progress = (double)MeasurementToUpdate.CurrentChopperCounts / MeasurementToUpdate.StopValue; break;
+                    }
+
+                    if (MeasurementToUpdate.Progress > 0)
+                        MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds((new DateTime(2000, 01, 01) - MeasurementToUpdate.CurrentDuration).TotalSeconds * (1 - 1 / MeasurementToUpdate.Progress));
+
                     Database.SubmitChanges();
-                    StopAcquisitions();
+
+                    if (MeasurementToUpdate.Progress >= 1)
+                    {
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + MeasurementToUpdate.MeasurementID + " has been finished (Progress=1)");
+                        MeasurementToUpdate.Progress = 1;
+                        MeasurementToUpdate.Remaining = new DateTime(2000, 01, 01);
+                        Database.SubmitChanges();
+                        StopAcquisitions();
+                    }
                 }
             }
         }

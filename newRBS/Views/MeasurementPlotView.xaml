@@ -17,50 +17,62 @@
     <DockPanel>
         <Border DockPanel.Dock="Right" Visibility="{Binding ConfigPanelVis, Converter={StaticResource BoolToVis}}" MinWidth="150">
             <StackPanel Orientation="Vertical">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Label Content="Data binding:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
-                    <ComboBox ItemsSource="{Binding DataBindingIntervals}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SelectedDataBindingInterval}" Margin="3" Grid.Column="1" Grid.Row="0"/>
-                    
-                    <Label Content="CutOffCounts (%):" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
-                    <TextBox Text="{Binding CutOffCountsPercent, UpdateSourceTrigger=PropertyChanged}" Margin="3" Grid.Column="1" Grid.Row="1"/>
-                    
-                    <Label Content="Counts axis:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
-                    <ComboBox ItemsSource="{Binding YAxisScale}" SelectedItem="{Binding SelectedYAxisScale}" Margin="3" Grid.Column="1" Grid.Row="2"/>
+                <Expander Header="Plot Configuration" IsExpanded="True">
+                    <StackPanel Orientation="Vertical">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Label Content="Data Binding:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0"/>
+                            <ComboBox ItemsSource="{Binding DataBindingIntervals}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SelectedDataBindingInterval}" Margin="3" Grid.Column="1" Grid.Row="0"/>
 
-                    <Label Content="Show sim. spectra:" HorizontalAlignment="Left" Grid.Column="0"  Grid.Row="3"/>
-                    <CheckBox IsChecked="{Binding ShowSimulatedSpectra}" VerticalAlignment="Center" Grid.Column="1" Grid.Row="3"/>
-                    
-                    <Label Content="Legend caption:" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Row="4"/>
-                    <ComboBox ItemsSource="{Binding LegendCaptions}" SelectedItem="{Binding SelectedLegendCaption}" Margin="3" Grid.ColumnSpan="2" Grid.Row="5"/>
+                            <Label Content="CutOffCounts (%):" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="1"/>
+                            <TextBox Text="{Binding CutOffCountsPercent, UpdateSourceTrigger=PropertyChanged}" Margin="3" Grid.Column="1" Grid.Row="1"/>
 
+                            <Label Content="Counts Axis:" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="2"/>
+                            <ComboBox ItemsSource="{Binding YAxisScale}" SelectedItem="{Binding SelectedYAxisScale}" Margin="3" Grid.Column="1" Grid.Row="2"/>
 
-                </Grid>
+                            <Label Content="Show simulated Spectra:" HorizontalAlignment="Right" Grid.Column="0"  Grid.Row="3"/>
+                            <CheckBox IsChecked="{Binding ShowSimulatedSpectra}" VerticalAlignment="Center" Grid.Column="1" Grid.Row="3"/>
+
+                            <Label Content="Show Element Positions:" HorizontalAlignment="Right" Grid.Column="0"  Grid.Row="4"/>
+                            <CheckBox IsChecked="{Binding ShowElementPositions}" VerticalAlignment="Center" Grid.Column="1" Grid.Row="4"/>
+
+                            <Label Content="Legend caption:" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Row="5"/>
+                            <ComboBox ItemsSource="{Binding LegendCaptions}" SelectedItem="{Binding SelectedLegendCaption}" Margin="3" Grid.ColumnSpan="2" Grid.Row="6"/>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+                <Expander Header="Charge/Counts over Time" IsExpanded="True">
+                    <StackPanel Orientation="Vertical">
+                        <oxy:PlotView Model="{Binding TimePlotModel}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Height="130" MinWidth="200"/>
+                    </StackPanel>
+                </Expander>
             </StackPanel>
         </Border>
         <Border DockPanel.Dock="Right">
-            <StackPanel Orientation="Vertical">
-                <Button Content="{Binding VisButtonContent}" Width="150" Height="22"  VerticalAlignment="Center" HorizontalAlignment="Center" VerticalContentAlignment="Top" Background="White" Command="{Binding ExpandConfigPanel}">
-                    <Button.LayoutTransform>
-                        <RotateTransform Angle="-90" />
-                    </Button.LayoutTransform>
-                </Button>
-            </StackPanel>
+            <Button Content="{Binding VisButtonContent}"  Width="10"  VerticalAlignment="Stretch" HorizontalAlignment="Center" VerticalContentAlignment="Center" Background="WhiteSmoke" BorderThickness="0" Command="{Binding ExpandConfigPanel}"/>
         </Border>
         <Border DockPanel.Dock="Top">
             <TextBlock TextAlignment="Center" Text="Hint: Use left button to zoom, middle button to mark and right button to pan."/>
         </Border>
-        <oxy:PlotView Model="{Binding plotModel}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
+        <oxy:PlotView Model="{Binding MeasurementsPlotModel}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SizeChanged">
+                    <cmd:EventToCommand Command="{Binding PlotSizeChangedCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </oxy:PlotView>
     </DockPanel>
 </UserControl>

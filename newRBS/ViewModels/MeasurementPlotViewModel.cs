@@ -33,6 +33,17 @@ namespace newRBS.ViewModels
     {
         public ICommand ExpandConfigPanel { get; set; }
 
+        private RelayCommand<EventArgs> _plotSizeChangedCommand;
+        public RelayCommand<EventArgs> PlotSizeChangedCommand
+        {
+            get
+            {
+                return _plotSizeChangedCommand
+                  ?? (_plotSizeChangedCommand = new RelayCommand<EventArgs>(
+                    eventargs => { YAxisUpdated(); }));
+            }
+        }
+
         private bool _ConfigPanelVis = true;
         public bool ConfigPanelVis
         {
@@ -43,15 +54,15 @@ namespace newRBS.ViewModels
                 switch (value)
                 {
                     case true:
-                        { VisButtonContent = "\u21D3 Plot Configuration \u21D3"; break; }
+                        { VisButtonContent = ">\n>\n>"; break; }
                     case false:
-                        { VisButtonContent = "\u21D1 Plot Configuration \u21D1"; break; }
+                        { VisButtonContent = "<\n<\n<"; break; }
                 }
                 RaisePropertyChanged();
             }
         }
 
-        private string _VisButtonContent = "\u21D3 Plot Configuration \u21D3";
+        private string _VisButtonContent = ">\n>\n>";
         public string VisButtonContent
         { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 
@@ -60,7 +71,9 @@ namespace newRBS.ViewModels
         /// </summary>
         private List<int> MeasurementIDList;
 
-        public PlotModel plotModel { get; set; }
+        public PlotModel MeasurementsPlotModel { get; set; }
+
+        public PlotModel TimePlotModel { get; set; }
 
         private List<OxyColor> LineColors { get; set; }
 
@@ -68,7 +81,7 @@ namespace newRBS.ViewModels
 
         public List<NameValueClass> DataBindingIntervals { get; set; }
 
-        private int _SelectedDataBindingInterval = 0;
+        private int _SelectedDataBindingInterval = 2;
         public int SelectedDataBindingInterval
         { get { return _SelectedDataBindingInterval; } set { _SelectedDataBindingInterval = value; UpdateAllPlots(); RaisePropertyChanged(); UpdateYAxisTitle(); } }
 
@@ -91,6 +104,10 @@ namespace newRBS.ViewModels
         private bool _ShowSimulatedSpectra = true;
         public bool ShowSimulatedSpectra
         { get { return _ShowSimulatedSpectra; } set { _ShowSimulatedSpectra = value; RaisePropertyChanged(); UpdateAllPlots(); } }
+
+        private bool _ShowElementPositions = false;
+        public bool ShowElementPositions
+        { get { return _ShowElementPositions; } set { _ShowElementPositions = value; RaisePropertyChanged(); UpdateElementPositions(); } }
 
         /// <summary>
         /// Constructor of the class. Hooks up to events, sets up commands and initialises variables.
@@ -129,9 +146,13 @@ namespace newRBS.ViewModels
                 OxyColors.Violet
             };
 
-            plotModel = new PlotModel();
+            MyGlobals.Charge_CountsOverTime = new List<TimeSeriesEvent>();
 
-            SetUpModel();
+            MeasurementsPlotModel = new PlotModel();
+            TimePlotModel = new PlotModel();
+
+            SetUpMeasurementsPlotModel();
+            SetUpTimePlotModel();
 
             DataBindingIntervals = new List<NameValueClass> { new NameValueClass("none", 0), new NameValueClass("1keV", 1), new NameValueClass("2keV", 2), new NameValueClass("5keV", 5), new NameValueClass("10keV", 10) };
 
@@ -149,21 +170,41 @@ namespace newRBS.ViewModels
         }
 
         /// <summary>
-        /// Function that sets up the <see cref="Model"/> of the <see cref="OxyPlot"/>.
+        /// Function that sets up the <see cref="MeasurementsPlotModel"/>.
         /// </summary>
-        public void SetUpModel()
+        public void SetUpMeasurementsPlotModel()
         {
-            plotModel.LegendOrientation = LegendOrientation.Vertical;
-            plotModel.LegendPlacement = LegendPlacement.Inside;
-            plotModel.LegendPosition = LegendPosition.TopRight;
-            plotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
-            plotModel.LegendBorder = OxyColors.Black;
+            MeasurementsPlotModel.LegendOrientation = LegendOrientation.Vertical;
+            MeasurementsPlotModel.LegendPlacement = LegendPlacement.Inside;
+            MeasurementsPlotModel.LegendPosition = LegendPosition.TopRight;
+            MeasurementsPlotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
+            MeasurementsPlotModel.LegendBorder = OxyColors.Black;
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
-            plotModel.Axes.Add(xAxis);
-            plotModel.Axes.Add(yAxis);
+            yAxis.AxisChanged += (o, e) => YAxisUpdated();
+
+            MeasurementsPlotModel.Axes.Add(xAxis);
+            MeasurementsPlotModel.Axes.Add(yAxis);
             UpdateYAxisTitle();
+        }
+
+        /// <summary>
+        /// Function that sets up the <see cref="TimePlotModel"/>.
+        /// </summary>
+        public void SetUpTimePlotModel()
+        {
+            var xAxis = new DateTimeAxis() { Position = AxisPosition.Bottom };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left };
+
+            TimePlotModel.Axes.Add(xAxis);
+            TimePlotModel.Axes.Add(yAxis);
+
+            var lineSeries = new LineSeries { TrackerFormatString = "Time: {2:HH:mm}\n{3}: {4:0.###}" };
+
+            TimePlotModel.Series.Add(lineSeries);
+
+            TimePlotModel.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -186,36 +227,36 @@ namespace newRBS.ViewModels
         {
             MeasurementIDList.Remove(measurement.MeasurementID);
 
-            var delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
+            var delSerie = MeasurementsPlotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
-                plotModel.Series.Remove(delSerie);
+                MeasurementsPlotModel.Series.Remove(delSerie);
 
-                plotModel.InvalidatePlot(true);
+                MeasurementsPlotModel.InvalidatePlot(true);
             }
 
-            delSerie = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
+            delSerie = MeasurementsPlotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).FirstOrDefault();
             if (delSerie != null)
             {
-                plotModel.Series.Remove(delSerie);
+                MeasurementsPlotModel.Series.Remove(delSerie);
 
-                plotModel.InvalidatePlot(true);
+                MeasurementsPlotModel.InvalidatePlot(true);
             }
         }
 
         /// <summary>
-        /// Function that cleas the <see cref="plotModel"/>.
+        /// Function that cleas the <see cref="MeasurementsPlotModel"/>.
         /// </summary>
         /// <param name="dump"></param>
         public void ClearPlot(List<int> dump)
         {
-            plotModel.Series.Clear();
+            MeasurementsPlotModel.Series.Clear();
             MeasurementIDList.Clear();
-            plotModel.InvalidatePlot(true);
+            MeasurementsPlotModel.InvalidatePlot(true);
         }
 
         /// <summary>
-        /// Function that plots a <see cref="Measurement"/> to the <see cref="plotModel"/>.
+        /// Function that plots a <see cref="Measurement"/> to the <see cref="MeasurementsPlotModel"/>.
         /// </summary>
         /// <param name="measurement"><see cref="Measurement"/> to be plotted.</param>
         public void PlotMeasurement(Measurement measurement)
@@ -277,7 +318,7 @@ namespace newRBS.ViewModels
             {
                 case 0: // Average undistinguishable points in spectrumX/spectrumY
                     {
-                        var XAxis = plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
+                        var XAxis = MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
 
                         int XPlotWidth = (int)(XAxis.ScreenMax.X - XAxis.ScreenMin.X);
 
@@ -350,14 +391,30 @@ namespace newRBS.ViewModels
                         break;
                     }
             }
-            plotModel.Series.Add(MeassuredPlot);
+            MeasurementsPlotModel.Series.Add(MeassuredPlot);
             if (measurement.SpectrumYSimulated != null && ShowSimulatedSpectra == true)
-                plotModel.Series.Add(SimulatedPlot);
-            plotModel.InvalidatePlot(true);
+                MeasurementsPlotModel.Series.Add(SimulatedPlot);
+            MeasurementsPlotModel.InvalidatePlot(true);
+
+            // Update TimePlotModel
+            var lineSeries = (LineSeries)TimePlotModel.Series.FirstOrDefault();
+
+            if (lineSeries.Points.Count() != MyGlobals.Charge_CountsOverTime.Count())
+            {
+                lineSeries.Points.Clear();
+                foreach (var temp in MyGlobals.Charge_CountsOverTime)
+                {
+                    if (temp.Value > 0)
+                    {
+                        lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(temp.Time), temp.Value));
+                    }
+                }
+                TimePlotModel.InvalidatePlot(true);
+            }
         }
 
         /// <summary>
-        /// Function that is executed whenever a <see cref="Measurement"/> was updated. It updates the corresponding plot in <see cref="plotModel"/>.
+        /// Function that is executed whenever a <see cref="Measurement"/> was updated. It updates the corresponding plot in <see cref="MeasurementsPlotModel"/>.
         /// </summary>
         /// <param name="measurement"></param>
         public void UpdatePlot(Measurement measurement)
@@ -365,10 +422,10 @@ namespace newRBS.ViewModels
             if (!MeasurementIDList.Contains(measurement.MeasurementID))
                 return;
 
-            List<Series> updateSeries = plotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).ToList();
+            List<Series> updateSeries = MeasurementsPlotModel.Series.Where(x => ((Measurement)x.Tag).MeasurementID == measurement.MeasurementID).ToList();
             foreach (Series updateSerie in updateSeries)
             {
-                plotModel.Series.Remove(updateSerie);
+                MeasurementsPlotModel.Series.Remove(updateSerie);
             }
             PlotMeasurement(measurement);
         }
@@ -382,16 +439,16 @@ namespace newRBS.ViewModels
             {
                 case "linear":
                     {
-                        plotModel.Axes.Remove(plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
+                        MeasurementsPlotModel.Axes.Remove(MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
                         var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0 };
-                        plotModel.Axes.Add(yAxis);
+                        MeasurementsPlotModel.Axes.Add(yAxis);
                         break;
                     }
                 case "logarithmic":
                     {
-                        plotModel.Axes.Remove(plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
+                        MeasurementsPlotModel.Axes.Remove(MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left));
                         var yAxis = new LogarithmicAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 1 };
-                        plotModel.Axes.Add(yAxis);
+                        MeasurementsPlotModel.Axes.Add(yAxis);
                         break;
                     }
             }
@@ -406,12 +463,12 @@ namespace newRBS.ViewModels
             {
                 case 0:
                     {
-                        plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = "Counts per channel";
+                        MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = "Counts per channel";
                         break;
                     }
                 default:
                     {
-                        plotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = string.Format("Counts per {0}keV interval", SelectedDataBindingInterval);
+                        MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Title = string.Format("Counts per {0}keV interval", SelectedDataBindingInterval);
                         break;
                     }
             }
@@ -448,7 +505,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void UpdateLegend()
         {
-            foreach (var plot in plotModel.Series)
+            foreach (var plot in MeasurementsPlotModel.Series)
             {
                 plot.Title = GetMeasurementTitle((Measurement)plot.Tag);
             }
@@ -465,12 +522,83 @@ namespace newRBS.ViewModels
             {
                 List<Measurement> measurements = Database.Measurements.Where(x => MeasurementIDList.Contains(x.MeasurementID)).ToList();
 
-                plotModel.Series.Clear();
+                MeasurementsPlotModel.Series.Clear();
 
                 foreach (Measurement measurement in measurements)
                 {
                     PlotMeasurement(measurement);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Function that draws or clears the annotation for the element surface channel position.
+        /// </summary>
+        public void UpdateElementPositions()
+        {
+            if (ShowElementPositions == true)
+            {
+                var yAxis = MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left);
+                var xAxis = MeasurementsPlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Bottom);
+
+                double currentPixelPerXAxisUnit = MeasurementsPlotModel.PlotArea.Width / (xAxis.ActualMaximum - xAxis.ActualMinimum);
+                double currentPixelPerYAxisUnit = MeasurementsPlotModel.PlotArea.Height / (yAxis.ActualMaximum - yAxis.ActualMinimum);
+
+                double currentMax = yAxis.ActualMaximum;
+
+                using (DatabaseDataContext Database = MyGlobals.Database)
+                {
+                    Measurement measurement = Database.Measurements.FirstOrDefault(x => MeasurementIDList.Contains(x.MeasurementID));
+                    double lastXPosition = 0;
+
+                    var elements = Database.Isotopes
+                        .Where(x => x.MassNumber == 0)
+                        .ToList()
+                        .Select(x => new { ElementName = x.Element.ShortName, ElementEnergy = measurement.IncomingIonEnergy * MyGlobals.KineFak(measurement.Isotope.Mass, x.Mass, measurement.OutcomingIonAngle) })
+                        .OrderBy(x => x.ElementEnergy);
+
+                    foreach (var element in elements)
+                    {
+                        ArrowAnnotation arrowAnnotation = new ArrowAnnotation
+                        {
+                            StartPoint = new DataPoint(element.ElementEnergy, currentMax - 20 / currentPixelPerYAxisUnit),
+                            EndPoint = new DataPoint(element.ElementEnergy, currentMax - 40 / currentPixelPerYAxisUnit),
+                            HeadLength = 5,
+                            HeadWidth = 2,
+                            Color = OxyColor.FromHsv(0.7, 0.3, 1),
+                            Layer = AnnotationLayer.BelowSeries,
+                        };
+
+                        if (element.ElementEnergy * currentPixelPerXAxisUnit > lastXPosition + 20)
+                        {
+                            arrowAnnotation.Text = element.ElementName;
+                            arrowAnnotation.Color = OxyColor.FromHsv(0.7, 1, 1);
+                            arrowAnnotation.Layer = AnnotationLayer.AboveSeries;
+                            lastXPosition = element.ElementEnergy * currentPixelPerXAxisUnit;
+                        }
+                        MeasurementsPlotModel.Annotations.Add(arrowAnnotation);
+                    }
+                }
+                MeasurementsPlotModel.IsLegendVisible = false;
+            }
+            else
+            {
+                MeasurementsPlotModel.Annotations.Clear();
+                MeasurementsPlotModel.IsLegendVisible = true;
+            }
+            MeasurementsPlotModel.InvalidatePlot(true);
+        }
+
+        /// <summary>
+        /// Function that is executed whenever the plot size or axis range is changed. It updates the element surface channel positions.
+        /// </summary>
+        public void YAxisUpdated()
+        {
+            if (ShowElementPositions == true)
+            {
+                MeasurementsPlotModel.Annotations.Clear();
+
+                UpdateElementPositions();
             }
         }
     }

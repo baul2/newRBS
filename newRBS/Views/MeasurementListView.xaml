@@ -8,11 +8,8 @@
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1000"
+             d:DesignHeight="300" d:DesignWidth="1200"
              DataContext="{Binding measurementListViewModel, Source={StaticResource Locator}}">
-    <UserControl.Resources>
-        <local:AtomicNumberToShortNameConverter x:Key="converter" />
-    </UserControl.Resources>
     <DataGrid 
         ItemsSource="{Binding MeasurementListViewSource.View}" 
         SelectedValuePath="Measurement.MeasurementID"
@@ -86,6 +83,10 @@
                 Binding="{Binding Measurement.CurrentCharge, StringFormat={}{0:0.00}}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
+                Header="ChopperCounts" 
+                Binding="{Binding Measurement.CurrentChopperCounts}"
+                IsReadOnly="True"/>
+            <DataGridTextColumn 
                 Header="Progress" 
                 Binding="{Binding Measurement.Progress, StringFormat={}{0:P0}}"
                 IsReadOnly="True"/>
@@ -119,7 +120,7 @@
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="Ion" 
-                Binding="{Binding Measurement.IncomingIonAtomicNumber, Converter={StaticResource converter}}"
+                Binding="{Binding Measurement.Isotope.Element.ShortName}"
                 IsReadOnly="True"/>
             <DataGridTextColumn 
                 Header="IonEnergy" 

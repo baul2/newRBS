@@ -137,7 +137,7 @@ namespace newRBS.ViewModels
                     {
                         NewMeasurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
+                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
                         break;
                     }
                 case 1: // -30° chamber
