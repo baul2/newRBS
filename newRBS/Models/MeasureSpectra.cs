@@ -79,8 +79,8 @@ namespace newRBS.Models
                         {
                             if (ChopperStartChannel == 0 || ChopperEndChannel == 0)
                             {
-                                MessageBox.Show("Chopper start channel and/or end channel aren't configured!", "Error");
-                                return;
+                                if (MessageBox.Show("Chopper start channel and/or end channel aren't configured!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                                    return;
                             }
                             cAEN_x730.StartAcquisition(7); // Start chopper
                             break;
@@ -196,6 +196,7 @@ namespace newRBS.Models
             {
                 long currentChopperCounts = 0;
                 double currentCharge = 0;
+                double currentValue = 0;
 
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
@@ -227,9 +228,28 @@ namespace newRBS.Models
                     switch (MeasurementToUpdate.Chamber)
                     {
                         case "-10°":
-                            { MeasurementToUpdate.CurrentChopperCounts = currentChopperCounts; break; }
+                            {
+                                MeasurementToUpdate.CurrentChopperCounts = currentChopperCounts;
+                                currentValue = currentChopperCounts;
+                                break;
+                            }
                         case "-30°":
-                            { MeasurementToUpdate.CurrentCharge = currentCharge; break; }
+                            {
+                                MeasurementToUpdate.CurrentCharge = currentCharge;
+                                currentValue = currentCharge;
+                                break;
+                            }
+                    }
+
+                    if (MyGlobals.Charge_CountsOverTime.Count() == 0)
+                    {
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = 0 });
+                    }
+
+                    if ((DateTime.Now - MyGlobals.Charge_CountsOverTime.LastOrDefault().Time).TotalSeconds >= MyGlobals.TimePlotIntervall)
+                    {
+                        double oldCounts = MyGlobals.Charge_CountsOverTime.Sum(x => x.Value);
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts)  });
                     }
 
                     switch (MeasurementToUpdate.StopType)

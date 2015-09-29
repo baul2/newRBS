@@ -14,6 +14,12 @@ using OxyPlot;
 
 namespace newRBS
 {
+    public class TimeSeriesEvent
+    {
+        public DateTime Time { get; set; }
+        public double Value { get; set; }
+    }
+
     class MyTextWriterTraceListener : TextWriterTraceListener
     {
         public MyTextWriterTraceListener(string fileName) : base(fileName)
@@ -136,5 +142,9 @@ namespace newRBS
 
             return k;
         }
+
+        public static List<TimeSeriesEvent> Charge_CountsOverTime { get; set; }
+
+        public static double TimePlotIntervall = 30;
     }
 }

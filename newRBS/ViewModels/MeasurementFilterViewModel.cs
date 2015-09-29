@@ -59,15 +59,15 @@ namespace newRBS.ViewModels
                 switch (value)
                 {
                     case true:
-                        { VisButtonContent = "\u21D1 Filter Panel \u21D1"; break; }
+                        { VisButtonContent = "<\n<\n<"; break; }
                     case false:
-                        { VisButtonContent = "\u21D3 Filter Panel \u21D3"; break; }
+                        { VisButtonContent = ">\n>\n>"; break; }
                 }
                 RaisePropertyChanged();
             }
         }
 
-        private string _VisButtonContent = "\u21D1 Filter Panel \u21D1";
+        private string _VisButtonContent = "<\n<\n<";
         public string VisButtonContent
         { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 

@@ -406,7 +406,7 @@ namespace newRBS.Database
         {
             using (FileStream fileStream = File.Create(FileName))
             {
-                var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().plotModel;
+                var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().MeasurementsPlotModel;
                 switch (Path.GetExtension(FileName))
                 {
                     case ".png":
