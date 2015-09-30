@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:newRBS.Views"
         xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
+        xmlns:global="clr-namespace:newRBS"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:z="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
         mc:Ignorable="d"
         Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
         DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
     <z:Interaction.Triggers>
         <z:EventTrigger EventName="Closing">
             <cmd:EventToCommand Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True"/>
@@ -23,10 +27,10 @@
                 <MenuItem Header="Close" Command="{Binding CloseProgramCommand}"/>
             </MenuItem>
             <MenuItem Header="Measurement">
-                <MenuItem Header="Start Acquisition" Command="{Binding NewMeasurementCommand}"/>
-                <MenuItem Header="Start Test Acquisition" Command="{Binding NewTestMeasurementCommand}"/>
-                <MenuItem Header="Stop Acquisition" Command="{Binding StopMeasurementCommand}"/>
-                <MenuItem Header="Configure Channels" Command="{Binding ChannelConfigurationCommand}"/>
+                <MenuItem Header="Start Acquisition" Command="{Binding NewMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
+                <MenuItem Header="Start Test Acquisition" Command="{Binding NewTestMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
+                <MenuItem Header="Stop Acquisition" Command="{Binding StopMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
+                <MenuItem Header="Configure Channels" Command="{Binding ChannelConfigurationCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
                 <Separator/>
                 <MenuItem Header="Import Measurements" Command="{Binding ImportMeasurementsCommand}"/>
                 <MenuItem Header="Export Measurements" Command="{Binding ExportMeasurementsCommand}"/>
@@ -46,7 +50,7 @@
             </MenuItem>
         </Menu>
         <ToolBarTray DockPanel.Dock="Top">
-            <ToolBar>
+            <ToolBar Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}">
                 <Button Command="{Binding NewMeasurementCommand}" ToolTip="Start Acquisition">
                     <Image Source="/Images/129.png" Height="24"/>
                 </Button>

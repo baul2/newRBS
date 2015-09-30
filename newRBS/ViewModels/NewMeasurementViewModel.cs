@@ -18,11 +18,12 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="Models.MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
+    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
     /// </summary>
     public class NewMeasurementViewModel : ViewModelBase
     {
@@ -120,8 +121,6 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StartMeasurementCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-
             DialogResult = false;
 
             int IncomingIonIsotopeID = NewMeasurement.IncomingIonIsotopeID;
@@ -137,14 +136,14 @@ namespace newRBS.ViewModels
                     {
                         NewMeasurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
                         break;
                     }
                 case 1: // -30° chamber
                     {
                         NewMeasurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
                         break;
                     }
             }

@@ -38,7 +38,6 @@ namespace newRBS.ViewModels
     public class ChannelConfigurationViewModel : ViewModelBase
     {
         private Models.MeasureWaveform measureWaveform;
-        private Models.MeasureSpectra measureSpectra;
 
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
@@ -168,7 +167,6 @@ namespace newRBS.ViewModels
             SaveChopperConfigCommand = new RelayCommand(() => _SaveChopperConfigCommand(), () => true);
 
             measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
-            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
             // Hooking up to events from MeasureWaveform
             measureWaveform.EventWaveform += new Models.MeasureWaveform.EventHandlerWaveform(WaveformUpdate);
@@ -203,10 +201,10 @@ namespace newRBS.ViewModels
 
             chopperConfig = new Models.ChopperConfig();
 
-            chopperConfig.LeftIntervalChannel = measureSpectra.chopperConfig.LeftIntervalChannel;
-            chopperConfig.RightIntervalChannel = measureSpectra.chopperConfig.RightIntervalChannel;
-            chopperConfig.IonMassNumber = measureSpectra.chopperConfig.IonMassNumber;
-            chopperConfig.IonEnergy = measureSpectra.chopperConfig.IonEnergy;
+            chopperConfig.LeftIntervalChannel = MeasureSpectra.chopperConfig.LeftIntervalChannel;
+            chopperConfig.RightIntervalChannel = MeasureSpectra.chopperConfig.RightIntervalChannel;
+            chopperConfig.IonMassNumber = MeasureSpectra.chopperConfig.IonMassNumber;
+            chopperConfig.IonEnergy = MeasureSpectra.chopperConfig.IonEnergy;
 
             WaveformPlot = new PlotModel();
             ChopperPlot = new PlotModel();
@@ -478,10 +476,10 @@ namespace newRBS.ViewModels
 
         public void _SaveChopperConfigCommand()
         {
-            measureSpectra.chopperConfig.LeftIntervalChannel = chopperConfig.LeftIntervalChannel;
-            measureSpectra.chopperConfig.RightIntervalChannel = chopperConfig.RightIntervalChannel;
-            measureSpectra.chopperConfig.IonMassNumber = chopperConfig.IonMassNumber;
-            measureSpectra.chopperConfig.IonEnergy = chopperConfig.IonEnergy;
+            MeasureSpectra.chopperConfig.LeftIntervalChannel = chopperConfig.LeftIntervalChannel;
+            MeasureSpectra.chopperConfig.RightIntervalChannel = chopperConfig.RightIntervalChannel;
+            MeasureSpectra.chopperConfig.IonMassNumber = chopperConfig.IonMassNumber;
+            MeasureSpectra.chopperConfig.IonEnergy = chopperConfig.IonEnergy;
 
             DialogResult = true;
         }

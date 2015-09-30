@@ -125,7 +125,7 @@ namespace newRBS.ViewModels
                     SampleID = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)").SampleID;
                     IncomingIonIsotopeID = Database.Isotopes.FirstOrDefault(x => x.MassNumber == 1).IsotopeID;
                 }
-                SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().StartAcquisitions(new List<int> { channelDialog.SelectedChannel }, measurement, SampleID, IncomingIonIsotopeID);
+                MeasureSpectra.StartAcquisitions(new List<int> { channelDialog.SelectedChannel }, measurement, SampleID, IncomingIonIsotopeID);
             }
         }
 
@@ -134,10 +134,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StopMeasurementCommand()
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
-            {
-                SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().StopAcquisitions();
-            }
+                MeasureSpectra.StopAcquisitions();
         }
 
         /// <summary>
@@ -203,9 +200,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _ChannelConfigurationCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-
-            if (measureSpectra.IsAcquiring() == true)
+            if (MeasureSpectra.IsAcquiring() == true)
             { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
 
             ChannelConfigurationViewModel channelConfigurationViewModel = new ChannelConfigurationViewModel();
@@ -316,13 +311,9 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _LogOutCommand()
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
-            {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-
-                if (measureSpectra.IsAcquiring() == true)
+                if (MeasureSpectra.IsAcquiring() == true)
                 { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
-            }
+            
 
             string OldUserName = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
 
@@ -345,14 +336,12 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _CloseProgramCommand(CancelEventArgs cancelEventArgs)
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
+            if (MyGlobals.CanMeasure == true)
             {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-
                 if (MessageBox.Show("Save channel configurations to disk?", "Save channel configurations", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                    measureSpectra.SaveChopperConfig();
+                    MeasureSpectra.SaveChopperConfig();
 
-                if (measureSpectra.IsAcquiring() == true)
+                if (MeasureSpectra.IsAcquiring() == true)
                 {
                     trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring");
                     MessageBox.Show("Can't close the program: Board is acquiring");

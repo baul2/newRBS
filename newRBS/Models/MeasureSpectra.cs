@@ -40,28 +40,28 @@ namespace newRBS.Models
     /// <summary>
     /// Class responsible for simultaneous measurements of spectra on several channels. 
     /// </summary>
-    public class MeasureSpectra
+    public static class MeasureSpectra
     {
-        private Coulombo coulombo;
+        private static Coulombo coulombo;
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public ChopperConfig chopperConfig;
+        public static ChopperConfig chopperConfig;
 
-        private Timer MeasureSpectraTimer;
+        private static Timer MeasureSpectraTimer;
 
-        private List<ActiveChannel> ActiveChannels = new List<ActiveChannel>(); // <Channel,ID>
+        private static List<ActiveChannel> ActiveChannels = new List<ActiveChannel>(); // <Channel,ID>
 
         /// <summary>
         /// Constructor of the class. Gets a reference to the instance of <see cref="CAEN_x730"/> from <see cref="ViewModels.ViewModelLocator"/>.
         /// </summary>
-        public MeasureSpectra()
+        public static void Init()
         {
             LoadChopperConfig();
         }
 
-        public void LoadChopperConfig()
+        public static void LoadChopperConfig()
         {
             XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
             FileStream ReadFileStream;
@@ -83,7 +83,7 @@ namespace newRBS.Models
             }
         }
 
-        public void SaveChopperConfig()
+        public static void SaveChopperConfig()
         {
             XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
             TextWriter WriteFileStream;
@@ -101,7 +101,7 @@ namespace newRBS.Models
         /// Function that returns the acquisition status of the device.
         /// </summary>
         /// <returns>TRUE if the divice is acquiring, FALS if not.</returns>
-        public bool IsAcquiring()
+        public static bool IsAcquiring()
         {
             if (CAEN_x730.ActiveChannels.Count > 0)
                 return true;
@@ -110,10 +110,10 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Database.Measurement"/> in the database. 
+        /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Measurement"/> in the database. 
         /// </summary>
         /// <param name="SelectedChannels">The channel numbers to start the acquisitions.</param>
-        public void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID, int IncomingIonIsotopeID)
+        public static void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID, int IncomingIonIsotopeID)
         {
             List<int> IDs = new List<int>();
 
@@ -194,9 +194,9 @@ namespace newRBS.Models
         }
 
         /// <summary>
-        /// Function that stops the acquisition for all active channels, finishes the corresponging instances of <see cref="Database.Measurement"/> in the database and exports the measurement to the backup folder.
+        /// Function that stops the acquisition for all active channels, finishes the corresponging instances of <see cref="Measurement"/> in the database and exports the measurement to the backup folder.
         /// </summary>
-        public void StopAcquisitions()
+        public static void StopAcquisitions()
         {
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -241,9 +241,7 @@ namespace newRBS.Models
         /// <summary>
         /// Function that get the new SpectrumY from <see cref="CAEN_x730.GetHistogram(int)"/> and updates the corresponding <see cref="Measurement"/> instance.
         /// </summary>
-        /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
-        /// <param name="Channel">Channel to read the spectrum from.</param>
-        public void MeasureSpectraWorker()
+        public static void MeasureSpectraWorker()
         {
             using (DatabaseDataContext Database = MyGlobals.Database)
             {

@@ -56,18 +56,18 @@ namespace newRBS.Models
         /// </summary>
         public static bool Init()
         {
+            IsInit = false;
+
             //Init library
             int ret = CAENDPP_InitLibrary(ref handle);
-            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); IsInit = false; return false; }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return false; }
             else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library initialized"); }
 
             //Add board
-            ConnParam connParam = new ConnParam();
-            connParam.LinkType = 0;
-            connParam.LinkNum = 0;
-            connParam.ConetNode = 0;
+            ConnParam connParam = new ConnParam { LinkType = 0, LinkNum = 0, ConetNode = 0 };
+
             ret = CAENDPP_AddBoard(handle, connParam, ref bID);
-            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); IsInit = false; return false; }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return false; }
             else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Board added"); }
 
             //Reset board to default parameters
@@ -345,7 +345,7 @@ namespace newRBS.Models
         /// </summary>
         public static void Close()
         {
-             int ret = CAENDPP_EndLibrary(handle);
+            int ret = CAENDPP_EndLibrary(handle);
             if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library closed"); }
 
