@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace newRBS.Models
 {
@@ -70,27 +72,74 @@ namespace newRBS.Models
 
             //Reset board to default parameters
             SetDefaultConfig();
+  
+            LoadCustomChannelConfigs();
+          
+            SendConfig();
         }
 
         /// <summary>
-        /// Function that sets the default configuration and calls <see cref="SendConfig"/>. 
+        /// Function that sets the default configuration. 
         /// </summary>
         public void SetDefaultConfig()
         {
             dgtzParams = new CAENDPP_DgtzParams_t();
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
-            for (int channel = 0; channel < 8; channel++) inputRange[channel] = 10; // 0.5Vpp
-
-            SendConfig();
+            for (int channel = 0; channel < 8; channel++) inputRange[channel] = 10; // 0.5Vpp 
         }
 
         /// <summary>
-        /// Function that sets the configuration of a single channel based on an instance of <see cref="ChannelParams"/> and calls <see cref="SendConfig"/>.
+        /// Function that loads the default channel configurations from the ChannelConfigs\ folder.
+        /// </summary>
+        public void LoadCustomChannelConfigs()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChannelParams));
+            FileStream ReadFileStream;
+
+            for (int i = 0; i < 8; i++)
+            {
+                string path = "ConfigurationFiles/Ch" + i + ".xml";
+                if (File.Exists(path))
+                {
+                    ReadFileStream = new FileStream(path, FileMode.Open);
+                    SetChannelConfig(i, (ChannelParams)SerializerObj.Deserialize(ReadFileStream), false);
+                    ReadFileStream.Close();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration read from file " + path);
+                }
+                else
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't red channel configuration file " + path);
+            }
+        }
+
+        /// <summary>
+        /// Function that saves the current channel configurations to the ChannelConfigs\ folder.
+        /// </summary>
+        public void SaveCustomChannelConfigs()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChannelParams));
+            TextWriter WriteFileStream;
+
+            for (int i = 0; i < 8; i++)
+            {
+                string path = "ConfigurationFiles/Ch" + i + ".xml";
+
+                WriteFileStream = new StreamWriter(path);
+                SerializerObj.Serialize(WriteFileStream, GetChannelConfig(i));
+                WriteFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration saved to file " + path);
+            }
+        }
+
+        /// <summary>
+        /// Function that sets the configuration of a single channel based on an instance of <see cref="ChannelParams"/>.
         /// </summary>
         /// <param name="channel">The number of the channel to configure.</param>
         /// <param name="channelParams">The instance of <see cref="ChannelParams"/> holding the channel configuration.</param>
-        public void SetChannelConfig(int channel, ChannelParams channelParams)
+        /// <param name="SendToDevice">Determines whether <see cref="SendConfig"/> is called.</param>
+        public void SetChannelConfig(int channel, ChannelParams channelParams, bool SendToDevice)
         {
             if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
             if (channelParams.InputRange != 0) inputRange[channel] = (int)channelParams.InputRange;
@@ -110,7 +159,8 @@ namespace newRBS.Models
             if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
             if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
 
-            SendConfig();
+            if (SendToDevice == true)
+                SendConfig();
         }
 
         /// <summary>
@@ -182,9 +232,9 @@ namespace newRBS.Models
         public void SendConfig()
         {
             int ret1 = 0, ret2 = 0;
-            ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
+            ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams); 
             for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
-
+    
             if (ret1 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error " + ret1 + ": " + GetErrorText(ret1)); }
             if (ret2 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error " + ret2 + ": " + GetErrorText(ret2)); }
             if (ret1 == 0 & ret2 == 0) { trace.Value.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
@@ -292,6 +342,8 @@ namespace newRBS.Models
         /// </summary>
         public void Close()
         {
+            SaveCustomChannelConfigs();
+
             int ret = CAENDPP_EndLibrary(handle);
             if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library closed"); }

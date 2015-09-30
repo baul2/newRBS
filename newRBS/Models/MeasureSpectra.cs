@@ -11,6 +11,8 @@ using newRBS.Database;
 using System.Reflection;
 using System.IO;
 using System.Windows;
+using System.Xml.Serialization;
+using GalaSoft.MvvmLight;
 
 namespace newRBS.Models
 {
@@ -18,6 +20,21 @@ namespace newRBS.Models
     {
         public int Channel { get; set; }
         public int MeasurementID { get; set; }
+    }
+
+    public class ChopperConfig : ViewModelBase
+    {
+        private int _LeftIntervalChannel;
+        public int LeftIntervalChannel { get { return _LeftIntervalChannel; } set { _LeftIntervalChannel = value; RaisePropertyChanged(); } }
+
+        private int _RightIntervalChannel;
+        public int RightIntervalChannel { get { return _RightIntervalChannel; } set { _RightIntervalChannel = value; RaisePropertyChanged(); } }
+
+        private int _IonMassNumber;
+        public int IonMassNumber { get { return _IonMassNumber; } set { _IonMassNumber = value; RaisePropertyChanged(); } }
+
+        private double _IonEnergy;
+        public double IonEnergy { get { return _IonEnergy; } set { _IonEnergy = value; RaisePropertyChanged(); } }
     }
 
     /// <summary>
@@ -31,8 +48,7 @@ namespace newRBS.Models
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public int ChopperStartChannel;
-        public int ChopperEndChannel;
+        public ChopperConfig chopperConfig;
 
         private Timer MeasureSpectraTimer;
 
@@ -44,6 +60,44 @@ namespace newRBS.Models
         public MeasureSpectra()
         {
             cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
+
+            LoadChopperConfig();
+        }
+
+        public void LoadChopperConfig()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
+            FileStream ReadFileStream;
+
+            string path = "ConfigurationFiles/Chopper.xml";
+            if (File.Exists(path))
+            {
+                ReadFileStream = new FileStream(path, FileMode.Open);
+                chopperConfig = (ChopperConfig)SerializerObj.Deserialize(ReadFileStream);
+                ReadFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Chopper configuration read from file " + path);
+            }
+            else
+            {
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't red Chopper configuration file " + path);
+
+                chopperConfig = new ChopperConfig { LeftIntervalChannel = 0, RightIntervalChannel = 1000, IonMassNumber = 1, IonEnergy = 1400 };
+            }
+        }
+
+        public void SaveChopperConfig()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
+            TextWriter WriteFileStream;
+
+            string path = "ConfigurationFiles/Chopper.xml";
+
+            WriteFileStream = new StreamWriter(path);
+            SerializerObj.Serialize(WriteFileStream, chopperConfig);
+            WriteFileStream.Close();
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Chopper configuration saved to file " + path);
         }
 
         /// <summary>
@@ -77,9 +131,11 @@ namespace newRBS.Models
                 {
                     case "-10°":
                         {
-                            if (ChopperStartChannel == 0 || ChopperEndChannel == 0)
+                            Console.WriteLine(chopperConfig.IonEnergy + " " + NewMeasurement.IncomingIonEnergy);
+                            Console.WriteLine(chopperConfig.IonMassNumber + " " + NewMeasurement.Isotope.MassNumber);
+                            if (chopperConfig.IonEnergy != NewMeasurement.IncomingIonEnergy || chopperConfig.IonMassNumber != NewMeasurement.Isotope.MassNumber)
                             {
-                                if (MessageBox.Show("Chopper start channel and/or end channel aren't configured!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                                if (MessageBox.Show("Chopper was configured for another ion beam. Please update the chopper configuration!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                                     return;
                             }
                             cAEN_x730.StartAcquisition(7); // Start chopper
@@ -201,7 +257,7 @@ namespace newRBS.Models
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
                     case "-10°":
-                        { currentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum(); break; }
+                        { currentChopperCounts = cAEN_x730.GetHistogram(7).Take(chopperConfig.RightIntervalChannel).Skip(chopperConfig.LeftIntervalChannel).Sum(); break; }
                     case "-30°":
                         { currentCharge = coulombo.GetCharge(); break; }
                 }
@@ -249,7 +305,7 @@ namespace newRBS.Models
                     if ((DateTime.Now - MyGlobals.Charge_CountsOverTime.LastOrDefault().Time).TotalSeconds >= MyGlobals.TimePlotIntervall)
                     {
                         double oldCounts = MyGlobals.Charge_CountsOverTime.Sum(x => x.Value);
-                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts)  });
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts) });
                     }
 
                     switch (MeasurementToUpdate.StopType)

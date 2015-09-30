@@ -7,12 +7,13 @@
         xmlns:utils="clr-namespace:newRBS.ViewModels.Utils"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:z="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
         mc:Ignorable="d"
         Title="newRBS" Height="700" Width="1100" WindowStartupLocation="CenterScreen"
         DataContext="{Binding mainViewModel, Source={StaticResource Locator}}">
     <z:Interaction.Triggers>
         <z:EventTrigger EventName="Closing">
-            <i:InvokeCommandAction Command="{Binding CloseProgramCommand}" />
+            <cmd:EventToCommand Command="{Binding OnClosingCommand}" PassEventArgsToCommand="True"/>
         </z:EventTrigger>
     </z:Interaction.Triggers>
     <DockPanel>

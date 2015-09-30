@@ -91,11 +91,11 @@ namespace newRBS.ViewModels
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
-            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z=>z.MassNumber>0).ToList());
+            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z => z.MassNumber > 0).ToList());
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
-            NewMeasurement = Database.Measurements.Where(y=>y.MeasurementName!= "TestMeasurement").OrderByDescending(x => x.StartTime).First();
+            NewMeasurement = Database.Measurements.Where(y => y.MeasurementName != "TestMeasurement").OrderByDescending(x => x.StartTime).First();
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
@@ -124,7 +124,7 @@ namespace newRBS.ViewModels
 
             DialogResult = false;
 
-            int IncomingIonIsotopeID =NewMeasurement.IncomingIonIsotopeID;
+            int IncomingIonIsotopeID = NewMeasurement.IncomingIonIsotopeID;
             int SampleID = NewMeasurement.SampleID;
 
             MyGlobals.GenericDetach<Measurement>(NewMeasurement);

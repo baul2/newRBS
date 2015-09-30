@@ -188,14 +188,37 @@
                         </Button>
                     </ToolBar>
                 </ToolBarTray>
-                <Border DockPanel.Dock="Bottom">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Selected Channel:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <TextBox Text="{Binding SelectedChannelNumber}" MinWidth="50" Margin="3"/>
-                        <Button Content="Set as Left Border" Command="{Binding SetAsLeftBorderCommand}" Margin="3" Padding="3"/>
-                        <Button Content="Set as Right Border" Command="{Binding SetAsRightBorderCommand}" Margin="3" Padding="3"/>
-                    </StackPanel>
-                </Border>
+                <StackPanel DockPanel.Dock="Left">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Left Interval Channel:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0"/>
+                        <TextBox Text="{Binding chopperConfig.LeftIntervalChannel}" MinWidth="50" Margin="3" Grid.Column="1" Grid.Row="0"/>
+                        <RadioButton GroupName="ChannelSelector" IsChecked="{Binding LeftChecked}" VerticalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
+
+                        <Label Content="Right Interval Channel:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1"/>
+                        <TextBox Text="{Binding chopperConfig.RightIntervalChannel}" MinWidth="50" Margin="3" Grid.Column="1" Grid.Row="1"/>
+                        <RadioButton GroupName="ChannelSelector" IsChecked="{Binding RightChecked}" VerticalAlignment="Center" Grid.Column="2" Grid.Row="1"/>
+
+                        <Label Content="Ion:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2"/>
+                        <ComboBox ItemsSource="{Binding Ions}" SelectedValuePath="MassNumber" SelectedValue="{Binding chopperConfig.IonMassNumber}" DisplayMemberPath="ShortDisplayName" MinWidth="50" Margin="3" Grid.Column="1" Grid.Row="2"/>
+
+                        <Label Content="Ion Energy (keV):" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="3"/>
+                        <TextBox Text="{Binding chopperConfig.IonEnergy}" MinWidth="50" Margin="3" Grid.Column="1" Grid.Row="3"/>
+
+                        <Button Content="Save Chopper Configuration" Command="{Binding SaveChopperConfigCommand}" MinWidth="50" Margin="3" Padding="3" Grid.ColumnSpan="2" Grid.Row="4"/>
+                    </Grid>
+                </StackPanel>
                 <Border>
                     <oxy:PlotView Model="{Binding ChopperPlot}" Controller="{Binding Source={x:Static global:MyGlobals.myController}, Mode=OneWay}" Margin="10"/>
                 </Border>

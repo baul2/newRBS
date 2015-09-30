@@ -73,7 +73,7 @@ namespace newRBS.Models
         {
             if (cAEN_x730.ActiveChannels.Count() == 0)
             {
-                cAEN_x730.SetChannelConfig(Channel, channelParams);
+                cAEN_x730.SetChannelConfig(Channel, channelParams,true);
                 return;
             }
             else
@@ -81,7 +81,7 @@ namespace newRBS.Models
                 waveformTimer.Enabled = false;
                 int activeChannel = cAEN_x730.ActiveChannels.First();
                 cAEN_x730.StopAcquisition(activeChannel);
-                cAEN_x730.SetChannelConfig(Channel, channelParams);
+                cAEN_x730.SetChannelConfig(Channel, channelParams,true);
                 cAEN_x730.StartAcquisition(Channel);
                 waveformTimer.Enabled = true;
             }

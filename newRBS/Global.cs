@@ -103,7 +103,7 @@ namespace newRBS
                     if (!newConnection.DatabaseExists())
                     {
                         trace.Value.TraceEvent(TraceEventType.Information, 0, "Connection problem");
-                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand();
+                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand(null);
                         return null;
                     }
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "User '" + logInDialog.logIn.UserName + "' logged in");

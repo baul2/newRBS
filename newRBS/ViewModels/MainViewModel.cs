@@ -53,7 +53,7 @@ namespace newRBS.ViewModels
 
 
         public ICommand LogOutCommand { get; set; }
-        public ICommand CloseProgramCommand { get; set; }
+        public RelayCommand<CancelEventArgs> OnClosingCommand { get; set; }
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
@@ -86,7 +86,7 @@ namespace newRBS.ViewModels
             CalculateCommand = new RelayCommand(() => _CalculateCommand(), () => true);
 
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
-            CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
+            OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
 
             MyGlobals.myController = new PlotController();
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
@@ -116,7 +116,7 @@ namespace newRBS.ViewModels
                 Measurement measurement = new Measurement();
                 measurement.IsTestMeasurement = true;
                 measurement.MeasurementName = "TestMeasurement";
-                int SampleID,IncomingIonIsotopeID;
+                int SampleID, IncomingIonIsotopeID;
                 using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     SampleID = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)").SampleID;
@@ -302,7 +302,7 @@ namespace newRBS.ViewModels
             if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonIsotopeID).Distinct().ToList().Count > 1)
             { MessageBox.Show("Select only measurements with identical irradiation parameters!"); return; }
 
-            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements.Select(x=>x.MeasurementID).ToList());
+            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements.Select(x => x.MeasurementID).ToList());
             Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
             energyCalibrationView.DataContext = energyCalibrationViewModel;
             energyCalibrationView.ShowDialog();
@@ -340,28 +340,37 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that closes the board and exits the program.
         /// </summary>
-        public void _CloseProgramCommand()
+        public void _CloseProgramCommand(CancelEventArgs cancelEventArgs)
         {
             if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
             {
                 Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
+                if (MessageBox.Show("Save channel configurations to disk?", "Save channel configurations", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    measureSpectra.SaveChopperConfig();
+
                 if (measureSpectra.IsAcquiring() == true)
-                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring"); MessageBox.Show("Can't close the program: Board is acquiring"); return; }
+                {
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring");
+                    MessageBox.Show("Can't close the program: Board is acquiring");
+                    if (cancelEventArgs!=null)
+                        cancelEventArgs.Cancel = true;
+                    return;
+                }
             }
-            
+
             if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
             {
                 SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
             }
-            
+
             if (SimpleIoc.Default.ContainsCreated<Models.Coulombo>() == true)
             {
                 SimpleIoc.Default.GetInstance<Models.Coulombo>().Close();
             }
-            
+
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");
-            
+
             Environment.Exit(0);
         }
     }

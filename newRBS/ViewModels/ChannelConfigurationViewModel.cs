@@ -37,6 +37,7 @@ namespace newRBS.ViewModels
     public class ChannelConfigurationViewModel : ViewModelBase
     {
         private Models.MeasureWaveform measureWaveform;
+        private Models.MeasureSpectra measureSpectra;
         private Models.CAEN_x730 cAEN_x730;
 
         public ICommand StartCommand { get; set; }
@@ -50,8 +51,7 @@ namespace newRBS.ViewModels
         public ICommand StartChopperCommand { get; set; }
         public ICommand StopChopperCommand { get; set; }
 
-        public ICommand SetAsLeftBorderCommand { get; set; }
-        public ICommand SetAsRightBorderCommand { get; set; }
+        public ICommand SaveChopperConfigCommand { get; set; }
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
@@ -104,8 +104,50 @@ namespace newRBS.ViewModels
 
         private System.Timers.Timer ChopperTimer;
 
-        private int _SelectedChannelNumber=0;
-        public int SelectedChannelNumber { get { return _SelectedChannelNumber; } set { _SelectedChannelNumber = value; Console.WriteLine("sdfa"); RaisePropertyChanged(); } }
+        private bool _LeftChecked = true;
+        public bool LeftChecked
+        {
+            get
+            { return _LeftChecked; }
+            set
+            {
+                _LeftChecked = true;
+                _RightChecked = false;
+                RaisePropertyChanged("LeftChecked"); RaisePropertyChanged("RightChecked");
+            }
+        }
+
+        private bool _RightChecked = false;
+        public bool RightChecked
+        {
+            get
+            { return _RightChecked; }
+            set
+            {
+                _RightChecked = true;
+                _LeftChecked = false;
+                RaisePropertyChanged("LeftChecked"); RaisePropertyChanged("RightChecked");
+            }
+        }
+
+        private int _SelectedChannelNumber = 0;
+        public int SelectedChannelNumber
+        {
+            get { return _SelectedChannelNumber; }
+            set
+            {
+                _SelectedChannelNumber = value;
+                if (LeftChecked == true)
+                    chopperConfig.LeftIntervalChannel = value;
+                if (RightChecked == true)
+                    chopperConfig.RightIntervalChannel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public Models.ChopperConfig chopperConfig { get; set; }
+
+        public ObservableCollection<Database.Isotope> Ions { get; set; }
 
         /// <summary>
         /// Constructor of the class. Sets up the commands, hooks up to events and sets the collections and selected items of the view.
@@ -123,11 +165,11 @@ namespace newRBS.ViewModels
             StartChopperCommand = new RelayCommand(() => _StartChopperCommand(), () => true);
             StopChopperCommand = new RelayCommand(() => _StopChopperCommand(), () => true);
 
-            SetAsLeftBorderCommand = new RelayCommand(() => _SetAsLeftBorderCommand(), () => true);
-            SetAsRightBorderCommand = new RelayCommand(() => _SetAsRightBorderCommand(), () => true);
+            SaveChopperConfigCommand = new RelayCommand(() => _SaveChopperConfigCommand(), () => true);
 
-            measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
             cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
+            measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
+            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
             // Hooking up to events from MeasureWaveform
             measureWaveform.EventWaveform += new Models.MeasureWaveform.EventHandlerWaveform(WaveformUpdate);
@@ -153,6 +195,19 @@ namespace newRBS.ViewModels
             PeakMean = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("4", 1), new NameValueClass("16", 2), new NameValueClass("64", 3) };
 
             channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
+
+            using (Database.DatabaseDataContext Database = MyGlobals.Database)
+            {
+                Ions = new ObservableCollection<Database.Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z => z.MassNumber > 0).ToList());
+                var tempElements = Ions.Select(x => x.Element).ToList();
+            }
+
+            chopperConfig = new Models.ChopperConfig();
+
+            chopperConfig.LeftIntervalChannel = measureSpectra.chopperConfig.LeftIntervalChannel;
+            chopperConfig.RightIntervalChannel = measureSpectra.chopperConfig.RightIntervalChannel;
+            chopperConfig.IonMassNumber = measureSpectra.chopperConfig.IonMassNumber;
+            chopperConfig.IonEnergy = measureSpectra.chopperConfig.IonEnergy;
 
             WaveformPlot = new PlotModel();
             ChopperPlot = new PlotModel();
@@ -389,7 +444,16 @@ namespace newRBS.ViewModels
             areaSeries.Points.Clear();
             areaSeries.Points2.Clear();
 
-            for (int i = 0; i < ChopperSpectrum.Count(); i++)
+            int maxDisplayChannelNumber = ChopperSpectrum.Count() - 1;
+
+            while (ChopperSpectrum[maxDisplayChannelNumber] == 0)
+            {
+                maxDisplayChannelNumber -= 1;
+                if (maxDisplayChannelNumber < 100)
+                    return;
+            }
+
+            for (int i = 50; i < maxDisplayChannelNumber; i++)
             {
                 areaSeries.Points.Add(new DataPoint(i, ChopperSpectrum[i]));
                 areaSeries.Points2.Add(new DataPoint(i, 0));
@@ -403,8 +467,8 @@ namespace newRBS.ViewModels
             {
                 MinimumY = 0,
                 MaximumY = 10000,
-                MinimumX = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperStartChannel,
-                MaximumX = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperEndChannel,
+                MinimumX = chopperConfig.LeftIntervalChannel,
+                MaximumX = chopperConfig.RightIntervalChannel,
                 Fill = OxyColor.FromAColor(20, OxyColors.Blue),
             };
 
@@ -413,14 +477,14 @@ namespace newRBS.ViewModels
             ChopperPlot.InvalidatePlot(true);
         }
 
-        public void _SetAsLeftBorderCommand()
+        public void _SaveChopperConfigCommand()
         {
-            SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperStartChannel = SelectedChannelNumber;
-        }
+            measureSpectra.chopperConfig.LeftIntervalChannel = chopperConfig.LeftIntervalChannel;
+            measureSpectra.chopperConfig.RightIntervalChannel = chopperConfig.RightIntervalChannel;
+            measureSpectra.chopperConfig.IonMassNumber = chopperConfig.IonMassNumber;
+            measureSpectra.chopperConfig.IonEnergy = chopperConfig.IonEnergy;
 
-        public void _SetAsRightBorderCommand()
-        {
-            SimpleIoc.Default.GetInstance<Models.MeasureSpectra>().ChopperEndChannel = SelectedChannelNumber;
+            DialogResult = true;
         }
     }
 }
