@@ -42,8 +42,6 @@ namespace newRBS.Models
     /// </summary>
     public static class MeasureSpectra
     {
-        private static Coulombo coulombo;
-
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
@@ -140,12 +138,13 @@ namespace newRBS.Models
                         }
                     case "-30°":
                         {
-                            coulombo = SimpleIoc.Default.GetInstance<Coulombo>();
+                            if (Coulombo.IsInit == false)
+                                Coulombo.Init();
                             if (NewMeasurement.StopType == "Charge (µC)")
-                                coulombo.SetCharge(NewMeasurement.StopValue);
+                                Coulombo.SetCharge(NewMeasurement.StopValue);
                             else
-                                coulombo.SetCharge(9999);
-                            coulombo.Start();
+                                Coulombo.SetCharge(9999);
+                            Coulombo.Start();
                             break;
                         }
                 }
@@ -207,7 +206,7 @@ namespace newRBS.Models
                     case "-10°":
                         { CAEN_x730.StopAcquisition(7); break; }
                     case "-30°":
-                        { coulombo.Stop(); break; }
+                        { Coulombo.Stop(); break; }
                 }
 
                 foreach (ActiveChannel activeChannel in ActiveChannels)
@@ -254,7 +253,7 @@ namespace newRBS.Models
                     case "-10°":
                         { currentChopperCounts = CAEN_x730.GetHistogram(7).Take(chopperConfig.RightIntervalChannel).Skip(chopperConfig.LeftIntervalChannel).Sum(); break; }
                     case "-30°":
-                        { currentCharge = coulombo.GetCharge(); break; }
+                        { currentCharge = Coulombo.GetCharge(); break; }
                 }
 
                 foreach (ActiveChannel activeChannel in ActiveChannels)

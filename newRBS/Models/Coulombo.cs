@@ -13,27 +13,23 @@ using System.Reflection;
 
 namespace newRBS.Models
 {
-    public class Coulombo
+    public static class Coulombo
     {
+        public static bool IsInit = false;
+
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        private SerialPort SPort;
-        private char IMess;
-        private char ZS = (char)13;
+        private static SerialPort SPort;
+        private static char IMess;
+        private static char ZS = (char)13;
 
-        [PreferredConstructor]
-        public Coulombo()
+        public static void Init()
         {
             Init("COM4", 9600, Parity.None, 8, StopBits.Two, "94"); //94 = Kenncode des Gerätes in Hex
         }
 
-        public Coulombo(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
-        {
-            Init(PortName, BaudRate, parity, DataBits, stopBits, CoulomboID);
-        }
-
-        public void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
+        public static void Init(string PortName, int BaudRate, Parity parity, int DataBits, StopBits stopBits, string CoulomboID)
         {
             //"COM3,9600,None,8,Two,94"
             IMess = (char)int.Parse(CoulomboID, System.Globalization.NumberStyles.HexNumber);
@@ -52,6 +48,7 @@ namespace newRBS.Models
                     throw new System.IO.IOException();
 
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Coulombo opend");
+                IsInit = true;
             }
             catch (System.IO.IOException e)
             {
@@ -60,7 +57,7 @@ namespace newRBS.Models
 
         }
 
-        private string Command(string text)
+        private static string Command(string text)
         {
             if (SPort.IsOpen == false) return "Error";
 
@@ -78,17 +75,17 @@ namespace newRBS.Models
             { return indata; }
         }
 
-        public void Close()
+        public static void Close()
         {
             SPort.Close();
         }
 
-        public string Version()
+        public static string Version()
         {
             return Command("V" + IMess + ZS);
         }
 
-        public void Stop()
+        public static void Stop()
         {
             if (Command("P" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be stoped");
@@ -96,7 +93,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement stoped");
         }
 
-        public void Start()
+        public static void Start()
         {
             if (Command("S" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be started");
@@ -104,7 +101,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement started");
         }
 
-        public void Continue()
+        public static void Continue()
         {
             if (Command("K" + IMess + ZS) == "Error")
                 trace.Value.TraceEvent(TraceEventType.Warning, 0, "Charge measurement couldn't be continued");
@@ -112,7 +109,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Charge measurement continued");
         }
 
-        public void MeasurementRange(string mbs)
+        public static void SetMeasurementRange(string mbs)
         {
             string mb = "7";
 
@@ -131,7 +128,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement range set to " + mbs);
         }
 
-        public void SetCharge(double lm)
+        public static void SetCharge(double lm)
         {
             string lms, lmsm;
             int lmi;
@@ -152,7 +149,7 @@ namespace newRBS.Models
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Final charge set to " + lm.ToString("{0.00}"));
         }
 
-        public double GetCharge()
+        public static double GetCharge()
         {
             string lms;
 
@@ -179,12 +176,12 @@ namespace newRBS.Models
             return charge;
         }
 
-        public string Status()
+        public static string GetStatus()
         {
             return Command("Z" + IMess + ZS);
         }
 
-        public double GetCurrent()
+        public static double GetCurrent()
         {
             string lms;
 

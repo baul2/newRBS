@@ -356,9 +356,9 @@ namespace newRBS.ViewModels
                 CAEN_x730.Close();
             }
 
-            if (SimpleIoc.Default.ContainsCreated<Coulombo>() == true)
+            if (Coulombo.IsInit == true)
             {
-                SimpleIoc.Default.GetInstance<Coulombo>().Close();
+                Coulombo.Close();
             }
 
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");

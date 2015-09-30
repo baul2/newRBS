@@ -42,18 +42,13 @@ namespace newRBS.ViewModels
             ////    SimpleIoc.Default.Register<IDataService, DataService>();
             ////}
 
-            // The ViewModels
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<MeasurementFilterViewModel>();
             SimpleIoc.Default.Register<MeasurementListViewModel>();
             SimpleIoc.Default.Register<MeasurementPlotViewModel>();
             SimpleIoc.Default.Register<EnergyCalibrationViewModel>(); 
-
-            // The Models
-            SimpleIoc.Default.Register<Models.Coulombo>();
         }
 
-        // The ViewModels
         public MainViewModel mainViewModel
         { get { return ServiceLocator.Current.GetInstance<MainViewModel>(); } }
 
@@ -68,11 +63,6 @@ namespace newRBS.ViewModels
 
         public EnergyCalibrationViewModel analysisViewModel
         { get { return ServiceLocator.Current.GetInstance<EnergyCalibrationViewModel>(); } }
-
-
-        // The Models
-        public Models.Coulombo coulombo
-        { get { return ServiceLocator.Current.GetInstance<Models.Coulombo>(); } }        
 
         public static void Cleanup()
         {
