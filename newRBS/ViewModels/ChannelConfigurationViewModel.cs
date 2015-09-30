@@ -195,7 +195,7 @@ namespace newRBS.ViewModels
                 var tempElements = Ions.Select(x => x.Element).ToList();
             }
 
-            chopperConfig = new Models.ChopperConfig();
+            chopperConfig = new ChopperConfig();
 
             chopperConfig.LeftIntervalChannel = MeasureSpectra.chopperConfig.LeftIntervalChannel;
             chopperConfig.RightIntervalChannel = MeasureSpectra.chopperConfig.RightIntervalChannel;

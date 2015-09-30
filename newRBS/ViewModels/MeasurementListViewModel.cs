@@ -10,7 +10,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows.Controls;
-using System.Threading;
 using System.Runtime.CompilerServices;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
@@ -19,6 +18,7 @@ using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using Microsoft.Win32;
 using newRBS.Database;
+using System.Timers;
 
 namespace newRBS.ViewModels
 {
@@ -41,6 +41,8 @@ namespace newRBS.ViewModels
         public delegate void EventHandlerMeasurement(Measurement measurement);
         public event EventHandlerMeasurement EventMeasurementToPlot, EventMeasurementNotToPlot;
 
+        private static Timer OfflineUpdateTimer = new Timer(MyGlobals.OfflineUpdateWorkerInterval);
+
         /// <summary>
         /// List of the currently shown <see cref="Measurement"/>s.
         /// </summary>
@@ -51,7 +53,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public CollectionViewSource MeasurementListViewSource { get; set; }
 
-        private bool _SelectAll=false;
+        private bool _SelectAll = false;
         public bool SelectAll
         {
             get { return this._SelectAll; }
@@ -179,6 +181,8 @@ namespace newRBS.ViewModels
         {
             MeasurementList.Clear();
 
+            OfflineUpdateTimer.Stop();
+
             List<Measurement> measurements = new List<Measurement>();
             Sample tempSample;
             Isotope tempIsotope;
@@ -195,6 +199,14 @@ namespace newRBS.ViewModels
                     tempElement = measurement.Isotope.Element;
                     // The view will access MeasurementList.Sample, but the Sample will only load when needed and the DataContext doesn't extend to the view
                     MeasurementList.Add(new SelectableMeasurement() { Selected = false, Measurement = measurement });
+
+                    // Check if measurement is running on another computer -> update measurement periodically
+                    if (measurement.Runs == true && MyGlobals.CanMeasure == false) 
+                    {
+                        OfflineUpdateTimer = new Timer(MyGlobals.OfflineUpdateWorkerInterval);
+                        OfflineUpdateTimer.Elapsed += delegate { OfflineUpdateWorker(measurement.MeasurementID); };
+                        OfflineUpdateTimer.Start();
+                    }
                 }
             }
 
@@ -236,6 +248,23 @@ namespace newRBS.ViewModels
             {
                 int index = MeasurementList.IndexOf(updateMeasurement);
                 MeasurementList[index].Measurement = measurement;
+            }
+        }
+
+        public void OfflineUpdateWorker(int MeasurementID)
+        {
+            using (DatabaseDataContext Database = MyGlobals.Database)
+            {
+                Measurement updateMeasurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
+
+                if (updateMeasurement != null)
+                {
+                    Sample tempSample= updateMeasurement.Sample;
+                    Isotope tempIsotope = updateMeasurement.Isotope;
+                    Element tempElement = updateMeasurement.Isotope.Element;
+                 
+                    UpdateMeasurementInList(updateMeasurement);
+                }
             }
         }
     }

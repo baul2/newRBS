@@ -90,7 +90,7 @@ namespace newRBS.Models
 
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Waveform acquisition was started for channel " + Channel);
 
-            waveformTimer = new Timer(500);
+            waveformTimer = new Timer(MyGlobals.WaveformWorkerInterval);
             waveformTimer.Elapsed += delegate { MeasureWaveformWorker(Channel); };
             waveformTimer.Start();
         }

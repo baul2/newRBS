@@ -126,9 +126,7 @@ namespace newRBS.Models
                 {
                     case "-10°":
                         {
-                            Console.WriteLine(chopperConfig.IonEnergy + " " + NewMeasurement.IncomingIonEnergy);
-                            Console.WriteLine(chopperConfig.IonMassNumber + " " + NewMeasurement.Isotope.MassNumber);
-                            if (chopperConfig.IonEnergy != NewMeasurement.IncomingIonEnergy || chopperConfig.IonMassNumber != NewMeasurement.Isotope.MassNumber)
+                            if (chopperConfig.IonEnergy != NewMeasurement.IncomingIonEnergy || chopperConfig.IonMassNumber != Database.Isotopes.FirstOrDefault(x => x.IsotopeID == IncomingIonIsotopeID).MassNumber)
                             {
                                 if (MessageBox.Show("Chopper was configured for another ion beam. Please update the chopper configuration!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                                     return;
@@ -186,7 +184,7 @@ namespace newRBS.Models
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + NewMeasurement.MeasurementID + " started on channel " + NewMeasurement.Channel);
                 }
 
-                MeasureSpectraTimer = new Timer(1000);
+                MeasureSpectraTimer = new Timer(MyGlobals.MeasurementWorkerInterval);
                 MeasureSpectraTimer.Elapsed += delegate { MeasureSpectraWorker(); };
                 MeasureSpectraTimer.Start();
             }
@@ -300,6 +298,7 @@ namespace newRBS.Models
                     {
                         double oldCounts = MyGlobals.Charge_CountsOverTime.Sum(x => x.Value);
                         MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts) });
+                        MyGlobals.Charge_CountsOverTime.RemoveAll(x => (DateTime.Now - x.Time) > TimeSpan.FromHours(4));
                     }
 
                     switch (MeasurementToUpdate.StopType)

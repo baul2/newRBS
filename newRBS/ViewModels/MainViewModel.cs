@@ -89,7 +89,18 @@ namespace newRBS.ViewModels
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
             OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
 
-            MyGlobals.CanMeasure = CAEN_x730.Init();
+            if (CAEN_x730.Init()== true)
+            {
+                MyGlobals.CanMeasure = true;
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in measurement mode");
+                MeasureSpectra.Init();
+            }
+            else
+            {
+                MyGlobals.CanMeasure = false;
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in offline mode");
+            }
+               
 
             MyGlobals.myController = new PlotController();
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
@@ -134,7 +145,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StopMeasurementCommand()
         {
-                MeasureSpectra.StopAcquisitions();
+            MeasureSpectra.StopAcquisitions();
         }
 
         /// <summary>
@@ -311,9 +322,8 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _LogOutCommand()
         {
-                if (MeasureSpectra.IsAcquiring() == true)
-                { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
-            
+            if (MeasureSpectra.IsAcquiring() == true)
+            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
 
             string OldUserName = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
 
@@ -334,31 +344,34 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Function that closes the board and exits the program.
         /// </summary>
+        /// <param name="cancelEventArgs">Argument that allows to cancel the closing of the window.</param>
         public void _CloseProgramCommand(CancelEventArgs cancelEventArgs)
         {
             if (MyGlobals.CanMeasure == true)
             {
-                if (MessageBox.Show("Save channel configurations to disk?", "Save channel configurations", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                    MeasureSpectra.SaveChopperConfig();
-
                 if (MeasureSpectra.IsAcquiring() == true)
                 {
                     trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring");
                     MessageBox.Show("Can't close the program: Board is acquiring");
-                    if (cancelEventArgs!=null)
+
+                    if (cancelEventArgs != null)
                         cancelEventArgs.Cancel = true;
+
                     return;
                 }
-            }
 
-            if (CAEN_x730.IsInit == true)
-            {
-                CAEN_x730.Close();
-            }
+                if (MessageBox.Show("Save channel configurations to disk?", "Save channel configurations", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    MeasureSpectra.SaveChopperConfig();
 
-            if (Coulombo.IsInit == true)
-            {
-                Coulombo.Close();
+                if (CAEN_x730.IsInit == true)
+                {
+                    CAEN_x730.Close();
+                }
+
+                if (Coulombo.IsInit == true)
+                {
+                    Coulombo.Close();
+                }
             }
 
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");

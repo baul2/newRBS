@@ -14,64 +14,17 @@ using OxyPlot;
 
 namespace newRBS
 {
-    public class TimeSeriesEvent
-    {
-        public DateTime Time { get; set; }
-        public double Value { get; set; }
-    }
-
-    class MyTextWriterTraceListener : TextWriterTraceListener
-    {
-        public MyTextWriterTraceListener(string fileName) : base(fileName)
-        {
-        }
-
-        public override void Write(string message)
-        {
-            base.Write(String.Format("[{0}]:{1}", DateTime.Now, message));
-        }
-
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
-        {
-            if (string.IsNullOrEmpty(message)) return;
-
-            WriteLine(string.Format("{0}, {1}, {2}, {3}", DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]"), eventType, source, message.Replace("\r", string.Empty).Replace("\n", string.Empty)));
-        }
-    }
-
-    public static class TraceSources
-    {
-        private static MyTextWriterTraceListener textWriterTraceListener = new MyTextWriterTraceListener("Logs/LogStart_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
-        public static TraceSource Create(string sourceName)
-        {
-            var source = new TraceSource(sourceName);
-
-            // Console listemer
-            Essential.Diagnostics.ColoredConsoleTraceListener listener1 = new Essential.Diagnostics.ColoredConsoleTraceListener();
-            listener1.Template = "{DateTime:'['HH':'mm':'ss'.'fff']'}, {EventType}, " + sourceName + ", {Message}{Data}";
-            listener1.ConvertWriteToEvent = true;
-            listener1.Filter = new EventTypeFilter(SourceLevels.All);
-            source.Listeners.Add(listener1);
-
-            // Log file listener
-            string path = "Logs/";
-            DirectoryInfo di = Directory.CreateDirectory(path);
-            MyTextWriterTraceListener listener2 = textWriterTraceListener;
-            listener2.Filter = new EventTypeFilter(SourceLevels.Information);
-            Trace.AutoFlush = true;
-            source.Listeners.Add(listener2);
-
-            source.Switch.Level = SourceLevels.All;
-            return source;
-        }
-    }
-
     static class MyGlobals
     {
-        public static PlotController myController { get; set; }
+        public static double MeasurementWorkerInterval = 1000; //ms
+        public static double WaveformWorkerInterval = 500; //ms
+        public static double OfflineUpdateWorkerInterval = 1000; //ms
 
-        private static bool _CanMeasure = false;
-        public static bool CanMeasure { get; set; }// { get { return _CanMeasure; } set { _CanMeasure = value; } }
+        public static double TimePlotIntervall = 30; //s
+
+        public static bool CanMeasure { get; set; }
+
+        public static PlotController myController { get; set; }
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
@@ -147,7 +100,57 @@ namespace newRBS
         }
 
         public static List<TimeSeriesEvent> Charge_CountsOverTime { get; set; }
+    }
 
-        public static double TimePlotIntervall = 30;
+    public class TimeSeriesEvent
+    {
+        public DateTime Time { get; set; }
+        public double Value { get; set; }
+    }
+
+    class MyTextWriterTraceListener : TextWriterTraceListener
+    {
+        public MyTextWriterTraceListener(string fileName) : base(fileName)
+        {
+        }
+
+        public override void Write(string message)
+        {
+            base.Write(String.Format("[{0}]:{1}", DateTime.Now, message));
+        }
+
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+
+            WriteLine(string.Format("{0}, {1}, {2}, {3}", DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]"), eventType, source, message.Replace("\r", string.Empty).Replace("\n", string.Empty)));
+        }
+    }
+
+    public static class TraceSources
+    {
+        private static MyTextWriterTraceListener textWriterTraceListener = new MyTextWriterTraceListener("Logs/LogStart_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
+        public static TraceSource Create(string sourceName)
+        {
+            var source = new TraceSource(sourceName);
+
+            // Console listemer
+            Essential.Diagnostics.ColoredConsoleTraceListener listener1 = new Essential.Diagnostics.ColoredConsoleTraceListener();
+            listener1.Template = "{DateTime:'['HH':'mm':'ss'.'fff']'}, {EventType}, " + sourceName + ", {Message}{Data}";
+            listener1.ConvertWriteToEvent = true;
+            listener1.Filter = new EventTypeFilter(SourceLevels.All);
+            source.Listeners.Add(listener1);
+
+            // Log file listener
+            string path = "Logs/";
+            DirectoryInfo di = Directory.CreateDirectory(path);
+            MyTextWriterTraceListener listener2 = textWriterTraceListener;
+            listener2.Filter = new EventTypeFilter(SourceLevels.Information);
+            Trace.AutoFlush = true;
+            source.Listeners.Add(listener2);
+
+            source.Switch.Level = SourceLevels.All;
+            return source;
+        }
     }
 }
