@@ -70,6 +70,9 @@ namespace newRBS
     {
         public static PlotController myController { get; set; }
 
+        private static bool _CanMeasure = false;
+        public static bool CanMeasure { get; set; }// { get { return _CanMeasure; } set { _CanMeasure = value; } }
+
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 

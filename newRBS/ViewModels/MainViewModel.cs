@@ -23,6 +23,7 @@ using newRBS.Database;
 using System.Reflection;
 using OxyPlot;
 using System.Globalization;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
@@ -87,6 +88,8 @@ namespace newRBS.ViewModels
 
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
             OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
+
+            MyGlobals.CanMeasure = CAEN_x730.Init();
 
             MyGlobals.myController = new PlotController();
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
@@ -359,14 +362,14 @@ namespace newRBS.ViewModels
                 }
             }
 
-            if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
+            if (CAEN_x730.IsInit == true)
             {
-                SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
+                CAEN_x730.Close();
             }
 
-            if (SimpleIoc.Default.ContainsCreated<Models.Coulombo>() == true)
+            if (SimpleIoc.Default.ContainsCreated<Coulombo>() == true)
             {
-                SimpleIoc.Default.GetInstance<Models.Coulombo>().Close();
+                SimpleIoc.Default.GetInstance<Coulombo>().Close();
             }
 
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");

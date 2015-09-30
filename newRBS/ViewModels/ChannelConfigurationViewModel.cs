@@ -28,6 +28,7 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Reflection;
 using System.Timers;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
@@ -38,7 +39,6 @@ namespace newRBS.ViewModels
     {
         private Models.MeasureWaveform measureWaveform;
         private Models.MeasureSpectra measureSpectra;
-        private Models.CAEN_x730 cAEN_x730;
 
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
@@ -167,7 +167,6 @@ namespace newRBS.ViewModels
 
             SaveChopperConfigCommand = new RelayCommand(() => _SaveChopperConfigCommand(), () => true);
 
-            cAEN_x730 = SimpleIoc.Default.GetInstance<Models.CAEN_x730>();
             measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
             measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
 
@@ -422,7 +421,7 @@ namespace newRBS.ViewModels
 
         public void _StartChopperCommand()
         {
-            cAEN_x730.StartAcquisition(7);
+            CAEN_x730.StartAcquisition(7);
 
             ChopperTimer = new System.Timers.Timer(1000);
             ChopperTimer.Elapsed += delegate { ChopperWorker(); };
@@ -432,12 +431,12 @@ namespace newRBS.ViewModels
         public void _StopChopperCommand()
         {
             ChopperTimer.Stop();
-            cAEN_x730.StopAcquisition(7);
+            CAEN_x730.StopAcquisition(7);
         }
 
         public void ChopperWorker()
         {
-            int[] ChopperSpectrum = cAEN_x730.GetHistogram(7);
+            int[] ChopperSpectrum = CAEN_x730.GetHistogram(7);
 
             var areaSeries = (AreaSeries)ChopperPlot.Series.FirstOrDefault();
 

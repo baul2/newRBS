@@ -42,7 +42,6 @@ namespace newRBS.Models
     /// </summary>
     public class MeasureSpectra
     {
-        private CAEN_x730 cAEN_x730;
         private Coulombo coulombo;
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
@@ -59,8 +58,6 @@ namespace newRBS.Models
         /// </summary>
         public MeasureSpectra()
         {
-            cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
-
             LoadChopperConfig();
         }
 
@@ -106,7 +103,7 @@ namespace newRBS.Models
         /// <returns>TRUE if the divice is acquiring, FALS if not.</returns>
         public bool IsAcquiring()
         {
-            if (cAEN_x730.ActiveChannels.Count > 0)
+            if (CAEN_x730.ActiveChannels.Count > 0)
                 return true;
             else
                 return false;
@@ -120,7 +117,7 @@ namespace newRBS.Models
         {
             List<int> IDs = new List<int>();
 
-            cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
+            CAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -138,7 +135,7 @@ namespace newRBS.Models
                                 if (MessageBox.Show("Chopper was configured for another ion beam. Please update the chopper configuration!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                                     return;
                             }
-                            cAEN_x730.StartAcquisition(7); // Start chopper
+                            CAEN_x730.StartAcquisition(7); // Start chopper
                             break;
                         }
                     case "-30°":
@@ -155,7 +152,7 @@ namespace newRBS.Models
 
                 foreach (int channel in SelectedChannels)
                 {
-                    cAEN_x730.StartAcquisition(channel);
+                    CAEN_x730.StartAcquisition(channel);
 
                     var LastMeasurement = Database.Measurements.Where(x => x.Channel == channel).OrderByDescending(y => y.StartTime).FirstOrDefault();
                     if (LastMeasurement != null)
@@ -178,7 +175,7 @@ namespace newRBS.Models
                     NewMeasurement.CurrentCharge = 0;
                     NewMeasurement.CurrentCounts = 0;
                     NewMeasurement.CurrentChopperCounts = 0;
-                    NewMeasurement.NumOfChannels = cAEN_x730.NumberOfChanels;
+                    NewMeasurement.NumOfChannels = CAEN_x730.NumberOfChanels;
                     NewMeasurement.SpectrumY = new int[] { 0 };
                     NewMeasurement.Runs = true;
 
@@ -208,7 +205,7 @@ namespace newRBS.Models
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
                     case "-10°":
-                        { cAEN_x730.StopAcquisition(7); break; }
+                        { CAEN_x730.StopAcquisition(7); break; }
                     case "-30°":
                         { coulombo.Stop(); break; }
                 }
@@ -220,7 +217,7 @@ namespace newRBS.Models
                     if (MeasurementToStop == null)
                     { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = " + activeChannel.MeasurementID + " not found"); return; }
 
-                    cAEN_x730.StopAcquisition(activeChannel.Channel);
+                    CAEN_x730.StopAcquisition(activeChannel.Channel);
 
                     MeasurementToStop.Runs = false;
 
@@ -257,7 +254,7 @@ namespace newRBS.Models
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
                     case "-10°":
-                        { currentChopperCounts = cAEN_x730.GetHistogram(7).Take(chopperConfig.RightIntervalChannel).Skip(chopperConfig.LeftIntervalChannel).Sum(); break; }
+                        { currentChopperCounts = CAEN_x730.GetHistogram(7).Take(chopperConfig.RightIntervalChannel).Skip(chopperConfig.LeftIntervalChannel).Sum(); break; }
                     case "-30°":
                         { currentCharge = coulombo.GetCharge(); break; }
                 }
@@ -266,7 +263,7 @@ namespace newRBS.Models
                 {
                     Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == activeChannel.MeasurementID);
 
-                    int[] newSpectrumY = cAEN_x730.GetHistogram(activeChannel.Channel);
+                    int[] newSpectrumY = CAEN_x730.GetHistogram(activeChannel.Channel);
                     long sum = newSpectrumY.Sum();
                     trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureSpectraWorker ID = " + activeChannel.MeasurementID + "; Counts = " + sum);
 
