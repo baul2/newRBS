@@ -51,7 +51,6 @@ namespace newRBS.ViewModels
 
             // The Models
             SimpleIoc.Default.Register<Models.Coulombo>();
-            SimpleIoc.Default.Register<Models.MeasureWaveform>();
         }
 
         // The ViewModels
@@ -73,11 +72,7 @@ namespace newRBS.ViewModels
 
         // The Models
         public Models.Coulombo coulombo
-        { get { return ServiceLocator.Current.GetInstance<Models.Coulombo>(); } }
-
-        public Models.MeasureWaveform measureWaveform
-        { get { return ServiceLocator.Current.GetInstance<Models.MeasureWaveform>(); } }
-        
+        { get { return ServiceLocator.Current.GetInstance<Models.Coulombo>(); } }        
 
         public static void Cleanup()
         {

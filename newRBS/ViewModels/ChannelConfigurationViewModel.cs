@@ -37,8 +37,6 @@ namespace newRBS.ViewModels
     /// </summary>
     public class ChannelConfigurationViewModel : ViewModelBase
     {
-        private Models.MeasureWaveform measureWaveform;
-
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
         public ICommand SaveWaveformCommand { get; set; }
@@ -91,7 +89,7 @@ namespace newRBS.ViewModels
         public int selectedChannel
         {
             get { return _selectedChannel; }
-            set { _selectedChannel = value; channelParams = measureWaveform.GetChannelConfig(_selectedChannel); RaisePropertyChanged(); }
+            set { _selectedChannel = value; channelParams = MeasureWaveform.GetChannelConfig(_selectedChannel); RaisePropertyChanged(); }
         }
 
         public ObservableCollection<NameValueClass> InputRange { get; set; }
@@ -166,10 +164,8 @@ namespace newRBS.ViewModels
 
             SaveChopperConfigCommand = new RelayCommand(() => _SaveChopperConfigCommand(), () => true);
 
-            measureWaveform = SimpleIoc.Default.GetInstance<Models.MeasureWaveform>();
-
             // Hooking up to events from MeasureWaveform
-            measureWaveform.EventWaveform += new Models.MeasureWaveform.EventHandlerWaveform(WaveformUpdate);
+            MeasureWaveform.EventWaveform += new Models.MeasureWaveform.EventHandlerWaveform(WaveformUpdate);
 
             AP1Items = new ObservableCollection<string>(Enum.GetNames(typeof(Models.CAENDPP_PHA_AnalogProbe1_t)).ToList());
             AP2Items = new ObservableCollection<string>(Enum.GetNames(typeof(Models.CAENDPP_PHA_AnalogProbe2_t)).ToList());
@@ -191,7 +187,7 @@ namespace newRBS.ViewModels
             BaselineMean = new ObservableCollection<NameValueClass>() { new NameValueClass("0", 0), new NameValueClass("16", 1), new NameValueClass("64", 2), new NameValueClass("256", 3), new NameValueClass("1024", 4), new NameValueClass("4096", 5), new NameValueClass("16384", 6) };
             PeakMean = new ObservableCollection<NameValueClass>() { new NameValueClass("1", 0), new NameValueClass("4", 1), new NameValueClass("16", 2), new NameValueClass("64", 3) };
 
-            channelParams = measureWaveform.GetChannelConfig(_selectedChannel);
+            channelParams = MeasureWaveform.GetChannelConfig(_selectedChannel);
 
             using (Database.DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -317,8 +313,8 @@ namespace newRBS.ViewModels
             Models.CAENDPP_PHA_DigitalProbe1_t DP1 = (Models.CAENDPP_PHA_DigitalProbe1_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe1_t), selectedDP1, true);
             Models.CAENDPP_PHA_DigitalProbe2_t DP2 = (Models.CAENDPP_PHA_DigitalProbe2_t)Enum.Parse(typeof(Models.CAENDPP_PHA_DigitalProbe2_t), selectedDP2, true);
 
-            measureWaveform.SetWaveformConfig(AP1, AP2, DP1, DP2, AUTOTrigger);
-            measureWaveform.StartAcquisition(selectedChannel);
+            MeasureWaveform.SetWaveformConfig(AP1, AP2, DP1, DP2, AUTOTrigger);
+            MeasureWaveform.StartAcquisition(selectedChannel);
         }
 
         /// <summary>
@@ -326,7 +322,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StopCommand()
         {
-            measureWaveform.StopAcquisition();
+            MeasureWaveform.StopAcquisition();
         }
 
         /// <summary>
@@ -334,7 +330,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void RestartMeasurement()
         {
-            if (measureWaveform.activeChannels.Count() > 0)
+            if (MeasureWaveform.activeChannels.Count() > 0)
             {
                 _StopCommand();
                 _StartCommand();
@@ -357,13 +353,13 @@ namespace newRBS.ViewModels
                 WriteFileStream.Close();
 
                 WriteFileStream = new StreamWriter(saveFileDialog.FileName);
-                WriteFileStream.WriteLine("Acquisition time\t{0}", measureWaveform.waveform.AcquisitionTime.ToString("yyyy-MM-dd HH:mm:ss"));
-                WriteFileStream.WriteLine("Acquisition channel\t{0}", measureWaveform.waveform.AcquisitionChannel);
-                WriteFileStream.WriteLine("Number of samples\t{0}", measureWaveform.waveform.NumSamples);
-                WriteFileStream.WriteLine("Length of a sample (ns)\t{0}", measureWaveform.waveform.LenSample);
+                WriteFileStream.WriteLine("Acquisition time\t{0}", MeasureWaveform.waveform.AcquisitionTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                WriteFileStream.WriteLine("Acquisition channel\t{0}", MeasureWaveform.waveform.AcquisitionChannel);
+                WriteFileStream.WriteLine("Number of samples\t{0}", MeasureWaveform.waveform.NumSamples);
+                WriteFileStream.WriteLine("Length of a sample (ns)\t{0}", MeasureWaveform.waveform.LenSample);
                 WriteFileStream.WriteLine("Sample number\t{0}\t{1}\t{2}\t{3}", selectedAP1, selectedAP2, selectedDP1, selectedDP2);
-                for (int i = 0; i < measureWaveform.waveform.AT1.Count(); i++)
-                    WriteFileStream.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", i, measureWaveform.waveform.AT1[i], measureWaveform.waveform.AT2[i], measureWaveform.waveform.DT1[i], measureWaveform.waveform.DT2[i]);
+                for (int i = 0; i < MeasureWaveform.waveform.AT1.Count(); i++)
+                    WriteFileStream.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", i, MeasureWaveform.waveform.AT1[i], MeasureWaveform.waveform.AT2[i], MeasureWaveform.waveform.DT1[i], MeasureWaveform.waveform.DT2[i]);
 
                 WriteFileStream.Close();
 
@@ -376,7 +372,7 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _SendToDeviceCommand()
         {
-            measureWaveform.SetChannelConfig(_selectedChannel, channelParams);
+            MeasureWaveform.SetChannelConfig(_selectedChannel, channelParams);
         }
 
         /// <summary>
