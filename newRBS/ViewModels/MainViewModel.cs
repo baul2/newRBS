@@ -89,6 +89,7 @@ namespace newRBS.ViewModels
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
             OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
 
+            // Check if the measurement equipment is accessible
             if (CAEN_x730.Init()== true)
             {
                 MyGlobals.CanMeasure = true;
@@ -100,8 +101,7 @@ namespace newRBS.ViewModels
                 MyGlobals.CanMeasure = false;
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in offline mode");
             }
-               
-
+        
             MyGlobals.myController = new PlotController();
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);

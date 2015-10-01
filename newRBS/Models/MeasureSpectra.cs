@@ -16,25 +16,13 @@ using GalaSoft.MvvmLight;
 
 namespace newRBS.Models
 {
+    /// <summary>
+    /// Class that is an item of a list of channels where measurements are currently running.
+    /// </summary>
     public class ActiveChannel
     {
         public int Channel { get; set; }
         public int MeasurementID { get; set; }
-    }
-
-    public class ChopperConfig : ViewModelBase
-    {
-        private int _LeftIntervalChannel;
-        public int LeftIntervalChannel { get { return _LeftIntervalChannel; } set { _LeftIntervalChannel = value; RaisePropertyChanged(); } }
-
-        private int _RightIntervalChannel;
-        public int RightIntervalChannel { get { return _RightIntervalChannel; } set { _RightIntervalChannel = value; RaisePropertyChanged(); } }
-
-        private int _IonMassNumber;
-        public int IonMassNumber { get { return _IonMassNumber; } set { _IonMassNumber = value; RaisePropertyChanged(); } }
-
-        private double _IonEnergy;
-        public double IonEnergy { get { return _IonEnergy; } set { _IonEnergy = value; RaisePropertyChanged(); } }
     }
 
     /// <summary>

@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -159,6 +160,7 @@
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabasePartialMethods.cs" />
+    <Compile Include="HelperClasses.cs" />
     <Compile Include="Models\Coulombo.cs" />
     <Compile Include="Models\EpsaraSharp\Data.cs" />
     <Compile Include="Models\EpsaraSharp\DataBeam.cs" />
@@ -191,14 +193,11 @@
     <Compile Include="ViewModels\SampleEditorViewModel.cs" />
     <Compile Include="ViewModels\SimulateSpectrumViewModel.cs" />
     <Compile Include="ViewModels\UserEditorViewModel.cs" />
-    <Compile Include="ViewModels\Utils\AreaData.cs" />
     <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
     <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
-    <Compile Include="ViewModels\Utils\NameValueClass.cs" />
-    <Compile Include="ViewModels\Utils\SelectableMeasurement.cs" />
     <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
     <Compile Include="Views\CalculateView.xaml.cs">
       <DependentUpon>CalculateView.xaml</DependentUpon>

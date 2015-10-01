@@ -142,7 +142,7 @@ namespace newRBS.ViewModels
             }
         }
 
-        public Models.ChopperConfig chopperConfig { get; set; }
+        public ChopperConfig chopperConfig { get; set; }
 
         public ObservableCollection<Database.Isotope> Ions { get; set; }
 
