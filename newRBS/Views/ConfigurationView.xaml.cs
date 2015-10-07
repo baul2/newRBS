@@ -18,9 +18,9 @@ namespace newRBS.Views
     /// <summary>
     /// Interaction logic for ChannelConfigurationView.xaml
     /// </summary>
-    public partial class ChannelConfigurationView : Window
+    public partial class ConfigurationView : Window
     {
-        public ChannelConfigurationView()
+        public ConfigurationView()
         {
             InitializeComponent();
         }

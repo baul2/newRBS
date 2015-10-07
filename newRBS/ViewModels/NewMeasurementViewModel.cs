@@ -18,11 +18,12 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="Models.MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
+    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
     /// </summary>
     public class NewMeasurementViewModel : ViewModelBase
     {
@@ -91,11 +92,11 @@ namespace newRBS.ViewModels
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
-            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z=>z.MassNumber>0).ToList());
+            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z => z.MassNumber > 0).ToList());
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
-            NewMeasurement = Database.Measurements.Where(y=>y.MeasurementName!= "TestMeasurement").OrderByDescending(x => x.StartTime).First();
+            NewMeasurement = Database.Measurements.Where(y => y.MeasurementName != "TestMeasurement").OrderByDescending(x => x.StartTime).First();
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
@@ -120,11 +121,9 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _StartMeasurementCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-
             DialogResult = false;
 
-            int IncomingIonIsotopeID =NewMeasurement.IncomingIonIsotopeID;
+            int IncomingIonIsotopeID = NewMeasurement.IncomingIonIsotopeID;
             int SampleID = NewMeasurement.SampleID;
 
             MyGlobals.GenericDetach<Measurement>(NewMeasurement);
@@ -137,14 +136,14 @@ namespace newRBS.ViewModels
                     {
                         NewMeasurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
                         break;
                     }
                 case 1: // -30° chamber
                     {
                         NewMeasurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
                         break;
                     }
             }

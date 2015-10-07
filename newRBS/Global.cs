@@ -14,67 +14,59 @@ using OxyPlot;
 
 namespace newRBS
 {
-    public class TimeSeriesEvent
-    {
-        public DateTime Time { get; set; }
-        public double Value { get; set; }
-    }
-
-    class MyTextWriterTraceListener : TextWriterTraceListener
-    {
-        public MyTextWriterTraceListener(string fileName) : base(fileName)
-        {
-        }
-
-        public override void Write(string message)
-        {
-            base.Write(String.Format("[{0}]:{1}", DateTime.Now, message));
-        }
-
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message)
-        {
-            if (string.IsNullOrEmpty(message)) return;
-
-            WriteLine(string.Format("{0}, {1}, {2}, {3}", DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]"), eventType, source, message.Replace("\r", string.Empty).Replace("\n", string.Empty)));
-        }
-    }
-
-    public static class TraceSources
-    {
-        private static MyTextWriterTraceListener textWriterTraceListener = new MyTextWriterTraceListener("Logs/LogStart_" + DateTime.Now.ToString("yyyy-MM-dd") + ".log");
-        public static TraceSource Create(string sourceName)
-        {
-            var source = new TraceSource(sourceName);
-
-            // Console listemer
-            Essential.Diagnostics.ColoredConsoleTraceListener listener1 = new Essential.Diagnostics.ColoredConsoleTraceListener();
-            listener1.Template = "{DateTime:'['HH':'mm':'ss'.'fff']'}, {EventType}, " + sourceName + ", {Message}{Data}";
-            listener1.ConvertWriteToEvent = true;
-            listener1.Filter = new EventTypeFilter(SourceLevels.All);
-            source.Listeners.Add(listener1);
-
-            // Log file listener
-            string path = "Logs/";
-            DirectoryInfo di = Directory.CreateDirectory(path);
-            MyTextWriterTraceListener listener2 = textWriterTraceListener;
-            listener2.Filter = new EventTypeFilter(SourceLevels.Information);
-            Trace.AutoFlush = true;
-            source.Listeners.Add(listener2);
-
-            source.Switch.Level = SourceLevels.All;
-            return source;
-        }
-    }
-
+    /// <summary>
+    /// Class that contains globally needed variables and functions
+    /// </summary>
     static class MyGlobals
     {
+        public static bool OffLineMode = true;
+
+        /// <summary>
+        /// The interval of the <see cref="Models.MeasureSpectra.MeasureSpectraWorker"/>.
+        /// </summary>
+        public static double MeasurementWorkerInterval = 1000; //ms
+
+        /// <summary>
+        /// The interval of the <see cref="Models.MeasureWaveform.MeasureWaveformWorker(int)"/>.
+        /// </summary>
+        public static double WaveformWorkerInterval = 500; //ms
+
+        /// <summary>
+        /// The interval of <see cref="ViewModels.MeasurementListViewModel.OfflineUpdateWorker(int)/> and <see cref="ViewModels.MeasurementPlotViewModel.OfflineUpdateWorker(int)"/>.
+        /// </summary>
+        public static double OfflineUpdateWorkerInterval = 1000; //ms
+
+        /// <summary>
+        /// The time between data points in the plot of the charge/counts per second (<see cref="ViewModels.MeasurementPlotViewModel.TimePlotModel"/>.
+        /// </summary>
+        public static double TimePlotIntervall = 30; //s
+
+        /// <summary>
+        /// The plot data of <see cref="ViewModels.MeasurementPlotViewModel.TimePlotModel"/>.
+        /// </summary>
+        public static List<TimeSeriesEvent> Charge_CountsOverTime { get; set; }
+
+        /// <summary>
+        /// Is 'true' when the measurement equipment is accessible and 'false' in offline mode.
+        /// </summary>
+        public static bool CanMeasure { get; set; }
+
+        /// <summary>
+        /// Determines the actions of mouse buttons in the various OxyPlots.
+        /// </summary>
         public static PlotController myController { get; set; }
 
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
+        /// <summary>
+        /// Stores the SQL connection string for the currently logged in user.
+        /// </summary>
         public static string ConString = "";
 
+        /// <summary>
+        /// Returns a new instance of <see cref="Database.DatabaseDataContext"/>. If the <see cref="ConString"/> is empty, prompts for new login data.
+        /// </summary>
         public static Database.DatabaseDataContext Database
         {
             get
@@ -82,17 +74,17 @@ namespace newRBS
                 Database.DatabaseDataContext newConnection = new Database.DatabaseDataContext(ConString);
                 newConnection.CommandTimeout = 10;
 
-                if (ConString == "")
+                if (ConString == "") // Get new login data
                 {
                     Views.Utils.LogInDialog logInDialog = new Views.Utils.LogInDialog("Please enter your login data and the connection settings!");
 
-                    while (logInDialog.ShowDialog() == true)
+                    while (logInDialog.ShowDialog() == true) 
                     {
                         ConString = "Data Source = " + logInDialog.logIn.IPAdress + "," + logInDialog.logIn.Port + "; Network Library=DBMSSOCN; User ID = " + logInDialog.logIn.UserName + "; Password = " + logInDialog.logIn.Password + "; Initial Catalog = " + logInDialog.logIn.UserName + "_db";
                         newConnection = new Database.DatabaseDataContext(ConString);
                         newConnection.CommandTimeout = 10;
 
-                        if (!newConnection.DatabaseExists())
+                        if (!newConnection.DatabaseExists()) // User + password combination isn't valid
                         {
                             MessageBox.Show("Please enter a valid username/password combination!", "Connection error!");
                             logInDialog = new Views.Utils.LogInDialog("Please enter your login data and the connection settings!");
@@ -103,7 +95,7 @@ namespace newRBS
                     if (!newConnection.DatabaseExists())
                     {
                         trace.Value.TraceEvent(TraceEventType.Information, 0, "Connection problem");
-                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand();
+                        SimpleIoc.Default.GetInstance<ViewModels.MainViewModel>()._CloseProgramCommand(null);
                         return null;
                     }
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "User '" + logInDialog.logIn.UserName + "' logged in");
@@ -112,6 +104,11 @@ namespace newRBS
             }
         }
 
+        /// <summary>
+        /// Function that detaches an entity of the DataContext.
+        /// </summary>
+        /// <typeparam name="T">Type of the entity.</typeparam>
+        /// <param name="entity">The entity which shall be detached.</param>
         public static void GenericDetach<T>(T entity) where T : class
         {
             foreach (PropertyInfo pi in entity.GetType().GetProperties())
@@ -142,9 +139,5 @@ namespace newRBS
 
             return k;
         }
-
-        public static List<TimeSeriesEvent> Charge_CountsOverTime { get; set; }
-
-        public static double TimePlotIntervall = 30;
     }
 }

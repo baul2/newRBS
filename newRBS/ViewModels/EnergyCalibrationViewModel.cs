@@ -28,7 +28,7 @@ using newRBS.Database;
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// Class that is an item of a datagrid.
+    /// Class that is an item of a datagrid from <see cref="Views.EnergyCalibrationView"/>.
     /// </summary>
     public class EnergyCalListItem : ViewModelBase
     {

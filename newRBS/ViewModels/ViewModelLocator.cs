@@ -42,21 +42,13 @@ namespace newRBS.ViewModels
             ////    SimpleIoc.Default.Register<IDataService, DataService>();
             ////}
 
-            // The ViewModels
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<MeasurementFilterViewModel>();
             SimpleIoc.Default.Register<MeasurementListViewModel>();
             SimpleIoc.Default.Register<MeasurementPlotViewModel>();
             SimpleIoc.Default.Register<EnergyCalibrationViewModel>(); 
-
-            // The Models
-            SimpleIoc.Default.Register<Models.CAEN_x730>();
-            SimpleIoc.Default.Register<Models.Coulombo>();
-            SimpleIoc.Default.Register<Models.MeasureSpectra>();
-            SimpleIoc.Default.Register<Models.MeasureWaveform>();
         }
 
-        // The ViewModels
         public MainViewModel mainViewModel
         { get { return ServiceLocator.Current.GetInstance<MainViewModel>(); } }
 
@@ -71,21 +63,6 @@ namespace newRBS.ViewModels
 
         public EnergyCalibrationViewModel analysisViewModel
         { get { return ServiceLocator.Current.GetInstance<EnergyCalibrationViewModel>(); } }
-
-
-        // The Models
-        public Models.CAEN_x730 cAen_X730
-        { get { return ServiceLocator.Current.GetInstance<Models.CAEN_x730>(); } }
-
-        public Models.Coulombo coulombo
-        { get { return ServiceLocator.Current.GetInstance<Models.Coulombo>(); } }
-
-        public Models.MeasureSpectra measureSpectra
-        { get { return ServiceLocator.Current.GetInstance<Models.MeasureSpectra>(); } }
-
-        public Models.MeasureWaveform measureWaveform
-        { get { return ServiceLocator.Current.GetInstance<Models.MeasureWaveform>(); } }
-        
 
         public static void Cleanup()
         {

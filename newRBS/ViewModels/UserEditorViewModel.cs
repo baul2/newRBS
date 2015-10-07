@@ -28,16 +28,6 @@ using System.Text.RegularExpressions;
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// Class that contains user data
-    /// </summary>
-    public class MyUser : ViewModelBase
-    {
-        public string UserName { get; set; }
-        public string LoginName { get; set; }
-        public string Database { get; set; }
-    }
-
-    /// <summary>
     /// Class that is the view model of <see cref="Views.UserEditorView"/>. They can add or remove users and their corresponding databases.
     /// </summary>
     public class UserEditorViewModel : ViewModelBase

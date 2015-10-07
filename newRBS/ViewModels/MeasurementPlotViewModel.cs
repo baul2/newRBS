@@ -10,7 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows.Controls;
-using System.Threading;
+using System.Timers;
 using System.Runtime.CompilerServices;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
@@ -76,6 +76,8 @@ namespace newRBS.ViewModels
         public PlotModel TimePlotModel { get; set; }
 
         private List<OxyColor> LineColors { get; set; }
+
+        private static Timer OfflineUpdateTimer = new Timer(MyGlobals.OfflineUpdateWorkerInterval);
 
         TraceSource trace = new TraceSource("MeasurementPlotViewModel");
 
@@ -148,9 +150,6 @@ namespace newRBS.ViewModels
 
             MyGlobals.Charge_CountsOverTime = new List<TimeSeriesEvent>();
 
-            MeasurementsPlotModel = new PlotModel();
-            TimePlotModel = new PlotModel();
-
             SetUpMeasurementsPlotModel();
             SetUpTimePlotModel();
 
@@ -174,11 +173,14 @@ namespace newRBS.ViewModels
         /// </summary>
         public void SetUpMeasurementsPlotModel()
         {
-            MeasurementsPlotModel.LegendOrientation = LegendOrientation.Vertical;
-            MeasurementsPlotModel.LegendPlacement = LegendPlacement.Inside;
-            MeasurementsPlotModel.LegendPosition = LegendPosition.TopRight;
-            MeasurementsPlotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
-            MeasurementsPlotModel.LegendBorder = OxyColors.Black;
+            MeasurementsPlotModel = new PlotModel
+            {
+                LegendOrientation = LegendOrientation.Vertical,
+                LegendPlacement = LegendPlacement.Inside,
+                LegendPosition = LegendPosition.TopRight,
+                LegendBackground = OxyColor.FromAColor(200, OxyColors.White),
+                LegendBorder = OxyColors.Black
+            };
 
             var xAxis = new LinearAxis() { Position = AxisPosition.Bottom, Title = "Energy (keV)", TitleFontSize = 16, AxisTitleDistance = 8, AbsoluteMinimum = 0 };
             var yAxis = new LinearAxis() { Position = AxisPosition.Left, TitleFontSize = 16, AxisTitleDistance = 18, Minimum = 0, AbsoluteMinimum = 0 };
@@ -194,8 +196,10 @@ namespace newRBS.ViewModels
         /// </summary>
         public void SetUpTimePlotModel()
         {
-            var xAxis = new DateTimeAxis() { Position = AxisPosition.Bottom };
-            var yAxis = new LinearAxis() { Position = AxisPosition.Left };
+            TimePlotModel = new PlotModel();
+
+            var xAxis = new DateTimeAxis() { Position = AxisPosition.Bottom, IntervalLength = 40, StringFormat = "HH:mm" };
+            var yAxis = new LinearAxis() { Position = AxisPosition.Left, IntervalLength = 30 };
 
             TimePlotModel.Axes.Add(xAxis);
             TimePlotModel.Axes.Add(yAxis);
@@ -263,6 +267,8 @@ namespace newRBS.ViewModels
         {
             if (SelectedDataBindingInterval > 0 && measurement.EnergyCalLinear > SelectedDataBindingInterval)
             { MessageBox.Show("Selected data binding interval is smaller than the actual channel spacing!", "Error"); SelectedDataBindingInterval = 0; return; }
+
+            OfflineUpdateTimer.Stop();
 
             var MeassuredPlot = new AreaSeries
             {
@@ -396,10 +402,18 @@ namespace newRBS.ViewModels
                 MeasurementsPlotModel.Series.Add(SimulatedPlot);
             MeasurementsPlotModel.InvalidatePlot(true);
 
+            // Check if measurement is running on another computer -> update measurement periodically
+            if (measurement.Runs == true && MyGlobals.CanMeasure == false)
+            {
+                OfflineUpdateTimer = new Timer(MyGlobals.OfflineUpdateWorkerInterval);
+                OfflineUpdateTimer.Elapsed += delegate { OfflineUpdateWorker(measurement.MeasurementID); };
+                OfflineUpdateTimer.Start();
+            }
+
             // Update TimePlotModel
             var lineSeries = (LineSeries)TimePlotModel.Series.FirstOrDefault();
 
-            if (lineSeries.Points.Count() != MyGlobals.Charge_CountsOverTime.Count())
+            if (lineSeries.Points.Count() != MyGlobals.Charge_CountsOverTime.Count() && MyGlobals.Charge_CountsOverTime.Count() >= 2)
             {
                 lineSeries.Points.Clear();
                 foreach (var temp in MyGlobals.Charge_CountsOverTime)
@@ -409,6 +423,9 @@ namespace newRBS.ViewModels
                         lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(temp.Time), temp.Value));
                     }
                 }
+                TimePlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Minimum = 0.7 * MyGlobals.Charge_CountsOverTime.Where(x => x.Value > 0).Min(x => x.Value);
+                TimePlotModel.Axes.FirstOrDefault(x => x.Position == AxisPosition.Left).Maximum = 1.3 * MyGlobals.Charge_CountsOverTime.Max(x => x.Value);
+
                 TimePlotModel.InvalidatePlot(true);
             }
         }
@@ -599,6 +616,19 @@ namespace newRBS.ViewModels
                 MeasurementsPlotModel.Annotations.Clear();
 
                 UpdateElementPositions();
+            }
+        }
+
+        public void OfflineUpdateWorker(int MeasurementID)
+        {
+            using (DatabaseDataContext Database = MyGlobals.Database)
+            {
+                Measurement updateMeasurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
+
+                if (updateMeasurement != null)
+                {
+                    UpdatePlot(updateMeasurement);
+                }
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,16 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using OxyPlot;
-using GalaSoft.MvvmLight.Ioc;
 
 namespace newRBS.Views
 {
-    public partial class MainView : Window
+    /// <summary>
+    /// Interaktionslogik für GoniometerView.xaml
+    /// </summary>
+    public partial class GoniometerView : Window
     {
-        public MainView()
+        public GoniometerView()
         {
             InitializeComponent();
         }

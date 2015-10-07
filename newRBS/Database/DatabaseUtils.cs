@@ -143,12 +143,15 @@ namespace newRBS.Database
 
                             XmlAttributes attrs = new XmlAttributes();
                             attrs.XmlIgnore = true;
-
+                            
                             xOver.Add(typeof(Measurement), "Sample", attrs);
                             xOver.Add(typeof(Measurement), "SampleID", attrs);
                             xOver.Add(typeof(Measurement), "SampleRemark", attrs);
+                            xOver.Add(typeof(Measurement), "Measurement_Projects", attrs);
+                            xOver.Add(typeof(Measurement), "Isotope", attrs);
                             xOver.Add(typeof(Measurement), "SpectrumYByte", attrs);
-                            xOver.Add(typeof(Measurement), "SpectrumYCalculatedByte", attrs);
+                            xOver.Add(typeof(Measurement), "SpectrumYModifiedByte", attrs);
+                            xOver.Add(typeof(Measurement), "SpectrumYSimulatedByte", attrs);
 
                             XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
                             SerializerObj.Serialize(WriteFileStream, Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList());
@@ -276,8 +279,11 @@ namespace newRBS.Database
                         xOver.Add(typeof(Measurement), "Sample", attrs);
                         xOver.Add(typeof(Measurement), "SampleID", attrs);
                         xOver.Add(typeof(Measurement), "SampleRemark", attrs);
+                        xOver.Add(typeof(Measurement), "Measurement_Projects", attrs);
+                        xOver.Add(typeof(Measurement), "Isotope", attrs);
                         xOver.Add(typeof(Measurement), "SpectrumYByte", attrs);
-                        xOver.Add(typeof(Measurement), "SpectrumYCalculatedByte", attrs);
+                        xOver.Add(typeof(Measurement), "SpectrumYModifiedByte", attrs);
+                        xOver.Add(typeof(Measurement), "SpectrumYSimulatedByte", attrs);
 
                         XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
                         using (FileStream ReadFileStream = new FileStream(FileName, FileMode.Open))

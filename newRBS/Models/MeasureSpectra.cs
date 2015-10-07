@@ -11,9 +11,14 @@ using newRBS.Database;
 using System.Reflection;
 using System.IO;
 using System.Windows;
+using System.Xml.Serialization;
+using GalaSoft.MvvmLight;
 
 namespace newRBS.Models
 {
+    /// <summary>
+    /// Class that is an item of a list of channels where measurements are currently running.
+    /// </summary>
     public class ActiveChannel
     {
         public int Channel { get; set; }
@@ -23,50 +28,82 @@ namespace newRBS.Models
     /// <summary>
     /// Class responsible for simultaneous measurements of spectra on several channels. 
     /// </summary>
-    public class MeasureSpectra
+    public static class MeasureSpectra
     {
-        private CAEN_x730 cAEN_x730;
-        private Coulombo coulombo;
-
         private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
-        public int ChopperStartChannel;
-        public int ChopperEndChannel;
+        public static ChopperConfig chopperConfig;
 
-        private Timer MeasureSpectraTimer;
+        private static Timer MeasureSpectraTimer;
 
-        private List<ActiveChannel> ActiveChannels = new List<ActiveChannel>(); // <Channel,ID>
+        private static List<ActiveChannel> ActiveChannels = new List<ActiveChannel>(); // <Channel,ID>
 
         /// <summary>
         /// Constructor of the class. Gets a reference to the instance of <see cref="CAEN_x730"/> from <see cref="ViewModels.ViewModelLocator"/>.
         /// </summary>
-        public MeasureSpectra()
+        public static void Init()
         {
-            cAEN_x730 = SimpleIoc.Default.GetInstance<CAEN_x730>();
+            LoadChopperConfig();
+        }
+
+        public static void LoadChopperConfig()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
+            FileStream ReadFileStream;
+
+            string path = "ConfigurationFiles/Chopper.xml";
+            if (File.Exists(path))
+            {
+                ReadFileStream = new FileStream(path, FileMode.Open);
+                chopperConfig = (ChopperConfig)SerializerObj.Deserialize(ReadFileStream);
+                ReadFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Chopper configuration read from file " + path);
+            }
+            else
+            {
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't red Chopper configuration file " + path);
+
+                chopperConfig = new ChopperConfig { LeftIntervalChannel = 0, RightIntervalChannel = 1000, IonMassNumber = 1, IonEnergy = 1400 };
+            }
+        }
+
+        public static void SaveChopperConfig()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChopperConfig));
+            TextWriter WriteFileStream;
+
+            string path = "ConfigurationFiles/Chopper.xml";
+
+            WriteFileStream = new StreamWriter(path);
+            SerializerObj.Serialize(WriteFileStream, chopperConfig);
+            WriteFileStream.Close();
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Chopper configuration saved to file " + path);
         }
 
         /// <summary>
         /// Function that returns the acquisition status of the device.
         /// </summary>
         /// <returns>TRUE if the divice is acquiring, FALS if not.</returns>
-        public bool IsAcquiring()
+        public static bool IsAcquiring()
         {
-            if (cAEN_x730.ActiveChannels.Count > 0)
+            if (CAEN_x730.ActiveChannels.Count > 0)
                 return true;
             else
                 return false;
         }
 
         /// <summary>
-        /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Database.Measurement"/> in the database. 
+        /// Function that starts the acquisitions for the given channels and initiates a new instance of <see cref="Measurement"/> in the database. 
         /// </summary>
         /// <param name="SelectedChannels">The channel numbers to start the acquisitions.</param>
-        public void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID, int IncomingIonIsotopeID)
+        public static void StartAcquisitions(List<int> SelectedChannels, Measurement NewMeasurement, int SampleID, int IncomingIonIsotopeID)
         {
             List<int> IDs = new List<int>();
 
-            cAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
+            CAEN_x730.SetMeasurementMode(CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram);
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -77,29 +114,30 @@ namespace newRBS.Models
                 {
                     case "-10°":
                         {
-                            if (ChopperStartChannel == 0 || ChopperEndChannel == 0)
+                            if (chopperConfig.IonEnergy != NewMeasurement.IncomingIonEnergy || chopperConfig.IonMassNumber != Database.Isotopes.FirstOrDefault(x => x.IsotopeID == IncomingIonIsotopeID).MassNumber)
                             {
-                                if (MessageBox.Show("Chopper start channel and/or end channel aren't configured!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                                if (MessageBox.Show("Chopper was configured for another ion beam. Please update the chopper configuration!\nContinue anyway?", "Error", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                                     return;
                             }
-                            cAEN_x730.StartAcquisition(7); // Start chopper
+                            CAEN_x730.StartAcquisition(7); // Start chopper
                             break;
                         }
                     case "-30°":
                         {
-                            coulombo = SimpleIoc.Default.GetInstance<Coulombo>();
+                            if (Coulombo.IsInit == false)
+                                Coulombo.Init();
                             if (NewMeasurement.StopType == "Charge (µC)")
-                                coulombo.SetCharge(NewMeasurement.StopValue);
+                                Coulombo.SetCharge(NewMeasurement.StopValue);
                             else
-                                coulombo.SetCharge(9999);
-                            coulombo.Start();
+                                Coulombo.SetCharge(9999);
+                            Coulombo.Start();
                             break;
                         }
                 }
 
                 foreach (int channel in SelectedChannels)
                 {
-                    cAEN_x730.StartAcquisition(channel);
+                    CAEN_x730.StartAcquisition(channel);
 
                     var LastMeasurement = Database.Measurements.Where(x => x.Channel == channel).OrderByDescending(y => y.StartTime).FirstOrDefault();
                     if (LastMeasurement != null)
@@ -122,7 +160,7 @@ namespace newRBS.Models
                     NewMeasurement.CurrentCharge = 0;
                     NewMeasurement.CurrentCounts = 0;
                     NewMeasurement.CurrentChopperCounts = 0;
-                    NewMeasurement.NumOfChannels = cAEN_x730.NumberOfChanels;
+                    NewMeasurement.NumOfChannels = CAEN_x730.NumberOfChanels;
                     NewMeasurement.SpectrumY = new int[] { 0 };
                     NewMeasurement.Runs = true;
 
@@ -134,16 +172,16 @@ namespace newRBS.Models
                     trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurement " + NewMeasurement.MeasurementID + " started on channel " + NewMeasurement.Channel);
                 }
 
-                MeasureSpectraTimer = new Timer(1000);
+                MeasureSpectraTimer = new Timer(MyGlobals.MeasurementWorkerInterval);
                 MeasureSpectraTimer.Elapsed += delegate { MeasureSpectraWorker(); };
                 MeasureSpectraTimer.Start();
             }
         }
 
         /// <summary>
-        /// Function that stops the acquisition for all active channels, finishes the corresponging instances of <see cref="Database.Measurement"/> in the database and exports the measurement to the backup folder.
+        /// Function that stops the acquisition for all active channels, finishes the corresponging instances of <see cref="Measurement"/> in the database and exports the measurement to the backup folder.
         /// </summary>
-        public void StopAcquisitions()
+        public static void StopAcquisitions()
         {
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -152,9 +190,9 @@ namespace newRBS.Models
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
                     case "-10°":
-                        { cAEN_x730.StopAcquisition(7); break; }
+                        { CAEN_x730.StopAcquisition(7); break; }
                     case "-30°":
-                        { coulombo.Stop(); break; }
+                        { Coulombo.Stop(); break; }
                 }
 
                 foreach (ActiveChannel activeChannel in ActiveChannels)
@@ -164,7 +202,7 @@ namespace newRBS.Models
                     if (MeasurementToStop == null)
                     { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't finish Measurement: Measurement with MeasurementID = " + activeChannel.MeasurementID + " not found"); return; }
 
-                    cAEN_x730.StopAcquisition(activeChannel.Channel);
+                    CAEN_x730.StopAcquisition(activeChannel.Channel);
 
                     MeasurementToStop.Runs = false;
 
@@ -188,9 +226,7 @@ namespace newRBS.Models
         /// <summary>
         /// Function that get the new SpectrumY from <see cref="CAEN_x730.GetHistogram(int)"/> and updates the corresponding <see cref="Measurement"/> instance.
         /// </summary>
-        /// <param name="MeasurementID">ID of the measurement where the spectra will be send to.</param>
-        /// <param name="Channel">Channel to read the spectrum from.</param>
-        public void MeasureSpectraWorker()
+        public static void MeasureSpectraWorker()
         {
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -201,16 +237,16 @@ namespace newRBS.Models
                 switch (Database.Measurements.FirstOrDefault(x => x.MeasurementID == ActiveChannels.FirstOrDefault().MeasurementID).Chamber)
                 {
                     case "-10°":
-                        { currentChopperCounts = cAEN_x730.GetHistogram(7).Take(ChopperEndChannel).Skip(ChopperStartChannel).Sum(); break; }
+                        { currentChopperCounts = CAEN_x730.GetHistogram(7).Take(chopperConfig.RightIntervalChannel).Skip(chopperConfig.LeftIntervalChannel).Sum(); break; }
                     case "-30°":
-                        { currentCharge = coulombo.GetCharge(); break; }
+                        { currentCharge = Coulombo.GetCharge(); break; }
                 }
 
                 foreach (ActiveChannel activeChannel in ActiveChannels)
                 {
                     Measurement MeasurementToUpdate = Database.Measurements.FirstOrDefault(x => x.MeasurementID == activeChannel.MeasurementID);
 
-                    int[] newSpectrumY = cAEN_x730.GetHistogram(activeChannel.Channel);
+                    int[] newSpectrumY = CAEN_x730.GetHistogram(activeChannel.Channel);
                     long sum = newSpectrumY.Sum();
                     trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureSpectraWorker ID = " + activeChannel.MeasurementID + "; Counts = " + sum);
 
@@ -249,7 +285,8 @@ namespace newRBS.Models
                     if ((DateTime.Now - MyGlobals.Charge_CountsOverTime.LastOrDefault().Time).TotalSeconds >= MyGlobals.TimePlotIntervall)
                     {
                         double oldCounts = MyGlobals.Charge_CountsOverTime.Sum(x => x.Value);
-                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts)  });
+                        MyGlobals.Charge_CountsOverTime.Add(new TimeSeriesEvent { Time = DateTime.Now, Value = (currentValue / MyGlobals.TimePlotIntervall - oldCounts) });
+                        MyGlobals.Charge_CountsOverTime.RemoveAll(x => (DateTime.Now - x.Time) > TimeSpan.FromHours(4));
                     }
 
                     switch (MeasurementToUpdate.StopType)
