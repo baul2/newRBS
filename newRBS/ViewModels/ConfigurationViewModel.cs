@@ -33,9 +33,9 @@ using newRBS.Models;
 namespace newRBS.ViewModels
 {
     /// <summary>
-    /// Class that is the view model of <see cref="Views.ChannelConfigurationView"/>. They set the channel configurations and display waveforms.
+    /// Class that is the view model of <see cref="Views.ConfigurationView"/>. They set the channel configurations and display waveforms.
     /// </summary>
-    public class ChannelConfigurationViewModel : ViewModelBase
+    public class ConfigurationViewModel : ViewModelBase
     {
         public ICommand StartCommand { get; set; }
         public ICommand StopCommand { get; set; }
@@ -54,7 +54,7 @@ namespace newRBS.ViewModels
         private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
-        /// Contains all the plot data and the plot style of the OxyPlot in <see cref="Views.ChannelConfigurationView"/>.
+        /// Contains all the plot data and the plot style of the OxyPlot in <see cref="Views.ConfigurationView"/>.
         /// </summary>
         public PlotModel WaveformPlot { get; set; }
 
@@ -149,7 +149,7 @@ namespace newRBS.ViewModels
         /// <summary>
         /// Constructor of the class. Sets up the commands, hooks up to events and sets the collections and selected items of the view.
         /// </summary>
-        public ChannelConfigurationViewModel()
+        public ConfigurationViewModel()
         {
             StartCommand = new RelayCommand(() => _StartCommand(), () => true);
             StopCommand = new RelayCommand(() => _StopCommand(), () => true);

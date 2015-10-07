@@ -176,13 +176,15 @@
     <Compile Include="Models\EpsaraSharp\DataVector.cs" />
     <Compile Include="Models\EpsaraSharp\EpsaraSharp.DataMeasurementForallCallbackNative.cs" />
     <Compile Include="Models\EpsaraSharp\PhyscoreOdeInputParameter.cs" />
+    <Compile Include="Models\Gonio.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
     <Compile Include="ViewModels\CalculateViewModel.cs" />
     <Compile Include="ViewModels\EnergyCalibrationViewModel.cs" />
-    <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\ConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\GoniometerViewModel.cs" />
     <Compile Include="ViewModels\MeasurementImportViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementInfoViewModel.cs" />
@@ -205,8 +207,11 @@
     <Compile Include="Views\EnergyCalibrationView.xaml.cs">
       <DependentUpon>EnergyCalibrationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ChannelConfigurationView.xaml.cs">
-      <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
+    <Compile Include="Views\ConfigurationView.xaml.cs">
+      <DependentUpon>ConfigurationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GoniometerView.xaml.cs">
+      <DependentUpon>GoniometerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MeasurementImportView.xaml.cs">
       <DependentUpon>MeasurementImportView.xaml</DependentUpon>
@@ -268,7 +273,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ChannelConfigurationView.xaml">
+    <Page Include="Views\ConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GoniometerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -409,6 +418,21 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\144.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\HorizontalTilt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\VerticalTilt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Translation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Rotation.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

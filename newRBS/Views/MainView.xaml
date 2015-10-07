@@ -30,7 +30,7 @@
                 <MenuItem Header="Start Acquisition" Command="{Binding NewMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
                 <MenuItem Header="Start Test Acquisition" Command="{Binding NewTestMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
                 <MenuItem Header="Stop Acquisition" Command="{Binding StopMeasurementCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
-                <MenuItem Header="Configure Channels" Command="{Binding ChannelConfigurationCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
+                <MenuItem Header="Configuration" Command="{Binding ConfigurationCommand}" Visibility="{Binding Source={x:Static global:MyGlobals.CanMeasure}, Converter={StaticResource BoolToVis}}"/>
                 <Separator/>
                 <MenuItem Header="Import Measurements" Command="{Binding ImportMeasurementsCommand}"/>
                 <MenuItem Header="Export Measurements" Command="{Binding ExportMeasurementsCommand}"/>
@@ -60,7 +60,11 @@
                 <Button Command="{Binding StopMeasurementCommand}" ToolTip="Stop Acquisition">
                     <Image Source="/Images/17.png" Height="24"/>
                 </Button>
-                <Button Command="{Binding ChannelConfigurationCommand}" ToolTip="Configure Channels">
+                <Separator/>
+                <Button Command="{Binding GoniometerCommand}" ToolTip="Goniometer Control">
+                    <Image Source="/Images/144.png" Height="24"/>
+                </Button>
+                <Button Command="{Binding ConfigurationCommand}" ToolTip="Configuration">
                     <Image Source="/Images/142.png" Height="24"/>
                 </Button>
             </ToolBar>

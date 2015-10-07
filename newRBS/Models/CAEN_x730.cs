@@ -58,6 +58,9 @@ namespace newRBS.Models
         {
             IsInit = false;
 
+            if (MyGlobals.OffLineMode == true)
+                return false;
+
             //Init library
             int ret = CAENDPP_InitLibrary(ref handle);
             if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return false; }

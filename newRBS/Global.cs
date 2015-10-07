@@ -19,6 +19,8 @@ namespace newRBS
     /// </summary>
     static class MyGlobals
     {
+        public static bool OffLineMode = true;
+
         /// <summary>
         /// The interval of the <see cref="Models.MeasureSpectra.MeasureSpectraWorker"/>.
         /// </summary>

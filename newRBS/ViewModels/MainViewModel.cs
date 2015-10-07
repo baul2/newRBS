@@ -36,7 +36,8 @@ namespace newRBS.ViewModels
         public ICommand NewTestMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
 
-        public ICommand ChannelConfigurationCommand { get; set; }
+        public ICommand GoniometerCommand { get; set; }
+        public ICommand ConfigurationCommand { get; set; }
 
         public ICommand ImportMeasurementsCommand { get; set; }
         public ICommand ExportMeasurementsCommand { get; set; }
@@ -64,13 +65,20 @@ namespace newRBS.ViewModels
         /// </summary>
         public MainViewModel()
         {
+            //Console.WriteLine("Gonio test");
+            //Gonio.Init();
+            //Console.WriteLine(Gonio.Status(Motor.VerticalTilt));
+            //Console.WriteLine(Gonio.GetPosition(Motor.VerticalTilt));
+            //Gonio.GoXSteps(Motor.VerticalTilt,100);
+
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program started");
 
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
             NewTestMeasurementCommand = new RelayCommand(() => _NewTestMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
 
-            ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
+            GoniometerCommand = new RelayCommand(() => _GoniometerCommand(), () => true);
+            ConfigurationCommand = new RelayCommand(() => _ConfigurationCommand(), () => true);
 
             ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementsCommand(), () => true);
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
@@ -90,7 +98,7 @@ namespace newRBS.ViewModels
             OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
 
             // Check if the measurement equipment is accessible
-            if (CAEN_x730.Init()== true)
+            if (CAEN_x730.Init() == true)
             {
                 MyGlobals.CanMeasure = true;
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in measurement mode");
@@ -101,7 +109,7 @@ namespace newRBS.ViewModels
                 MyGlobals.CanMeasure = false;
                 trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in offline mode");
             }
-        
+
             MyGlobals.myController = new PlotController();
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
             MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);
@@ -206,18 +214,26 @@ namespace newRBS.ViewModels
                 DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
+        public void _GoniometerCommand()
+        {
+            GoniometerViewModel goniometerViewModel = new GoniometerViewModel();
+            Views.GoniometerView goniometerView = new Views.GoniometerView();
+            goniometerView.DataContext = goniometerViewModel;
+            goniometerView.ShowDialog();
+        }
+
         /// <summary>
-        /// Function that starts a new <see cref="ChannelConfigurationViewModel"/> instance and binds it to a <see cref="Views.ChannelConfigurationView"/> instance.
+        /// Function that starts a new <see cref="ConfigurationViewModel"/> instance and binds it to a <see cref="Views.ConfigurationView"/> instance.
         /// </summary>
-        public void _ChannelConfigurationCommand()
+        public void _ConfigurationCommand()
         {
             if (MeasureSpectra.IsAcquiring() == true)
             { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
 
-            ChannelConfigurationViewModel channelConfigurationViewModel = new ChannelConfigurationViewModel();
-            Views.ChannelConfigurationView channelConfiguration = new Views.ChannelConfigurationView();
-            channelConfiguration.DataContext = channelConfigurationViewModel;
-            channelConfiguration.ShowDialog();
+            ConfigurationViewModel channelConfigurationViewModel = new ConfigurationViewModel();
+            Views.ConfigurationView channelConfigurationView = new Views.ConfigurationView();
+            channelConfigurationView.DataContext = channelConfigurationViewModel;
+            channelConfigurationView.ShowDialog();
         }
 
         /// <summary>
@@ -347,8 +363,8 @@ namespace newRBS.ViewModels
         /// <param name="cancelEventArgs">Argument that allows to cancel the closing of the window.</param>
         public void _CloseProgramCommand(CancelEventArgs cancelEventArgs)
         {
-            if (MyGlobals.CanMeasure == true)
-            {
+           if (MyGlobals.CanMeasure == true)
+            { 
                 if (MeasureSpectra.IsAcquiring() == true)
                 {
                     trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring");
@@ -371,6 +387,11 @@ namespace newRBS.ViewModels
                 if (Coulombo.IsInit == true)
                 {
                     Coulombo.Close();
+                }
+
+                if (Gonio.IsInit == true)
+                {
+                    Gonio.Close();
                 }
             }
 
