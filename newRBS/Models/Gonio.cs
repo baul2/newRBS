@@ -18,6 +18,9 @@ using GalaSoft.MvvmLight;
 
 namespace newRBS.Models
 {
+    /// <summary>
+    /// Enum that associates the motor number with the motor name.
+    /// </summary>
     public enum Motor
     {
         Translation = 0,
@@ -35,6 +38,18 @@ namespace newRBS.Models
         private static Stream MessageStream;
 
         public static bool IsInit = false;
+
+        /// <summary>
+        /// Dictionary that contains the calibration for each motor. 
+        /// steps * calibration = position in °
+        /// </summary>
+        public static Dictionary<Motor, double> MotorCalibration = new Dictionary<Motor, double>
+        {
+            { Motor.Translation,1.11},
+            { Motor.HorizontalTilt,2.22},
+            { Motor.VerticalTilt,3.33},
+            { Motor.Rotation,4.44},
+        };
 
         public static bool Init()
         {
@@ -69,14 +84,33 @@ namespace newRBS.Models
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Gonio closed");
         }
 
-        public static string WRMot(Motor? motor, string command)
+        public static string SendCommand(Motor? motor, string command)
         {
             if (motor != null)
                 command = (char)(16 + (int)motor) + command;
 
             byte[] writeBuffer = command.Select(x => (byte)x).ToArray();
-            
-            Console.WriteLine(BitConverter.ToString(writeBuffer));
+
+            MessageStream.Write(writeBuffer, 0, writeBuffer.Length);
+
+            System.Threading.Thread.Sleep(100);
+
+            byte[] readBuffer = Enumerable.Repeat((byte)0, 50).ToArray();
+
+            int NumberOfBytes = MessageStream.Read(readBuffer, 0, readBuffer.Length);
+
+            return Encoding.Default.GetString(readBuffer, 0, NumberOfBytes);
+        }
+
+        public static string SendData(Motor? motor, string command)
+        {
+            if (motor == null)
+                return "";
+
+            command = (char)(32 + (int)motor) + command;
+
+            byte[] writeBuffer = command.Select(x => (byte)x).ToArray();
+
             MessageStream.Write(writeBuffer, 0, writeBuffer.Length);
 
             System.Threading.Thread.Sleep(100);
@@ -90,12 +124,12 @@ namespace newRBS.Models
 
         public static string Version()
         {
-            return WRMot(null, "V");
+            return SendCommand(null, "V");
         }
 
         public static string Status(Motor motor)
         {
-            string Answer = WRMot(motor, ((char)7).ToString());
+            string Answer = SendCommand(motor, ((char)7).ToString());
 
             if (Answer.Length == 10)
             {
@@ -108,16 +142,22 @@ namespace newRBS.Models
             }
         }
 
-        public static double GetPosition(Motor motor)
+        public static bool GetBit(this byte b, int bitNumber)
         {
-            string Answer = WRMot(motor, ((char)7).ToString());
+            return (b & (1 << bitNumber)) != 0;
+        }
 
-            int position = 0;
+        public static int GetStepPosition(Motor motor)
+        {
+            string Answer = SendCommand(motor, ((char)7).ToString());
 
             if (Answer.Length == 10)
             {
-                position = int.Parse(string.Concat((Answer.Take(7).Reverse())));
-                return position;
+                bool sign = GetBit((byte)Answer[7], 2);
+                if (sign == true)
+                    return -1 * int.Parse(string.Concat((Answer.Take(7).Reverse())));
+                else
+                    return int.Parse(string.Concat((Answer.Take(7).Reverse())));
             }
             else
             {
@@ -126,38 +166,50 @@ namespace newRBS.Models
             }
         }
 
-        public static void GoXSteps(Motor motor, int SW)
+        public static void GoXSteps(Motor motor, int Steps)
         {
-            double absSW = Math.Abs(SW);
-            if (absSW < 1048575 & absSW > 0)
+            double absSteps = Math.Abs(Steps);
+            if (absSteps < 1048575 & absSteps > 0)
             {
                 string Command = "";
                 byte[] SWA = new byte[5];
 
-                SWA[4] = (byte)Math.Truncate(absSW / 16 / 16 / 16 / 16);
-                absSW = absSW - SWA[4] * 16 * 16 * 16 * 16;
-                SWA[3] = (byte)Math.Truncate(absSW / 16 / 16 / 16);
-                absSW = absSW - SWA[3] * 16 * 16 * 16;
-                SWA[2] = (byte)Math.Truncate(absSW / 16 / 16);
-                absSW = absSW - SWA[2] * 16 * 16;
-                SWA[1] = (byte)Math.Truncate(absSW / 16);
-                SWA[0] = (byte)(absSW - SWA[1] * 16);
+                SWA[4] = (byte)Math.Truncate(absSteps / 16 / 16 / 16 / 16);
+                absSteps = absSteps - SWA[4] * 16 * 16 * 16 * 16;
+                SWA[3] = (byte)Math.Truncate(absSteps / 16 / 16 / 16);
+                absSteps = absSteps - SWA[3] * 16 * 16 * 16;
+                SWA[2] = (byte)Math.Truncate(absSteps / 16 / 16);
+                absSteps = absSteps - SWA[2] * 16 * 16;
+                SWA[1] = (byte)Math.Truncate(absSteps / 16);
+                SWA[0] = (byte)(absSteps - SWA[1] * 16);
                 Command = Command + (char)SWA[0] + (char)SWA[1] + (char)SWA[2] + (char)SWA[3] + (char)SWA[4];
-                if (SW < 0) { Command = Command + (char)16; } else { Command = Command + (char)17; }
+                if (Steps < 0) { Command = Command + (char)16; } else { Command = Command + (char)17; }
                 Command = Command + (char)0 + (char)0;
 
-                string Answer = WRMot(motor, Command);
+                string Answer = SendData(motor, Command);
 
                 if (Answer[0] != 255)
                 {
-                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Error during 'SetStepSize', Error code: " + GetErrorCode(Answer[0]));
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Error during 'GoSteps', Error code: " + GetErrorCode(Answer[0]));
                 }
             }
         }
 
+        public static void GoToStepPosition(Motor motor, int StepPosition)
+        {
+            int steps = StepPosition - GetStepPosition(motor);
+
+            GoXSteps(motor, steps);
+        }
+
+        public static void GoToPosition(Motor motor, double Position)
+        {
+            GoToStepPosition(motor, (int)((double)Position / MotorCalibration[motor]));
+        }
+
         public static void Start(Motor motor)
         {
-            string Answer = WRMot(motor, ((char)2).ToString());
+            string Answer = SendCommand(motor, ((char)2).ToString());
 
             if (Answer[0] != 255)
             {
@@ -167,7 +219,7 @@ namespace newRBS.Models
 
         public static void Stop(Motor motor)
         {
-            string Answer = WRMot(motor, ((char)3).ToString());
+            string Answer = SendCommand(motor, ((char)3).ToString());
 
             if (Answer[0] != 255)
             {
@@ -177,7 +229,7 @@ namespace newRBS.Models
 
         public static void Reset(Motor motor)
         {
-            string Answer = WRMot(motor, ((char)8).ToString());
+            string Answer = SendCommand(motor, ((char)8).ToString());
 
             if (Answer[0] != 255)
             {
