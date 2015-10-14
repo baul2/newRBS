@@ -68,8 +68,11 @@ namespace newRBS.ViewModels
             //Console.WriteLine("Gonio test");
             //Gonio.Init();
             //Console.WriteLine(Gonio.Status(Motor.VerticalTilt));
-            //Console.WriteLine(Gonio.GetPosition(Motor.VerticalTilt));
-            //Gonio.GoXSteps(Motor.VerticalTilt,100);
+            //Console.WriteLine(Gonio.GetStepPosition(Motor.VerticalTilt));
+            //Gonio.GoXSteps(Motor.VerticalTilt, -200);
+            //Gonio.GoToStepPosition(Motor.VerticalTilt,123);
+            //Gonio.Start(Motor.VerticalTilt);
+            //Console.ReadKey();
 
             trace.Value.TraceEvent(TraceEventType.Information, 0, "Program started");
 
