@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['viewmodellocator',['ViewModelLocator',['../classnew_r_b_s_1_1_view_models_1_1_view_model_locator.html#a7c232cbec7e0a2f12b3d81a63c02a6d8',1,'newRBS::ViewModels::ViewModelLocator']]]
+  ['onmeasurementlistchanged',['OnMeasurementListChanged',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#ae0d63f5d46e734b2aed65d723b216944',1,'newRBS::ViewModels::MeasurementListViewModel']]],
+  ['onselectablemeasurementmodified',['OnSelectableMeasurementModified',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#a2b6a6d1b53320491346656a98a88cee2',1,'newRBS::ViewModels::MeasurementListViewModel']]]
 ];

@@ -1,29 +1,6 @@
 var searchData=
 [
-  ['sample',['Sample',['../classnew_r_b_s_1_1_database_1_1_sample.html',1,'newRBS::Database']]],
-  ['sampleeditorviewmodel',['SampleEditorViewModel',['../classnew_r_b_s_1_1_view_models_1_1_sample_editor_view_model.html',1,'newRBS::ViewModels']]],
-  ['sampleeditorviewmodel',['SampleEditorViewModel',['../classnew_r_b_s_1_1_view_models_1_1_sample_editor_view_model.html#a8aa6a1b5e063a2444544e13a27c0358e',1,'newRBS::ViewModels::SampleEditorViewModel']]],
-  ['samples',['Samples',['../classnew_r_b_s_1_1_view_models_1_1_sample_editor_view_model.html#a46f2c4a285bd46e3dee0af6045ab8b5f',1,'newRBS::ViewModels::SampleEditorViewModel']]],
-  ['savemeasurementimage',['SaveMeasurementImage',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#ae06f4c943ea9f5f6062fd0ecdb497986',1,'newRBS::Database::DatabaseUtils']]],
-  ['selectablemeasurement',['SelectableMeasurement',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_selectable_measurement.html',1,'newRBS::ViewModels::Utils']]],
-  ['selectedfilter',['selectedFilter',['../classnew_r_b_s_1_1_view_models_1_1_measurement_filter_view_model.html#ae74ad1ab20dc6d7ef97459d86aaa4501',1,'newRBS::ViewModels::MeasurementFilterViewModel']]],
-  ['selectedmeasurement',['SelectedMeasurement',['../classnew_r_b_s_1_1_view_models_1_1_simulate_spectrum_view_model.html#aeb2d7b5db8ef99311551bf49009cfabc',1,'newRBS.ViewModels.SimulateSpectrumViewModel.SelectedMeasurement()'],['../classnew_r_b_s_1_1_view_models_1_1_measurement_import_view_model.html#aced39d25692548fb94a67b9f6e81305a',1,'newRBS.ViewModels.MeasurementImportViewModel.selectedMeasurement()']]],
-  ['selectedproject',['SelectedProject',['../classnew_r_b_s_1_1_view_models_1_1_measurement_filter_view_model.html#a46c774073c6b2516154f97e6ec79d150',1,'newRBS::ViewModels::MeasurementFilterViewModel']]],
-  ['sendconfig',['SendConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a2be9f4cbcbe3c5d3033d417f3b189b76',1,'newRBS::Models::CAEN_x730']]],
-  ['sendmeasurementnewevent',['SendMeasurementNewEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#aa93a2c5f3c394a4e37ec37210af3f429',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementremoveevent',['SendMeasurementRemoveEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a008e9c686cbf07769926cea2ab00f437',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementupdateevent',['SendMeasurementUpdateEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a6bb1f7f268e23067fec6ab1ccaa67739',1,'newRBS::Database::DatabaseUtils']]],
-  ['setchannelconfig',['SetChannelConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a5d7b171087a5280bbe92bee4c754d058',1,'newRBS.Models.CAEN_x730.SetChannelConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#a65c28f9edbf82f872413007798a6bd18',1,'newRBS.Models.MeasureWaveform.SetChannelConfig()']]],
-  ['setdefaultconfig',['SetDefaultConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a0962aaed2f8642bb123dda5cf05d3353',1,'newRBS.Models.CAEN_x730.SetDefaultConfig()'],['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html#ad91b067887c31a2a0d49c75c048cbf67',1,'newRBS.Models.CAENDPP_DgtzParams_t.setDefaultConfig()']]],
-  ['setmeasurementmode',['SetMeasurementMode',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a34f882c6e49f5d47175fc65d05169464',1,'newRBS::Models::CAEN_x730']]],
-  ['setwaveformconfig',['SetWaveformConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a7cd7d21ed37c4a644267780b75b6d739',1,'newRBS.Models.CAEN_x730.SetWaveformConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ad0a46ac87a38d06f48d44de88d48f153',1,'newRBS.Models.MeasureWaveform.SetWaveformConfig()']]],
-  ['simulatespectrumviewmodel',['SimulateSpectrumViewModel',['../classnew_r_b_s_1_1_view_models_1_1_simulate_spectrum_view_model.html',1,'newRBS::ViewModels']]],
-  ['simulatespectrumviewmodel',['SimulateSpectrumViewModel',['../classnew_r_b_s_1_1_view_models_1_1_simulate_spectrum_view_model.html#af64c4ba6695e4f4a2a92fa24dd42f1d4',1,'newRBS::ViewModels::SimulateSpectrumViewModel']]],
-  ['spectrumxcal',['SpectrumXCal',['../classnew_r_b_s_1_1_database_1_1_measurement.html#ad006468d24648ed1a70796e691cb0663',1,'newRBS::Database::Measurement']]],
-  ['spectrumy',['SpectrumY',['../classnew_r_b_s_1_1_database_1_1_measurement.html#a9dc6c7f60ebaf014dc05bcd860d26c04',1,'newRBS::Database::Measurement']]],
-  ['startacquisition',['StartAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#af74091e860764cb29d248e6af6c7d9f3',1,'newRBS.Models.CAEN_x730.StartAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#af59884dca552b1281ee7ea93b6cd8c5c',1,'newRBS.Models.MeasureWaveform.StartAcquisition()']]],
-  ['startacquisitions',['StartAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a2a284382f7411f566f62402a504657f8',1,'newRBS::Models::MeasureSpectra']]],
-  ['stopacquisition',['StopAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a221bb43d103bd9d4c4ee224718d13889',1,'newRBS.Models.CAEN_x730.StopAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ae407fee612f9a8ab2f0d1378ab1fe5a9',1,'newRBS.Models.MeasureWaveform.StopAcquisition()']]],
-  ['stopacquisitions',['StopAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a3ad1caa5b25dc3f134d4de7daf0937ac',1,'newRBS::Models::MeasureSpectra']]],
-  ['submitchanges',['SubmitChanges',['../classnew_r_b_s_1_1_database_1_1_database_data_context.html#aa519ccb33d4d6286e8d8133d476754e1',1,'newRBS::Database::DatabaseDataContext']]]
+  ['plotmeasurement',['PlotMeasurement',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#a01aa3dbb6c0a6f20816b7fca1e888bfb',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
+  ['plotmeasurements',['PlotMeasurements',['../classnew_r_b_s_1_1_view_models_1_1_energy_calibration_view_model.html#ae8e896683fbece44c6ed798da13ab627',1,'newRBS::ViewModels::EnergyCalibrationViewModel']]],
+  ['project',['Project',['../classnew_r_b_s_1_1_database_1_1_project.html',1,'newRBS::Database']]]
 ];

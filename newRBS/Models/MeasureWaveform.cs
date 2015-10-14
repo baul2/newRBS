@@ -104,6 +104,8 @@ namespace newRBS.Models
                 return;
 
             waveformTimer.Stop();
+            waveformTimer.Dispose();
+            waveformTimer = new Timer(MyGlobals.WaveformWorkerInterval);
 
             CAEN_x730.StopAcquisition(activeChannels.First());
 
@@ -119,6 +121,10 @@ namespace newRBS.Models
         public static void MeasureWaveformWorker(int Channel)
         {
             waveformTimer.Enabled = false;
+            if (CAEN_x730.ActiveChannels.Contains(Channel)== false)
+            {
+                return;
+            }
             waveform = CAEN_x730.GetWaveform(Channel);
             trace.Value.TraceEvent(TraceEventType.Verbose, 0, "MeasureWaveformWorker Channel = " + Channel);
             waveformTimer.Enabled = true;

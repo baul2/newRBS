@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['getchannelconfig',['GetChannelConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#ad13d88750d9a9968839e9326bae567b0',1,'newRBS.Models.CAEN_x730.GetChannelConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#a88e1cf781190c5329618219d56ebd051',1,'newRBS.Models.MeasureWaveform.GetChannelConfig()']]],
-  ['gethistogram',['GetHistogram',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a685ecded1c5cce6d388d517541dd0fa3',1,'newRBS::Models::CAEN_x730']]],
-  ['getwaveform',['GetWaveform',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a067a69530944d1362673fbc6961ab2b8',1,'newRBS::Models::CAEN_x730']]]
+  ['fillfilterlist',['FillFilterList',['../classnew_r_b_s_1_1_view_models_1_1_measurement_filter_view_model.html#a02df910af926fde9dc3c4fed42c80260',1,'newRBS::ViewModels::MeasurementFilterViewModel']]],
+  ['filllayerelements',['FillLayerElements',['../classnew_r_b_s_1_1_view_models_1_1_material_editor_view_model.html#a5f479f2411e3e3518620095597d5e7ff',1,'newRBS::ViewModels::MaterialEditorViewModel']]],
+  ['filluserlist',['FillUserList',['../classnew_r_b_s_1_1_view_models_1_1_user_editor_view_model.html#a569b416dd11c6104aaa2431645d7af7f',1,'newRBS::ViewModels::UserEditorViewModel']]]
 ];
