@@ -1,19 +1,23 @@
 var searchData=
 [
   ['caen_5fx730',['CAEN_x730',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html',1,'newRBS::Models']]],
-  ['caen_5fx730',['CAEN_x730',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a3c4582f27c3d89009f206af511610e3a',1,'newRBS::Models::CAEN_x730']]],
   ['caendpp_5facqmode_5ft',['CAENDPP_AcqMode_t',['../namespacenew_r_b_s_1_1_models.html#ab88f7f2d2115346b5f5afbe8796f3b57',1,'newRBS::Models']]],
   ['caendpp_5fdgtzparams_5ft',['CAENDPP_DgtzParams_t',['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fanalogprobe1_5ft',['CAENDPP_PHA_AnalogProbe1_t',['../namespacenew_r_b_s_1_1_models.html#aeeaaac22eb14ee6fe4800babb75d9224',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fanalogprobe2_5ft',['CAENDPP_PHA_AnalogProbe2_t',['../namespacenew_r_b_s_1_1_models.html#a9830daffc74a9e0af99e84ee112c2a00',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fdigitalprobe1_5ft',['CAENDPP_PHA_DigitalProbe1_t',['../namespacenew_r_b_s_1_1_models.html#ac905f67dc1daa4411e28bfb814398692',1,'newRBS::Models']]],
   ['caendpp_5fpha_5fdigitalprobe2_5ft',['CAENDPP_PHA_DigitalProbe2_t',['../namespacenew_r_b_s_1_1_models.html#af79064155aa968b8576948ec2adac011',1,'newRBS::Models']]],
+  ['canmeasure',['CanMeasure',['../classnew_r_b_s_1_1_my_globals.html#a28c5a0d6128c0689d4ccbb79955ff6f4',1,'newRBS::MyGlobals']]],
   ['changefilter',['ChangeFilter',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#ab0ab1e184cc5cae7b7af067390bc9662',1,'newRBS::ViewModels::MeasurementListViewModel']]],
-  ['channelconfigurationviewmodel',['ChannelConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_channel_configuration_view_model.html#ad2257ca23e9830bd24be395f9114a0d9',1,'newRBS::ViewModels::ChannelConfigurationViewModel']]],
-  ['channelconfigurationviewmodel',['ChannelConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_channel_configuration_view_model.html',1,'newRBS::ViewModels']]],
   ['channelparams',['ChannelParams',['../classnew_r_b_s_1_1_models_1_1_channel_params.html',1,'newRBS::Models']]],
+  ['charge_5fcountsovertime',['Charge_CountsOverTime',['../classnew_r_b_s_1_1_my_globals.html#a34cc38becdbdb7c5bda9b56157fee188',1,'newRBS::MyGlobals']]],
   ['checkedlistitem',['CheckedListItem',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_checked_list_item.html',1,'newRBS::ViewModels::Utils']]],
+  ['chopperconfig',['ChopperConfig',['../classnew_r_b_s_1_1_chopper_config.html',1,'newRBS']]],
+  ['clearfiltertreeselecteditem',['ClearFilterTreeSelectedItem',['../classnew_r_b_s_1_1_view_models_1_1_measurement_filter_view_model.html#aa0f47ddae473d50af82ae93c9dbdbd31',1,'newRBS::ViewModels::MeasurementFilterViewModel']]],
   ['clearplot',['ClearPlot',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#aa3266864b4401d3daa30b4d634b2a62b',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
-  ['close',['Close',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a54b2e19959355321ac3e0f95f06ff2c7',1,'newRBS::Models::CAEN_x730']]],
-  ['connparam',['ConnParam',['../structnew_r_b_s_1_1_models_1_1_conn_param.html',1,'newRBS::Models']]]
+  ['close',['Close',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#aa2880ea72be679bbd05beaa498bd6439',1,'newRBS::Models::CAEN_x730']]],
+  ['configurationviewmodel',['ConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_configuration_view_model.html',1,'newRBS::ViewModels']]],
+  ['configurationviewmodel',['ConfigurationViewModel',['../classnew_r_b_s_1_1_view_models_1_1_configuration_view_model.html#a4afd50e5153b4fcd79b703e90569c813',1,'newRBS::ViewModels::ConfigurationViewModel']]],
+  ['connparam',['ConnParam',['../structnew_r_b_s_1_1_models_1_1_conn_param.html',1,'newRBS::Models']]],
+  ['constring',['ConString',['../classnew_r_b_s_1_1_my_globals.html#aa06a377777e7b44126cb6f2e93991e51',1,'newRBS::MyGlobals']]]
 ];

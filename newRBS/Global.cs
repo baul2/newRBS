@@ -19,12 +19,12 @@ namespace newRBS
     /// </summary>
     static class MyGlobals
     {
-        public static bool OffLineMode = true;
+        public static bool OffLineMode = false;
 
         /// <summary>
         /// The interval of the <see cref="Models.MeasureSpectra.MeasureSpectraWorker"/>.
         /// </summary>
-        public static double MeasurementWorkerInterval = 1000; //ms
+        public static double MeasurementWorkerInterval = 500; //ms
 
         /// <summary>
         /// The interval of the <see cref="Models.MeasureWaveform.MeasureWaveformWorker(int)"/>.

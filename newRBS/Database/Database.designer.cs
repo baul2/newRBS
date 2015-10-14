@@ -22,7 +22,7 @@ namespace newRBS.Database
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="newRBSadmin_db")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="test_db")]
 	public partial class DatabaseDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -60,7 +60,7 @@ namespace newRBS.Database
     #endregion
 		
 		public DatabaseDataContext() : 
-				base(global::newRBS.Properties.Settings.Default.newRBSadmin_dbConnectionString, mappingSource)
+				base(global::newRBS.Properties.Settings.Default.test_dbConnectionString, mappingSource)
 		{
 			OnCreated();
 		}

@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Database Name="newRBSadmin_db" Class="DatabaseDataContext" EntityBase="EntityBase" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=141.35.49.196,35877;Initial Catalog=newRBSadmin_db;User ID=newRBSadmin" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="newRBSadmin_dbConnectionString" Provider="System.Data.SqlClient" />
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="test_db" Class="DatabaseDataContext" EntityBase="EntityBase" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=SVRH;Initial Catalog=test_db;Persist Security Info=True;User ID=test" SettingsObjectName="newRBS.Properties.Settings" SettingsPropertyName="test_dbConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Elements" Member="Elements">
     <Type Name="Element">
       <Column Name="ElementID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />

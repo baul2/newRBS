@@ -12,5 +12,8 @@ var searchData=
   ['measurementlistviewmodel',['MeasurementListViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html',1,'newRBS::ViewModels']]],
   ['measurementplotviewmodel',['MeasurementPlotViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html',1,'newRBS::ViewModels']]],
   ['measurespectra',['MeasureSpectra',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html',1,'newRBS::Models']]],
-  ['measurewaveform',['MeasureWaveform',['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html',1,'newRBS::Models']]]
+  ['measurewaveform',['MeasureWaveform',['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html',1,'newRBS::Models']]],
+  ['myglobals',['MyGlobals',['../classnew_r_b_s_1_1_my_globals.html',1,'newRBS']]],
+  ['mytextwritertracelistener',['MyTextWriterTraceListener',['../classnew_r_b_s_1_1_my_text_writer_trace_listener.html',1,'newRBS']]],
+  ['myuser',['MyUser',['../classnew_r_b_s_1_1_my_user.html',1,'newRBS']]]
 ];
