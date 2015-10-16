@@ -20,8 +20,6 @@ namespace newRBS.Views
 {
     public partial class MainView : Window
     {
-        private Models.CAEN_x730 cAEN_x730;
-
         public MainView()
         {
             InitializeComponent();

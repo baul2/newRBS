@@ -18,6 +18,9 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Diagnostics;
+using System.Reflection;
+using System.IO;
 
 namespace newRBS.ViewModels
 {
@@ -26,6 +29,9 @@ namespace newRBS.ViewModels
         public AsyncObservableCollection<FilterClass> Items { get; set; }
     }
 
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MeasurementFilterView"/>. They filter the database by date/sample/project... and send the obtained <see cref="Measurement.MeasurementID"/>s as events.
+    /// </summary>
     public class MeasurementFilterViewModel : ViewModelBase
     {
         public delegate void EventHandlerFilter(List<int> MeasurementIDList);
@@ -40,6 +46,9 @@ namespace newRBS.ViewModels
         public ICommand AddMeasurementCommand { get; set; }
         public ICommand RemoveMeasurementCommand { get; set; }
 
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
+
         private bool _measurementFilterPanelVis = true;
         public bool measurementFilterPanelVis
         {
@@ -50,24 +59,30 @@ namespace newRBS.ViewModels
                 switch (value)
                 {
                     case true:
-                        { VisButtonContent = "\u21D1 Filter Panel \u21D1"; break; }
+                        { VisButtonContent = "<\n<\n<"; break; }
                     case false:
-                        { VisButtonContent = "\u21D3 Filter Panel \u21D3"; break; }
+                        { VisButtonContent = ">\n>\n>"; break; }
                 }
                 RaisePropertyChanged();
             }
         }
 
-        private string _VisButtonContent = "\u21D1 Filter Panel \u21D1";
+        private string _VisButtonContent = "<\n<\n<";
         public string VisButtonContent
         { get { return _VisButtonContent; } set { _VisButtonContent = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// The list of available filter types.
+        /// </summary>
         public AsyncObservableCollection<string> filterTypeList { get; set; }
 
         private int _filterTypeIndex;
         public int filterTypeIndex
         { get { return _filterTypeIndex; } set { _filterTypeIndex = value; FillFilterList(filterTypeList[value]); } }
 
+        /// <summary>
+        /// The currently selected filter.
+        /// </summary>
         public FilterClass selectedFilter { get; set; }
 
         public RelayCommand<TreeViewHelper.DependencyPropertyEventArgs> SelectedItemChanged { get; set; }
@@ -77,17 +92,22 @@ namespace newRBS.ViewModels
             if (e != null && e.DependencyPropertyChangedEventArgs.NewValue != null)
             {
                 FilterClass temp = (FilterClass)e.DependencyPropertyChangedEventArgs.NewValue;
-                Console.WriteLine(temp.Name);
                 SelectedProject = null;
                 NewFilterSelected(temp);
             }
         }
 
+        /// <summary>
+        /// The ItemsSource of the TreeView. It contains the available filters (<see cref="FilterClass"/>).
+        /// </summary>
         public TreeViewModel filterTree { get; set; }
 
         public ObservableCollection<Project> Projects { get; set; }
 
         private Project _SelectedProject;
+        /// <summary>
+        /// The currently selected <see cref="Project"/>.
+        /// </summary>
         public Project SelectedProject
         {
             get { return _SelectedProject; }
@@ -95,7 +115,6 @@ namespace newRBS.ViewModels
             {
                 if (value != null)
                 {
-                    Console.WriteLine("SelectedProject");
                     ClearFilterTreeSelectedItem();
                     SelectProject(value);
                 }
@@ -104,22 +123,9 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void ClearFilterTreeSelectedItem()
-        {
-            foreach (var s in filterTree.Items)
-            {
-                if (s.IsSelected == true) s.IsSelected = false;
-                if (s.Children != null)
-                    foreach (var u in s.Children)
-                    {
-                        if (u.IsSelected == true) u.IsSelected = false;
-                        if (u.Children != null)
-                            foreach (var t in u.Children)
-                                if (t.IsSelected == true) t.IsSelected = false;
-                    }
-            }
-        }
-
+        /// <summary>
+        /// Constructor of the class. It sets up the Commands and initiate the <see cref="filterTypeList"/> and <see cref="filterTree"/>.
+        /// </summary>
         public MeasurementFilterViewModel()
         {
             ExpandFilterList = new RelayCommand(() => _ExpandFilterList(), () => true);
@@ -138,9 +144,14 @@ namespace newRBS.ViewModels
 
             SelectedItemChanged = new RelayCommand<TreeViewHelper.DependencyPropertyEventArgs>(TreeViewItemSelectedChangedCallBack);
 
+            Projects = new ObservableCollection<Project>();
+
             Init();
         }
 
+        /// <summary>
+        /// Function that resets the <see cref="filterTypeList"/> and fills the list of <see cref="Project"/>s.
+        /// </summary>
         public void Init()
         {
             filterTypeIndex = 1;
@@ -148,18 +159,49 @@ namespace newRBS.ViewModels
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Projects = new ObservableCollection<Project>(Database.Projects.ToList());
+                Projects.Clear();
+                foreach (var project in Database.Projects.ToList())
+                    Projects.Add(project);
             }
         }
 
-        private void _ExpandFilterList()
+        /// <summary>
+        /// Function that iterates over all entries in <see cref="filterTree"/> and sets their 'IsSelected' property to false.
+        /// </summary>
+        public void ClearFilterTreeSelectedItem()
+        {
+            foreach (var s in filterTree.Items)
+            {
+                if (s.IsSelected == true) s.IsSelected = false;
+                if (s.Children != null)
+                    foreach (var u in s.Children)
+                    {
+                        if (u.IsSelected == true) u.IsSelected = false;
+                        if (u.Children != null)
+                            foreach (var t in u.Children)
+                                if (t.IsSelected == true) t.IsSelected = false;
+                    }
+            }
+        }
+
+        /// <summary>
+        /// Function that expand/collaps the filter panel.
+        /// </summary>
+        public void _ExpandFilterList()
         {
             measurementFilterPanelVis = !measurementFilterPanelVis;
         }
 
-        private void FillFilterList(string filterType)
+        /// <summary>
+        /// Function that populates the filter tree with the selected filterType from the <see cref="filterTypeList"/>.
+        /// </summary>
+        /// <param name="filterType">The string of the selected filterType.</param>
+        public void FillFilterList(string filterType)
         {
-            Console.WriteLine("Update filter list with filterType: {0}", filterType);
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filterType: '" + filterType + "'");
+
+            ClearFilterTreeSelectedItem();
+
             if (filterTree.Items.Count() > 0)
             {
                 while (filterTree.Items.Count > 0)
@@ -177,7 +219,6 @@ namespace newRBS.ViewModels
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
-                        Console.WriteLine("All count: {0}", Database.Measurements.ToList().Count());
                         List<int> allYears = (from spec in Database.Measurements select spec.StartTime.Year).Distinct().ToList();
                         foreach (int Year in allYears)
                         {
@@ -210,50 +251,50 @@ namespace newRBS.ViewModels
                     break;
 
                 case "Channel":
-                    Console.WriteLine("Channel");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         List<int> allChannels = Database.Measurements.Select(x => x.Channel).Distinct().ToList();
-                        Console.WriteLine("NumChannels {0}", allChannels.Count());
 
                         foreach (int Channel in allChannels)
                         {
-                            Console.WriteLine(Channel);
                             filterTree.Items.Add(new FilterClass() { Name = Channel.ToString(), Type = "Channel", Channel = Channel });
                         }
                     }
                     break;
 
                 case "Sample":
-                    Console.WriteLine("Sample");
                     filterTree.Items.Add(new FilterClass() { Name = "All", Type = "All" });
 
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         //List<string> allSampleNames = (from sample in Database.Samples select sample.SampleName).Distinct().ToList();
                         List<string> allSampleNames = Database.Samples.Select(x => x.SampleName).ToList();
-                        Console.WriteLine("NumSamples {0}", allSampleNames.Count());
 
                         foreach (string sampleName in allSampleNames)
                         {
-                            Console.WriteLine(sampleName);
                             filterTree.Items.Add(new FilterClass() { Name = sampleName, Type = "Sample", SampleName = sampleName });
                         }
                     }
                     break;
 
                 default:
-                    Console.WriteLine("No action found for filterType: {0}", filterType);
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "No action found for filterType: '" + filterType +"'");
                     break;
             }
             if (EventNewFilter != null) EventNewFilter(new List<int>());
         }
 
+        /// <summary>
+        /// Function that sends an event containing a list of <see cref="Measurement.MeasurementID"/>s generated from the selected filter.
+        /// </summary>
+        /// <param name="filter">The filter which has been selected in the <see cref="filterTree"/>.</param>
         public void NewFilterSelected(FilterClass filter)
         {
             if (selectedFilter == null) return;
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected filter: '" + filter.Name + " (" + filter.Type + ", " + filter.SubType + ")'");
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
@@ -308,20 +349,28 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void SelectProject(Project project)
+        /// <summary>
+        /// Function that sends an event containing a list of <see cref="Measurement.MeasurementID"/>s generated from the selected <see cref="Project"/>.
+        /// </summary>
+        /// <param name="project">The <see cref="Project"/> which has been selected.</param>
+        public void SelectProject(Project project)
         {
             if (project == null) return;
 
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "New selected project: '" + project.ProjectName + "'");
+
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Console.WriteLine("Load project");
                 List<int> MeasurementIDList = Database.Measurement_Projects.Where(x => x.ProjectID == project.ProjectID).Select(x => x.MeasurementID).ToList();
                 // Send event (to SpectraListView...)
                 if (EventNewFilter != null) EventNewFilter(MeasurementIDList);
             }
         }
 
-        private void _NewProjectCommand()
+        /// <summary>
+        /// Function that adds a new <see cref="Project"/> to the <see cref="Projects"/> list.
+        /// </summary>
+        public void _NewProjectCommand()
         {
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new project name:", "");
             if (inputDialog.ShowDialog() == true)
@@ -332,10 +381,15 @@ namespace newRBS.ViewModels
                         Database.Projects.InsertOnSubmit(newProject);
                         Database.SubmitChanges();
                         Projects.Add(newProject);
+
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Created new project: '" + newProject.ProjectName + "'");
                     }
         }
 
-        private void _RenameProjectCommand()
+        /// <summary>
+        /// Function that renames the selected <see cref="Project"/>.
+        /// </summary>
+        public void _RenameProjectCommand()
         {
             if (SelectedProject == null) return;
 
@@ -346,15 +400,21 @@ namespace newRBS.ViewModels
                     using (DatabaseDataContext Database = MyGlobals.Database)
                     {
                         Project renamedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
+                        string OldName = renamedProject.ProjectName;
                         renamedProject.ProjectName = inputDialog.Answer;
                         Database.SubmitChanges();
+
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Project '" + OldName + "' renamed to '" + renamedProject.ProjectName + "'");
                     }
 
                     Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID).ProjectName = inputDialog.Answer;
                 }
         }
 
-        private void _DeleteProjectCommand()
+        /// <summary>
+        /// Function that deletes the selected <see cref="Project"/>.
+        /// </summary>
+        public void _DeleteProjectCommand()
         {
             if (SelectedProject == null) return;
 
@@ -365,8 +425,11 @@ namespace newRBS.ViewModels
                 using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => x.ProjectID == SelectedProject.ProjectID));
-                    Database.Projects.DeleteOnSubmit(Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
+                    Project deletedProject = Database.Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID);
+                    Database.Projects.DeleteOnSubmit(deletedProject);
                     Database.SubmitChanges();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Project '" + deletedProject.ProjectName + "' was deleted");
                 }
 
                 Projects.Remove(Projects.FirstOrDefault(x => x.ProjectID == SelectedProject.ProjectID));
@@ -374,7 +437,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _AddMeasurementCommand()
+        /// <summary>
+        /// Function that adds the selected <see cref="Measurement"/>s to a specified <see cref="Project"/>.
+        /// </summary>
+        public void _AddMeasurementCommand()
         {
             List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
 
@@ -383,8 +449,6 @@ namespace newRBS.ViewModels
             Views.Utils.ProjectSelector projectSelector = new Views.Utils.ProjectSelector();
             if (projectSelector.ShowDialog() == true)
             {
-                Console.WriteLine(projectSelector.SelectedProject.ProjectName);
-
                 using (DatabaseDataContext Database = MyGlobals.Database)
                 {
                     List<Measurement_Project> newMeasurement_Projects = new List<Measurement_Project>();
@@ -396,11 +460,16 @@ namespace newRBS.ViewModels
 
                     Database.Measurement_Projects.InsertAllOnSubmit(newMeasurement_Projects);
                     Database.SubmitChanges();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " added to Project '" + projectSelector.SelectedProject.ProjectName + "'");
                 }
             }
         }
 
-        private void _RemoveMeasurementCommand()
+        /// <summary>
+        /// Function that removes the selected <see cref="Measurement"/>s from the selected <see cref="Project"/>.
+        /// </summary>
+        public void _RemoveMeasurementCommand()
         {
             if (SelectedProject == null) return;
 
@@ -410,8 +479,10 @@ namespace newRBS.ViewModels
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
-                Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)));
+                Database.Measurement_Projects.DeleteAllOnSubmit(Database.Measurement_Projects.Where(x => selectedMeasurementIDs.Contains(x.MeasurementID)).Where(y => y.ProjectID == SelectedProject.ProjectID));
                 Database.SubmitChanges();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", selectedMeasurementIDs) + " removed from Project '" + SelectedProject.ProjectName + "'");
             }
 
             SelectProject(SelectedProject);

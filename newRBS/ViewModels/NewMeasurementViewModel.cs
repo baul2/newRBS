@@ -18,12 +18,15 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.NewMeasurementView"/>. They set the parameter of a new <see cref="Measurement"/> and start it via <see cref="MeasureSpectra.StartAcquisitions(List{int}, Measurement, int, int)"/>.
+    /// </summary>
     public class NewMeasurementViewModel : ViewModelBase
     {
-        private Models.MeasureSpectra measureSpectra;
         private DatabaseDataContext Database;
 
         public ICommand NewSampleCommand { get; set; }
@@ -39,7 +42,10 @@ namespace newRBS.ViewModels
         public ObservableCollection<CheckedListItem<int>> Channels_30 { get; set; }
 
         private Measurement _Measurement;
-        public Measurement Measurement
+        /// <summary>
+        /// <see cref="Measurement"/> that stores the parameters of the new Measurement.
+        /// </summary>
+        public Measurement NewMeasurement
         {
             get { return _Measurement; }
             set { _Measurement = value; RaisePropertyChanged(); }
@@ -51,7 +57,7 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<ElementClass> Ions { get; set; }
+        public ObservableCollection<Isotope> Ions { get; set; }
 
         public ObservableCollection<string> StopTypes { get; set; }
 
@@ -65,9 +71,11 @@ namespace newRBS.ViewModels
 
         public ObservableCollection<string> VariableParameters { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up commands and initializes variables.
+        /// </summary>
         public NewMeasurementViewModel()
         {
-            measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
             Database = MyGlobals.Database;
 
             NewSampleCommand = new RelayCommand(() => _NewSampleCommand(), () => true);
@@ -84,17 +92,19 @@ namespace newRBS.ViewModels
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
-            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } };
+            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z => z.MassNumber > 0).ToList());
 
             Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
 
-            Measurement = Database.Measurements.OrderByDescending(x => x.StartTime).First();
+            NewMeasurement = Database.Measurements.Where(y => y.MeasurementName != "TestMeasurement").OrderByDescending(x => x.StartTime).First();
 
             VariableParameters = new ObservableCollection<string> { "x", "y", "Theta", "Phi", "Energy", "Charge" };
         }
 
-
-        private void _NewSampleCommand()
+        /// <summary>
+        /// Function that inserts a new <see cref="Sample"/>.
+        /// </summary>
+        public void _NewSampleCommand()
         {
             int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)
@@ -102,37 +112,47 @@ namespace newRBS.ViewModels
                 Sample newSample = Database.Samples.FirstOrDefault(x => x.SampleID == newSampleID);
                 if (!Samples.Contains(newSample))
                     Samples.Add(newSample);
-                Measurement.Sample = newSample;
+                NewMeasurement.Sample = newSample;
             }
         }
 
-        private void _StartMeasurementCommand()
+        /// <summary>
+        /// Function that starts the measurement.
+        /// </summary>
+        public void _StartMeasurementCommand()
         {
             DialogResult = false;
 
-            int SampleID = Measurement.SampleID;
-            MyGlobals.GenericDetach<Measurement>(Measurement);
+            int IncomingIonIsotopeID = NewMeasurement.IncomingIonIsotopeID;
+            int SampleID = NewMeasurement.SampleID;
+
+            MyGlobals.GenericDetach<Measurement>(NewMeasurement);
+
+            NewMeasurement.IsTestMeasurement = false;
 
             switch (SelectedChamberTabIndex)
             {
                 case 0: // -10° chamber
                     {
-                        Measurement.Chamber = "-10°";
+                        NewMeasurement.Chamber = "-10°";
                         List<int> selectedChannels = new List<int>(Channels_10.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);//
                         break;
                     }
                 case 1: // -30° chamber
                     {
-                        Measurement.Chamber = "-30°";
+                        NewMeasurement.Chamber = "-30°";
                         List<int> selectedChannels = new List<int>(Channels_30.Where(i => i.IsChecked == true).Select(x => x.Item).ToList());
-                        measureSpectra.StartAcquisitions(selectedChannels, Measurement, SampleID);
+                        MeasureSpectra.StartAcquisitions(selectedChannels, NewMeasurement, SampleID, IncomingIonIsotopeID);
                         break;
                     }
             }
         }
 
-        private void _CancelCommand()
+        /// <summary>
+        /// Function that cancels the new measurement and closes the window.
+        /// </summary>
+        public void _CancelCommand()
         {
             DialogResult = false;
             _DialogResult = null;

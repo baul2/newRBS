@@ -1,16 +1,15 @@
 var searchData=
 [
-  ['savemeasurementimage',['SaveMeasurementImage',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#ae06f4c943ea9f5f6062fd0ecdb497986',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendconfig',['SendConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a2be9f4cbcbe3c5d3033d417f3b189b76',1,'newRBS::Models::CAEN_x730']]],
-  ['sendmeasurementnewevent',['SendMeasurementNewEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#aa93a2c5f3c394a4e37ec37210af3f429',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementremoveevent',['SendMeasurementRemoveEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a008e9c686cbf07769926cea2ab00f437',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementupdateevent',['SendMeasurementUpdateEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a6bb1f7f268e23067fec6ab1ccaa67739',1,'newRBS::Database::DatabaseUtils']]],
-  ['setchannelconfig',['SetChannelConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a5d7b171087a5280bbe92bee4c754d058',1,'newRBS.Models.CAEN_x730.SetChannelConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#a65c28f9edbf82f872413007798a6bd18',1,'newRBS.Models.MeasureWaveform.SetChannelConfig()']]],
-  ['setdefaultconfig',['setDefaultConfig',['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html#ad91b067887c31a2a0d49c75c048cbf67',1,'newRBS.Models.CAENDPP_DgtzParams_t.setDefaultConfig()'],['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a0962aaed2f8642bb123dda5cf05d3353',1,'newRBS.Models.CAEN_x730.SetDefaultConfig()']]],
-  ['setmeasurementmode',['SetMeasurementMode',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a34f882c6e49f5d47175fc65d05169464',1,'newRBS::Models::CAEN_x730']]],
-  ['setwaveformconfig',['SetWaveformConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a7cd7d21ed37c4a644267780b75b6d739',1,'newRBS.Models.CAEN_x730.SetWaveformConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ad0a46ac87a38d06f48d44de88d48f153',1,'newRBS.Models.MeasureWaveform.SetWaveformConfig()']]],
-  ['startacquisition',['StartAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#af74091e860764cb29d248e6af6c7d9f3',1,'newRBS.Models.CAEN_x730.StartAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#af59884dca552b1281ee7ea93b6cd8c5c',1,'newRBS.Models.MeasureWaveform.StartAcquisition()']]],
-  ['startacquisitions',['StartAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#aca60954e4054616a0f6b44db2263a177',1,'newRBS::Models::MeasureSpectra']]],
-  ['stopacquisition',['StopAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a221bb43d103bd9d4c4ee224718d13889',1,'newRBS.Models.CAEN_x730.StopAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ae407fee612f9a8ab2f0d1378ab1fe5a9',1,'newRBS.Models.MeasureWaveform.StopAcquisition()']]],
-  ['stopacquisitions',['StopAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a3ad1caa5b25dc3f134d4de7daf0937ac',1,'newRBS::Models::MeasureSpectra']]]
+  ['mainviewmodel',['MainViewModel',['../classnew_r_b_s_1_1_view_models_1_1_main_view_model.html#aa761317adbf925b45b34b24652f94f2d',1,'newRBS::ViewModels::MainViewModel']]],
+  ['materialeditorviewmodel',['MaterialEditorViewModel',['../classnew_r_b_s_1_1_view_models_1_1_material_editor_view_model.html#a10fde2dde8ce1dfad6aeed180aeec46e',1,'newRBS::ViewModels::MaterialEditorViewModel']]],
+  ['measurementfilterviewmodel',['MeasurementFilterViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_filter_view_model.html#a522df60ceb39ce0c304872de09ffacc2',1,'newRBS::ViewModels::MeasurementFilterViewModel']]],
+  ['measurementimportviewmodel',['MeasurementImportViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_import_view_model.html#a72c71afec9492ff9a7efcaa047216457',1,'newRBS::ViewModels::MeasurementImportViewModel']]],
+  ['measurementinfoclass',['MeasurementInfoClass',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_measurement_info_class.html#a7e97a2c0b3393ff8070237ff1e2b9814',1,'newRBS::ViewModels::Utils::MeasurementInfoClass']]],
+  ['measurementinfoviewmodel',['MeasurementInfoViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_info_view_model.html#a74a8d017b7f9152af7219b062505eb33',1,'newRBS::ViewModels::MeasurementInfoViewModel']]],
+  ['measurementlistviewmodel',['MeasurementListViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#aee00e4d4b8a168940ebf7c97310b4f14',1,'newRBS::ViewModels::MeasurementListViewModel']]],
+  ['measurementnottoplot',['MeasurementNotToPlot',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#a00a86c1b1adc7cf90fd565cc213da18f',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
+  ['measurementplotviewmodel',['MeasurementPlotViewModel',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#a3c39bbad82f3806204fe97719774c9dd',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
+  ['measurementtoplot',['MeasurementToPlot',['../classnew_r_b_s_1_1_view_models_1_1_measurement_plot_view_model.html#a19ed65339cb7c7c9c1d52668c9b0bb04',1,'newRBS::ViewModels::MeasurementPlotViewModel']]],
+  ['measurespectraworker',['MeasureSpectraWorker',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a4cee5ac8ccfee722bdfa6d944f871fa3',1,'newRBS::Models::MeasureSpectra']]],
+  ['measurewaveformworker',['MeasureWaveformWorker',['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#af69e8d7303c309446700d5aed17b3c5e',1,'newRBS::Models::MeasureWaveform']]]
 ];

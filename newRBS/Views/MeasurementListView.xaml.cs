@@ -12,34 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Data;
 
 namespace newRBS.Views
 {
-    /// <summary>
-    /// Interaction logic for SpectraListView.xaml
-    /// </summary>
-    public partial class SpectraListView : UserControl
+    public partial class MeasurementListView : UserControl
     {
-        public SpectraListView()
+        public MeasurementListView()
         {
             InitializeComponent();
-        }
-    }
-
-    [ValueConversion(typeof(object), typeof(string))]
-    public class AtomicNumberToShortNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter,
-                          System.Globalization.CultureInfo culture)
-        {
-            return ViewModels.Utils.ElementData.ShortName[(int)value-1].ToString();
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter,
-                        System.Globalization.CultureInfo culture)
-        {
-            return null;
         }
     }
 }

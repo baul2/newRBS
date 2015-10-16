@@ -20,6 +20,10 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using System.IO;
 using newRBS.Database;
+using System.Reflection;
+using OxyPlot;
+using System.Globalization;
+using newRBS.Models;
 
 namespace newRBS.ViewModels
 {
@@ -29,9 +33,11 @@ namespace newRBS.ViewModels
     public class MainViewModel : ViewModelBase
     {
         public ICommand NewMeasurementCommand { get; set; }
+        public ICommand NewTestMeasurementCommand { get; set; }
         public ICommand StopMeasurementCommand { get; set; }
 
-        public ICommand ChannelConfigurationCommand { get; set; }
+        public ICommand GoniometerCommand { get; set; }
+        public ICommand ConfigurationCommand { get; set; }
 
         public ICommand ImportMeasurementsCommand { get; set; }
         public ICommand ExportMeasurementsCommand { get; set; }
@@ -39,27 +45,43 @@ namespace newRBS.ViewModels
 
         public ICommand SaveMeasurementPlotCommand { get; set; }
 
-        public ICommand MaterialEditorCommand { get; set; }
-        public ICommand SampleEditorCommand { get; set; }
-
         public ICommand EnergyCalCommand { get; set; }
         public ICommand SimulateSpectrumCommand { get; set; }
+        public ICommand CalculateCommand { get; set; }
+
+        public ICommand MaterialEditorCommand { get; set; }
+        public ICommand SampleEditorCommand { get; set; }
         public ICommand UserEditorCommand { get; set; }
 
-        public ICommand LogOutCommand { get; set; }
-        public ICommand CloseProgramCommand { get; set; }
 
-        TraceSource trace = new TraceSource("MainViewModel");
+        public ICommand LogOutCommand { get; set; }
+        public RelayCommand<CancelEventArgs> OnClosingCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
         /// Constructor of the class. It sets up all the commands.
         /// </summary>
         public MainViewModel()
         {
+            //Console.WriteLine("Gonio test");
+            //Gonio.Init();
+            //Console.WriteLine(Gonio.Status(Motor.VerticalTilt));
+            //Console.WriteLine(Gonio.GetStepPosition(Motor.VerticalTilt));
+            //Gonio.GoXSteps(Motor.VerticalTilt, -200);
+            //Gonio.GoToStepPosition(Motor.VerticalTilt,123);
+            //Gonio.Start(Motor.VerticalTilt);
+            //Console.ReadKey();
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Program started");
+
             NewMeasurementCommand = new RelayCommand(() => _NewMeasurementCommand(), () => true);
+            NewTestMeasurementCommand = new RelayCommand(() => _NewTestMeasurementCommand(), () => true);
             StopMeasurementCommand = new RelayCommand(() => _StopMeasurementCommand(), () => true);
 
-            ChannelConfigurationCommand = new RelayCommand(() => _ChannelConfigurationCommand(), () => true);
+            GoniometerCommand = new RelayCommand(() => _GoniometerCommand(), () => true);
+            ConfigurationCommand = new RelayCommand(() => _ConfigurationCommand(), () => true);
 
             ImportMeasurementsCommand = new RelayCommand(() => _ImportMeasurementsCommand(), () => true);
             ExportMeasurementsCommand = new RelayCommand(() => _ExportMeasurementsCommand(), () => true);
@@ -73,9 +95,28 @@ namespace newRBS.ViewModels
 
             EnergyCalCommand = new RelayCommand(() => _EnergyCalCommand(), () => true);
             SimulateSpectrumCommand = new RelayCommand(() => _SimulateSpectrumCommand(), () => true);
+            CalculateCommand = new RelayCommand(() => _CalculateCommand(), () => true);
 
             LogOutCommand = new RelayCommand(() => _LogOutCommand(), () => true);
-            CloseProgramCommand = new RelayCommand(() => _CloseProgramCommand(), () => true);
+            OnClosingCommand = new RelayCommand<CancelEventArgs>(_CloseProgramCommand);
+
+            // Check if the measurement equipment is accessible
+            if (CAEN_x730.Init() == true)
+            {
+                MyGlobals.CanMeasure = true;
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in measurement mode");
+                MeasureSpectra.Init();
+            }
+            else
+            {
+                MyGlobals.CanMeasure = false;
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Program is in offline mode");
+            }
+
+            MyGlobals.myController = new PlotController();
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, PlotCommands.ZoomRectangle);
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, 2, PlotCommands.ResetAt);
+            MyGlobals.myController.BindMouseDown(OxyMouseButton.Middle, PlotCommands.PointsOnlyTrack);
         }
 
         /// <summary>
@@ -90,15 +131,32 @@ namespace newRBS.ViewModels
         }
 
         /// <summary>
+        /// Function that starts a new test measurement.
+        /// </summary>
+        public void _NewTestMeasurementCommand()
+        {
+            Views.Utils.ChannelDialog channelDialog = new Views.Utils.ChannelDialog();
+            if (channelDialog.ShowDialog() == true)
+            {
+                Measurement measurement = new Measurement();
+                measurement.IsTestMeasurement = true;
+                measurement.MeasurementName = "TestMeasurement";
+                int SampleID, IncomingIonIsotopeID;
+                using (DatabaseDataContext Database = MyGlobals.Database)
+                {
+                    SampleID = Database.Samples.FirstOrDefault(x => x.SampleName == "(undefined)").SampleID;
+                    IncomingIonIsotopeID = Database.Isotopes.FirstOrDefault(x => x.MassNumber == 1).IsotopeID;
+                }
+                MeasureSpectra.StartAcquisitions(new List<int> { channelDialog.SelectedChannel }, measurement, SampleID, IncomingIonIsotopeID);
+            }
+        }
+
+        /// <summary>
         /// Function that stops the current acquisition.
         /// </summary>
         public void _StopMeasurementCommand()
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
-            {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
-                measureSpectra.StopAcquisitions();
-            }
+            MeasureSpectra.StopAcquisitions();
         }
 
         /// <summary>
@@ -159,20 +217,26 @@ namespace newRBS.ViewModels
                 DatabaseUtils.SaveMeasurementImage(saveFileDialog.FileName);
         }
 
-        /// <summary>
-        /// Function that starts a new <see cref="ChannelConfigurationViewModel"/> instance and binds it to a <see cref="Views.ChannelConfigurationView"/> instance.
-        /// </summary>
-        public void _ChannelConfigurationCommand()
+        public void _GoniometerCommand()
         {
-            Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            GoniometerViewModel goniometerViewModel = new GoniometerViewModel();
+            Views.GoniometerView goniometerView = new Views.GoniometerView();
+            goniometerView.DataContext = goniometerViewModel;
+            goniometerView.ShowDialog();
+        }
 
-            if (measureSpectra.IsAcquiring() == true)
-            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
+        /// <summary>
+        /// Function that starts a new <see cref="ConfigurationViewModel"/> instance and binds it to a <see cref="Views.ConfigurationView"/> instance.
+        /// </summary>
+        public void _ConfigurationCommand()
+        {
+            if (MeasureSpectra.IsAcquiring() == true)
+            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't start channel configuration: Board is acquiring"); MessageBox.Show("Can't start channel configuration: Board is acquiring"); return; }
 
-            ChannelConfigurationViewModel channelConfigurationViewModel = new ChannelConfigurationViewModel();
-            Views.ChannelConfigurationView channelConfiguration = new Views.ChannelConfigurationView();
-            channelConfiguration.DataContext = channelConfigurationViewModel;
-            channelConfiguration.ShowDialog();
+            ConfigurationViewModel channelConfigurationViewModel = new ConfigurationViewModel();
+            Views.ConfigurationView channelConfigurationView = new Views.ConfigurationView();
+            channelConfigurationView.DataContext = channelConfigurationViewModel;
+            channelConfigurationView.ShowDialog();
         }
 
         /// <summary>
@@ -218,7 +282,7 @@ namespace newRBS.ViewModels
                     userEditorView.ShowDialog();
                 }
                 else
-                    Console.WriteLine("Connection problem");
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Database connection problem");
             }
         }
 
@@ -227,10 +291,27 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _SimulateSpectrumCommand()
         {
-            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel();
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 1) { MessageBox.Show("Select exactly one measurement", "Error"); return; }
+
+            SimulateSpectrumViewModel simulateSpectrumViewModel = new SimulateSpectrumViewModel(selectedMeasurementIDs.FirstOrDefault());
             Views.SimulateSpectrumView simulateSpectrumView = new Views.SimulateSpectrumView();
             simulateSpectrumView.DataContext = simulateSpectrumViewModel;
             simulateSpectrumView.ShowDialog();
+        }
+
+        /// <summary>
+        /// Function that starts a new <see cref="CalculateViewModel"/> instance and binds it to a <see cref="Views.CalculateView"/> instance.
+        /// </summary>
+        public void _CalculateCommand()
+        {
+            List<int> selectedMeasurementIDs = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(y => y.Measurement.MeasurementID).ToList();
+            if (selectedMeasurementIDs.Count() != 2) { MessageBox.Show("Select exactly two measurements", "Error"); return; }
+
+            CalculateViewModel calculateViewModel = new CalculateViewModel(selectedMeasurementIDs);
+            Views.CalculateView calculateView = new Views.CalculateView();
+            calculateView.DataContext = calculateViewModel;
+            calculateView.ShowDialog();
         }
 
         /// <summary>
@@ -238,8 +319,18 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _EnergyCalCommand()
         {
-            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel();
-            if (energyCalibrationViewModel.ValidSelectedMeasurements == false) return;
+            var selectedMeasurements = SimpleIoc.Default.GetInstance<MeasurementListViewModel>().MeasurementList.Where(x => x.Selected == true).Select(x => x.Measurement).ToList();
+
+            if (selectedMeasurements.Count() == 0)
+            { MessageBox.Show("Select at least one measurement!"); return; }
+
+            if (selectedMeasurements.Select(x => x.Channel).Distinct().ToList().Count > 1)
+            { MessageBox.Show("Select only measurements from the same channel!"); return; }
+
+            if (selectedMeasurements.Select(x => x.IncomingIonEnergy).Distinct().ToList().Count > 1 || selectedMeasurements.Select(x => x.IncomingIonIsotopeID).Distinct().ToList().Count > 1)
+            { MessageBox.Show("Select only measurements with identical irradiation parameters!"); return; }
+
+            EnergyCalibrationViewModel energyCalibrationViewModel = new EnergyCalibrationViewModel(selectedMeasurements.Select(x => x.MeasurementID).ToList());
             Views.EnergyCalibrationView energyCalibrationView = new Views.EnergyCalibrationView();
             energyCalibrationView.DataContext = energyCalibrationViewModel;
             energyCalibrationView.ShowDialog();
@@ -250,15 +341,15 @@ namespace newRBS.ViewModels
         /// </summary>
         public void _LogOutCommand()
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
-            {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+            if (MeasureSpectra.IsAcquiring() == true)
+            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
 
-                if (measureSpectra.IsAcquiring() == true)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't log out user: Board is acquiring"); MessageBox.Show("Can't log out user: Board is acquiring"); return; }
-            }
+            string OldUserName = new string(MyGlobals.ConString.Split(';').FirstOrDefault(x => x.Contains("User ID = ")).Skip(11).ToArray());
 
             MyGlobals.ConString = "";
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "User '" + OldUserName + "' logged out");
+
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().filterTree.Items.Clear();
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Projects.Clear();
             SimpleIoc.Default.GetInstance<MeasurementPlotViewModel>().ClearPlot(new List<int>());
@@ -267,26 +358,48 @@ namespace newRBS.ViewModels
             DatabaseDataContext temp = MyGlobals.Database;
 
             SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>().Init();
-            //var adventurerWindowVM = SimpleIoc.Default.GetInstance<MeasurementFilterViewModel>(System.Guid.NewGuid().ToString());
         }
 
         /// <summary>
         /// Function that closes the board and exits the program.
         /// </summary>
-        public void _CloseProgramCommand()
+        /// <param name="cancelEventArgs">Argument that allows to cancel the closing of the window.</param>
+        public void _CloseProgramCommand(CancelEventArgs cancelEventArgs)
         {
-            if (SimpleIoc.Default.ContainsCreated<Models.MeasureSpectra>() == true)
-            {
-                Models.MeasureSpectra measureSpectra = SimpleIoc.Default.GetInstance<Models.MeasureSpectra>();
+           if (MyGlobals.CanMeasure == true)
+            { 
+                if (MeasureSpectra.IsAcquiring() == true)
+                {
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't close the program: Board is acquiring");
+                    MessageBox.Show("Can't close the program: Board is acquiring");
 
-                if (measureSpectra.IsAcquiring() == true)
-                { trace.TraceEvent(TraceEventType.Warning, 0, "Can't close program: Board is acquiring"); MessageBox.Show("Can't close program: Board is acquiring"); return; }
+                    if (cancelEventArgs != null)
+                        cancelEventArgs.Cancel = true;
+
+                    return;
+                }
+
+                if (MessageBox.Show("Save channel configurations to disk?", "Save channel configurations", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    MeasureSpectra.SaveChopperConfig();
+
+                if (CAEN_x730.IsInit == true)
+                {
+                    CAEN_x730.Close();
+                }
+
+                if (Coulombo.IsInit == true)
+                {
+                    Coulombo.Close();
+                }
+
+                if (Gonio.IsInit == true)
+                {
+                    Gonio.Close();
+                }
             }
 
-            if (SimpleIoc.Default.ContainsCreated<Models.CAEN_x730>() == true)
-            {
-                SimpleIoc.Default.GetInstance<Models.CAEN_x730>().Close();
-            }
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Program closed");
+
             Environment.Exit(0);
         }
     }

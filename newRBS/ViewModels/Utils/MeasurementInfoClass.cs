@@ -45,7 +45,7 @@ namespace newRBS.ViewModels.Utils
 
         public ObservableCollection<string> Orientations { get; set; }
         public ObservableCollection<string> Chambers { get; set; }
-        public ObservableCollection<ElementClass> Ions { get; set; }
+        public ObservableCollection<Isotope> Ions { get; set; }
 
         public ObservableCollection<string> StopTypes { get; set; }
 
@@ -63,14 +63,14 @@ namespace newRBS.ViewModels.Utils
             Orientations = new ObservableCollection<string> { "(undefined)", "random", "aligned" };
             Chambers = new ObservableCollection<string> { "(undefined)", "-10°", "-30°" };
             StopTypes = new ObservableCollection<string> { "Manual", "Duration (min)", "Charge (µC)", "Counts", "ChopperCounts" };
-            Ions = new ObservableCollection<ElementClass> { new ElementClass { ShortName = "H", AtomicNumber = 1, AtomicMass = 1 }, new ElementClass { ShortName = "He", AtomicNumber = 2, AtomicMass = 4 }, new ElementClass { ShortName = "Li", AtomicNumber = 3, AtomicMass = 7 } }; 
+            Ions = new ObservableCollection<Isotope>(Database.Elements.Where(x => x.AtomicNumber <= 3).SelectMany(y => y.Isotopes).Where(z=>z.MassNumber>0).ToList());
         }
 
 
         /// <summary>
         /// Function that creates a new <see cref="Sample"/> instance and attaches it the the current <see cref="Measurement"/>.
         /// </summary>
-        private void _NewSampleCommand()
+        public void _NewSampleCommand()
         {
             int? newSampleID = DatabaseUtils.AddNewSample();
             if (newSampleID != null)

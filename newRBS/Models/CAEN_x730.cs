@@ -3,24 +3,29 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace newRBS.Models
 {
     /// <summary>
     /// Class that controls the CAEN N6730 device.
     /// </summary>
-    public class CAEN_x730
+    public static class CAEN_x730
     {
-        int handle;
-        int bID;
-        CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
-        int waveformAutoTrigger = 1;
-        CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
-        int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
-        public List<int> ActiveChannels = new List<int>();
-        public int NumberOfChanels = 16384;
+        public static bool IsInit = false;
+        private static int handle;
+        private static int bID;
+        private static CAENDPP_AcqMode_t acqMode = CAENDPP_AcqMode_t.CAENDPP_AcqMode_Histogram;
+        private static int waveformAutoTrigger;
+        private static CAENDPP_DgtzParams_t dgtzParams = new CAENDPP_DgtzParams_t();
+        private static int[] inputRange = new int[8] { 10, 10, 10, 10, 10, 10, 10, 10 };
+        public static List<int> ActiveChannels = new List<int>();
+        public static int NumberOfChanels = 16384;
 
-        TraceSource trace = new TraceSource("CAEN_x730");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         const string cAENDPPLib = "CAENDPPLib.dll";
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
@@ -34,6 +39,8 @@ namespace newRBS.Models
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_GetBoardConfiguration(int handle, int bID, ref int acqMode, ref CAENDPP_DgtzParams_t dgtzParams);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int CAENDPP_ClearCurrentHistogram(int handle, int channel);
+        [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_StartAcquisition(int handle, int channel);
         [DllImport(cAENDPPLib, CallingConvention = CallingConvention.Cdecl)]
         private static extern int CAENDPP_StopAcquisition(int handle, int channel);
@@ -45,47 +52,100 @@ namespace newRBS.Models
         private static extern int CAENDPP_EndLibrary(int handle);
 
         /// <summary>
-        /// Constructor that initializes the library, adds the board and sends the default configuration. 
+        /// Function that initializes the library, adds the board and sends the default and custom configuration. 
         /// </summary>
-        public CAEN_x730()
+        public static bool Init()
         {
+            IsInit = false;
+
+            if (MyGlobals.OffLineMode == true)
+                return false;
+
             //Init library
             int ret = CAENDPP_InitLibrary(ref handle);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Library initialized"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return false; }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library initialized"); }
 
             //Add board
-            ConnParam connParam = new ConnParam();
-            connParam.LinkType = 0;
-            connParam.LinkNum = 0;
-            connParam.ConetNode = 0;
+            ConnParam connParam = new ConnParam { LinkType = 0, LinkNum = 0, ConetNode = 0 };
+
             ret = CAENDPP_AddBoard(handle, connParam, ref bID);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Board added"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return false; }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Board added"); }
 
             //Reset board to default parameters
             SetDefaultConfig();
+
+            LoadCustomChannelConfigs();
+
+            SendConfig();
+
+            IsInit = true;
+            return true;
         }
 
         /// <summary>
-        /// Function that sets the default configuration and calls <see cref="SendConfig"/>. 
+        /// Function that sets the default configuration. 
         /// </summary>
-        public void SetDefaultConfig()
+        public static void SetDefaultConfig()
         {
             dgtzParams = new CAENDPP_DgtzParams_t();
             dgtzParams.initializeArrays();
             dgtzParams.setDefaultConfig();
-            for (int channel = 0; channel < 8; channel++) inputRange[channel] = 10; // 0.5Vpp
-
-            SendConfig();
+            for (int channel = 0; channel < 8; channel++) inputRange[channel] = 10; // 0.5Vpp 
         }
 
         /// <summary>
-        /// Function that sets the configuration of a single channel based on an instance of <see cref="ChannelParams"/> and calls <see cref="SendConfig"/>.
+        /// Function that loads the default channel configurations from the ChannelConfigs\ folder.
+        /// </summary>
+        public static void LoadCustomChannelConfigs()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChannelParams));
+            FileStream ReadFileStream;
+
+            for (int i = 0; i < 8; i++)
+            {
+                string path = "ConfigurationFiles/Ch" + i + ".xml";
+                if (File.Exists(path))
+                {
+                    ReadFileStream = new FileStream(path, FileMode.Open);
+                    SetChannelConfig(i, (ChannelParams)SerializerObj.Deserialize(ReadFileStream), false);
+                    ReadFileStream.Close();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration read from file " + path);
+                }
+                else
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't red channel configuration file " + path);
+            }
+        }
+
+        /// <summary>
+        /// Function that saves the current channel configurations to the ChannelConfigs\ folder.
+        /// </summary>
+        public static void SaveCustomChannelConfigs()
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(ChannelParams));
+            TextWriter WriteFileStream;
+
+            for (int i = 0; i < 8; i++)
+            {
+                string path = "ConfigurationFiles/Ch" + i + ".xml";
+
+                WriteFileStream = new StreamWriter(path);
+                SerializerObj.Serialize(WriteFileStream, GetChannelConfig(i));
+                WriteFileStream.Close();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Channel configuration saved to file " + path);
+            }
+        }
+
+        /// <summary>
+        /// Function that sets the configuration of a single channel based on an instance of <see cref="ChannelParams"/>.
         /// </summary>
         /// <param name="channel">The number of the channel to configure.</param>
         /// <param name="channelParams">The instance of <see cref="ChannelParams"/> holding the channel configuration.</param>
-        public void SetChannelConfig(int channel, ChannelParams channelParams)
+        /// <param name="SendToDevice">Determines whether <see cref="SendConfig"/> is called.</param>
+        public static void SetChannelConfig(int channel, ChannelParams channelParams, bool SendToDevice)
         {
             if (channelParams.DCoffset != null) dgtzParams.DCoffset[channel] = (int)channelParams.DCoffset;
             if (channelParams.InputRange != 0) inputRange[channel] = (int)channelParams.InputRange;
@@ -105,7 +165,8 @@ namespace newRBS.Models
             if (channelParams.EnergyNormalizationFactor != null) dgtzParams.DPPParams.enf[channel] = (float)channelParams.EnergyNormalizationFactor;
             if (channelParams.InputSignalDecimation != null) dgtzParams.DPPParams.decimation[channel] = (int)channelParams.InputSignalDecimation;
 
-            SendConfig();
+            if (SendToDevice == true)
+                SendConfig();
         }
 
         /// <summary>
@@ -113,7 +174,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="channel">The number of the channel to get the configuration.</param>
         /// <returns>An instance of <see cref="ChannelParams"/> holding the current channel configuration.</returns>
-        public ChannelParams GetChannelConfig(int channel)
+        public static ChannelParams GetChannelConfig(int channel)
         {
             ChannelParams channelParams = new ChannelParams();
 
@@ -146,7 +207,7 @@ namespace newRBS.Models
         /// <param name="DP1">Enum for digital probe 1.</param>
         /// <param name="DP2">Enum for digital probe 2.</param>
         /// <param name="AutoTrigger">Sets AutoTrigger to on (true) of off (false).</param>
-        public void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2, bool AutoTrigger)
+        public static void SetWaveformConfig(CAENDPP_PHA_AnalogProbe1_t AP1, CAENDPP_PHA_AnalogProbe2_t AP2, CAENDPP_PHA_DigitalProbe1_t DP1, CAENDPP_PHA_DigitalProbe2_t DP2, bool AutoTrigger)
         {
             dgtzParams.WFParams.ap1 = AP1;
             dgtzParams.WFParams.ap2 = AP2;
@@ -161,7 +222,7 @@ namespace newRBS.Models
         /// Function that sets the acquisition mode and calls <see cref="SendConfig"/>.
         /// </summary>
         /// <param name="acquisitionMode">Acquisition mode (Waveform/Histogram).</param>
-        public void SetMeasurementMode(CAENDPP_AcqMode_t acquisitionMode)
+        public static void SetMeasurementMode(CAENDPP_AcqMode_t acquisitionMode)
         {
             acqMode = acquisitionMode;
 
@@ -174,33 +235,34 @@ namespace newRBS.Models
         /// <remarks>
         /// The variables int acqMode (<see cref="CAENDPP_AcqMode_t"/>) and dgtzParams (<see cref="CAENDPP_DgtzParams_t"/>) of the class <see cref="CAEN_x730"/> are used.
         /// </remarks>
-        public void SendConfig()
+        public static void SendConfig()
         {
             int ret1 = 0, ret2 = 0;
             ret1 = CAENDPP_SetBoardConfiguration(handle, bID, (int)acqMode, dgtzParams);
             for (int channel = 0; channel < 8; channel++) ret2 = CAENDPP_SetInputRange(handle, channel, inputRange[channel]);
 
-            if (ret1 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error {0}: {1}", ret1, GetErrorText(ret1)); }
-            if (ret2 != 0) { trace.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error {0}: {1}", ret2, GetErrorText(ret2)); }
-            if (ret1 == 0 & ret2 == 0) { trace.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
+            if (ret1 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetBoardConfiguration: Error " + ret1 + ": " + GetErrorText(ret1)); }
+            if (ret2 != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "CAENDPP_SetInputRange: Error " + ret2 + ": " + GetErrorText(ret2)); }
+            if (ret1 == 0 & ret2 == 0) { trace.Value.TraceEvent(TraceEventType.Information, 0, "Configuration send"); }
         }
 
         /// <summary>
         /// Function that starts the acquisition for the specified channel.
         /// </summary>
         /// <param name="channel">Channel number (0...7) to start the acquisition.</param>
-        public void StartAcquisition(int channel)
+        public static void StartAcquisition(int channel)
         {
             if (ActiveChannels.Contains(channel)) // Checks if measurement is already running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Acquisition already running for channel " + channel);
                 return;
             }
+            int ret2 = CAENDPP_ClearCurrentHistogram(handle, channel);
             int ret = CAENDPP_StartAcquisition(handle, channel);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else
             {
-                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Acquisition started for channel " + channel);
                 ActiveChannels.Add(channel); // Adds channel to the active channels
             }
         }
@@ -210,7 +272,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="channel">Channel number (0...7) to read the histogram from.</param>
         /// <returns>Array of the obtained histogram. Type: UInt32[]. Length: 16384.</returns>
-        public int[] GetHistogram(int channel)
+        public static int[] GetHistogram(int channel)
         {
             UInt32[] h1 = new UInt32[16384];
             UInt32 counts = 0;
@@ -218,8 +280,8 @@ namespace newRBS.Models
             int acqStatus = 0;
 
             int ret = CAENDPP_GetCurrentHistogram(handle, channel, h1, ref counts, ref realTime, ref deadTime, ref acqStatus);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Verbose, 0, "Histogram read on channel {0}", channel); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Histogram read on channel " + channel); }
 
             return (int[])(object)h1;
         }
@@ -229,7 +291,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="channel">Channel number (0...7) to read the waveforms from.</param>
         /// <returns>Structure <see cref="Waveform"/> that holds the waveforms and number of samples.</returns>
-        public Waveform GetWaveform(int channel)
+        public static Waveform GetWaveform(int channel)
         {
             Waveform waveform = new Waveform();
 
@@ -242,20 +304,22 @@ namespace newRBS.Models
             waveform.AcquisitionTime = DateTime.Now;
             waveform.AcquisitionChannel = channel;
 
-            for (int i = 0; i < 100; i++)
+            DateTime startDateTime = DateTime.Now;
+
+            while ((DateTime.Now - startDateTime).Milliseconds < 300)
             {
-                int ret = CAENDPP_GetWaveform(handle, channel, (short)waveformAutoTrigger, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
-                if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); return waveform; }
-                else
+                int ret = CAENDPP_GetWaveform(handle, channel, 1, waveform.AT1, waveform.AT2, waveform.DT1, waveform.DT2, ref waveform.NumSamples, ref waveform.LenSample);
+
+                if (ret != 0)
+                { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); return waveform; }
+
+                if (waveform.NumSamples > 0)
                 {
-                    if (waveform.NumSamples > 0)
-                    {
-                        trace.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel {0}", channel);
-                        return waveform;
-                    }
+                    trace.Value.TraceEvent(TraceEventType.Verbose, 0, "Waveform read on channel " + channel);
+                    return waveform;
                 }
             }
-            trace.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel {0}", channel);
+            trace.Value.TraceEvent(TraceEventType.Warning, 0, "Waveform could not be read on channel " + channel);
             return waveform;
         }
 
@@ -263,18 +327,18 @@ namespace newRBS.Models
         /// Function that stops the acquisition for the specified channel.
         /// </summary>
         /// <param name="channel">Channel number (0...7) to stop the acquisition.</param>
-        public void StopAcquisition(int channel)
+        public static void StopAcquisition(int channel)
         {
             if (!ActiveChannels.Contains(channel)) // Checks if measurement is not running
             {
-                trace.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Warning, 0, "Acquisition not running for channel " + channel);
                 return;
             }
             int ret = CAENDPP_StopAcquisition(handle, channel);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
             else
             {
-                trace.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel {0}", channel);
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Acquisition stopped for channel " + channel);
                 ActiveChannels.Remove(channel); // Removes channel from the active channels
             }
         }
@@ -282,11 +346,13 @@ namespace newRBS.Models
         /// <summary>
         /// Function that closes the library.
         /// </summary>
-        public void Close()
+        public static void Close()
         {
             int ret = CAENDPP_EndLibrary(handle);
-            if (ret != 0) { trace.TraceEvent(TraceEventType.Error, 0, "Error {0}: {1}", ret, GetErrorText(ret)); }
-            else { trace.TraceEvent(TraceEventType.Information, 0, "Library closed"); }
+            if (ret != 0) { trace.Value.TraceEvent(TraceEventType.Error, 0, "Error " + ret + ": " + GetErrorText(ret)); }
+            else { trace.Value.TraceEvent(TraceEventType.Information, 0, "Library closed"); }
+
+            IsInit = false;
         }
 
         /// <summary>
@@ -294,7 +360,7 @@ namespace newRBS.Models
         /// </summary>
         /// <param name="ret">Error code of a library call.</param>
         /// <returns>Error string corresponding to the error code.</returns>
-        private string GetErrorText(int ret)
+        private static string GetErrorText(int ret)
         {
             switch (ret)
             {

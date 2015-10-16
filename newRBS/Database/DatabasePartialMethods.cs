@@ -10,9 +10,25 @@ using System.ComponentModel;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using GalaSoft.MvvmLight.Command;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace newRBS.Database
 {
+    public abstract class EntityBase
+    {
+        internal virtual void OnSaving(ChangeAction changeAction) { }
+
+        internal virtual void OnSaved(ChangeAction changeAction) { }
+    }
+
+    internal class ChangeEntity
+    {
+        public ChangeAction ChangeAction { get; set; }
+
+        public EntityBase Entity { get; set; }
+    }
+
     /// <summary>
     /// Class that represents the MS SQL Server database. 
     /// </summary>
@@ -22,6 +38,9 @@ namespace newRBS.Database
     /// </remarks>
     public partial class DatabaseDataContext
     {
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
+
         /// <summary>
         /// Function that can be used to load specific childs of a table class at its initialization.
         /// </summary>
@@ -34,50 +53,83 @@ namespace newRBS.Database
             var dlo = new DataLoadOptions();
             dlo.LoadWith<Measurement>(c => c.Sample);
             dlo.LoadWith<Material>(c => c.Layers);
-            dlo.LoadWith<Layer>(c => c.Elements);
+            dlo.LoadWith<Layer>(c => c.LayerElements);
             //this.LoadOptions = dlo;
             //this.Log = Console.Out;
         }
 
         /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance is added to the database and which calls <see cref="DatabaseUtils.SendMeasurementNewEvent(Measurement)"/>.
+        /// Function (overriden version of SubmitChanges) that notifies all child entities about it's change.
         /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been added to the database.</param>
-        partial void InsertMeasurement(Measurement measurement)
+        /// <param name="failureMode"></param>
+        public override void SubmitChanges(ConflictMode failureMode)
         {
-            //Console.WriteLine("DatabaseDataContext.InsertMeasurement");
+            // Get the entities that are to be inserted / updated / deleted
+            ChangeSet changeSet = GetChangeSet();
 
-            ExecuteDynamicInsert(measurement);
+            // Get a single list of all the entities in the change set
+            IEnumerable<object> changeSetEntities = changeSet.Deletes;
+            changeSetEntities = changeSetEntities.Union(changeSet.Inserts);
+            changeSetEntities = changeSetEntities.Union(changeSet.Updates);
 
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementNewEvent(measurement);
-        }
+            // Get a single list of all the enitities that inherit from EntityBase
+            IEnumerable<ChangeEntity> entities =
+                 from entity in changeSetEntities.Cast<EntityBase>()
+                 select new ChangeEntity()
+                 {
+                     ChangeAction =
+                          changeSet.Deletes.Contains(entity) ? ChangeAction.Delete
+                        : changeSet.Inserts.Contains(entity) ? ChangeAction.Insert
+                        : changeSet.Updates.Contains(entity) ? ChangeAction.Update
+                        : ChangeAction.None,
+                     Entity = entity as EntityBase
+                 };
 
-        /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance in the database is modified and which calls <see cref="DatabaseUtils.SendMeasurementUpdateEvent(Measurement)"/>.
-        /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been modified.</param>
-        partial void UpdateMeasurement(Measurement measurement)
-        {
-            //Console.WriteLine("DatabaseDataContext.UpdateMeasurement");
+            // "Raise" the OnSaving event for the entities 
+            foreach (ChangeEntity entity in entities)
+            {
+                entity.Entity.OnSaving(entity.ChangeAction);
+            }
 
-            ExecuteDynamicUpdate(measurement);
+            // Save the changes
+            try
+            {
+                base.SubmitChanges(failureMode);
+            }
+            catch (ChangeConflictException ex)
+            {
+                trace.Value.TraceEvent(TraceEventType.Error, 0, "Optimistic concurrency error during Database.SubmitChanges(). Conflicting fiels: " + string.Join(", ", ChangeConflicts[0].MemberConflicts.Select(X => X.Member.Name).ToList()));
 
-            int temp = measurement.Sample.SampleID;
-            DatabaseUtils.SendMeasurementUpdateEvent(measurement);
-        }
+                /*
+                foreach (ObjectChangeConflict changeConflict in base.ChangeConflicts)
+                {
+                    System.Data.Linq.Mapping.MetaTable metatable = base.Mapping.GetTable(changeConflict.Object.GetType());
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Table name: {0}", metatable.TableName);
+                    sb.AppendLine();
 
-        /// <summary>
-        /// Function that is excecuted every time a <see cref="Measurement"/> instance is deleted from the database and which calls <see cref="DatabaseUtils.SendMeasurementRemoveEvent(Measurement)"/>.
-        /// </summary>
-        /// <param name="measurement"><see cref="Measurement"/> that has been deleted from the database.</param>
-        partial void DeleteMeasurement(Measurement measurement)
-        {
-            //Console.WriteLine("DatabaseDataContext.DeleteMeasurement");
+                    foreach (MemberChangeConflict col in changeConflict.MemberConflicts)
+                    {
+                        sb.AppendFormat("Column name :    {0}", col.Member.Name); sb.AppendLine();
+                        if (col.Member.Name == "SpectrumYByte") { sb.AppendFormat("Original value : skipped"); sb.AppendLine(); sb.AppendFormat("Current value :  skipped"); sb.AppendLine(); sb.AppendFormat("Database value : skipped"); sb.AppendLine(); sb.AppendLine(); continue; }
+                        sb.AppendFormat("Original value : {0}", col.OriginalValue.ToString()); sb.AppendLine();
+                        sb.AppendFormat("Current value :  {0}", col.CurrentValue.ToString()); sb.AppendLine();
+                        sb.AppendFormat("Database value : {0}", col.DatabaseValue.ToString()); sb.AppendLine(); sb.AppendLine();
+                    }
+                    Console.WriteLine(sb);
+                    //changeConflict.Resolve(RefreshMode.KeepCurrentValues);
+                }
+                */
 
-            ExecuteDynamicDelete(measurement);
+                base.ChangeConflicts.ResolveAll(RefreshMode.KeepChanges);
+                this.SubmitChanges(ConflictMode.ContinueOnConflict);
+            }
 
-            DatabaseUtils.SendMeasurementRemoveEvent(measurement);
+            // "Raise" the OnSaved event for the entities
+            foreach (ChangeEntity entity in entities)
+            {
+                entity.Entity.OnSaved(entity.ChangeAction);
+            }
         }
     }
 
@@ -89,6 +141,43 @@ namespace newRBS.Database
     /// </remarks>
     public partial class Measurement
     {
+        partial void OnCreated()
+        {
+            IsTestMeasurement = false;
+            StopType = "Manual";
+            Orientation = "(undefiened)";
+            Chamber = "(undefiened)";
+        }
+
+        /// <summary>
+        /// Function that is called whenever a <see cref="Measurement"/> instance is inserted/updated/deleted. It calls the corresponding functions in <see cref="DatabaseUtils"/>.
+        /// </summary>
+        /// <param name="changeAction"></param>
+        internal override void OnSaved(ChangeAction changeAction)
+        {
+            base.OnSaved(changeAction);
+
+            // Load the sample/isotope/element entity before sending the Measurement instance
+            Sample tempSample = this.Sample;  
+            Isotope tempIsotope = this.Isotope;
+            Element tempElement = this.Isotope.Element;
+
+            switch (changeAction)
+            {
+                case ChangeAction.Insert:
+                    DatabaseUtils.SendMeasurementNewEvent(this);
+                    break;
+                case ChangeAction.Update:
+                    DatabaseUtils.SendMeasurementUpdateEvent(this);
+                    break;
+                case ChangeAction.Delete:
+                    DatabaseUtils.SendMeasurementRemoveEvent(this);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         /// <summary>
         /// property that holds the array of the RBS counts per channel. 
         /// </summary>
@@ -100,8 +189,6 @@ namespace newRBS.Database
         {
             get
             {
-                if (SpectrumYByte == null)
-                    Console.WriteLine("null");
                 int[] intArray = new int[SpectrumYByte.Length / sizeof(int)];
                 Buffer.BlockCopy(SpectrumYByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
                 return intArray;
@@ -114,8 +201,42 @@ namespace newRBS.Database
             }
         }
 
+        public int[] SpectrumYModified
+        {
+            get
+            {
+                if (SpectrumYModifiedByte== null) return null;
+                int[] intArray = new int[SpectrumYModifiedByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYModifiedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                return intArray;
+            }
+            set
+            {
+                byte[] byteArray = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
+                SpectrumYModifiedByte = byteArray;
+            }
+        }
+
+        public int[] SpectrumYSimulated
+        {
+            get
+            {
+                if (SpectrumYSimulatedByte == null) return null;
+                int[] intArray = new int[SpectrumYSimulatedByte.Length / sizeof(int)];
+                Buffer.BlockCopy(SpectrumYSimulatedByte.ToArray(), 0, intArray, 0, intArray.Length * sizeof(int));
+                return intArray;
+            }
+            set
+            {
+                byte[] byteArray = new byte[value.Length * sizeof(int)];
+                Buffer.BlockCopy(value, 0, byteArray, 0, byteArray.Length);
+                SpectrumYSimulatedByte = byteArray;
+            }
+        }
+
         /// <summary>
-        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/> and <see cref="Measurement.EnergyCalSlope"/>.
+        /// Property, which 'get' function calculates the energy values for each channel based on <see cref="Measurement.EnergyCalOffset"/>, <see cref="Measurement.EnergyCalLinear"/> and <see cref="Measurement.EnergyCalQuadratic"/>.
         /// </summary>
         public float[] SpectrumXCal
         {
@@ -123,19 +244,57 @@ namespace newRBS.Database
             {
                 float[] spectrumXCal = new float[NumOfChannels];
                 for (int i = 0; i < NumOfChannels; i++)
-                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalSlope;
+                    spectrumXCal[i] = (float)EnergyCalOffset + i * (float)EnergyCalLinear + i*i*(float)EnergyCalQuadratic;
                 return spectrumXCal;
             }
         }
     }
 
     /// <summary>
-    /// Class that stores the properties of a element in <see cref="Layer"/> of a <see cref="Material"/>.
+    /// Class that stores the properties of an element of the periodic system.
     /// </summary>
     /// <remarks>
     /// Can be saved to the MS SQL Server database via a table of <see cref="Element"/>s in <see cref="DatabaseDataContext"/>.
     /// </remarks>
-    public partial class Element { }
+    public partial class Element
+    {
+        public string DisplayName
+        { get { return (AtomicNumber.ToString() + " - " + ShortName + " - " + LongName); } }
+    }
+
+    /// <summary>
+    /// Class that stores the properties of an isotope of the periodic system.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="Isotope"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class Isotope
+    {
+        public string IsotopeDisplayName
+        {
+            get
+            {
+                if (MassNumber == 0) return "(natural)" + this.Element.ShortName;
+                else return MassNumber+this.Element.ShortName + " (" + Abundance + "%)";
+            }
+        }
+
+        public string ShortDisplayName
+        {
+            get
+            {
+                return MassNumber+this.Element.ShortName;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Class that stores the properties of an element in <see cref="Layer"/> of a <see cref="Material"/>.
+    /// </summary>
+    /// <remarks>
+    /// Can be saved to the MS SQL Server database via a table of <see cref="LayerElement"/>s in <see cref="DatabaseDataContext"/>.
+    /// </remarks>
+    public partial class ElementLayer { }
 
     /// <summary>
     /// Class that stores the properties of a layer of a <see cref="Material"/>.

@@ -1,20 +1,6 @@
 var searchData=
 [
-  ['sample',['Sample',['../classnew_r_b_s_1_1_database_1_1_sample.html',1,'newRBS::Database']]],
-  ['savemeasurementimage',['SaveMeasurementImage',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#ae06f4c943ea9f5f6062fd0ecdb497986',1,'newRBS::Database::DatabaseUtils']]],
-  ['selectablemeasurement',['SelectableMeasurement',['../classnew_r_b_s_1_1_view_models_1_1_utils_1_1_selectable_measurement.html',1,'newRBS::ViewModels::Utils']]],
-  ['sendconfig',['SendConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a2be9f4cbcbe3c5d3033d417f3b189b76',1,'newRBS::Models::CAEN_x730']]],
-  ['sendmeasurementnewevent',['SendMeasurementNewEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#aa93a2c5f3c394a4e37ec37210af3f429',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementremoveevent',['SendMeasurementRemoveEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a008e9c686cbf07769926cea2ab00f437',1,'newRBS::Database::DatabaseUtils']]],
-  ['sendmeasurementupdateevent',['SendMeasurementUpdateEvent',['../classnew_r_b_s_1_1_database_1_1_database_utils.html#a6bb1f7f268e23067fec6ab1ccaa67739',1,'newRBS::Database::DatabaseUtils']]],
-  ['setchannelconfig',['SetChannelConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a5d7b171087a5280bbe92bee4c754d058',1,'newRBS.Models.CAEN_x730.SetChannelConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#a65c28f9edbf82f872413007798a6bd18',1,'newRBS.Models.MeasureWaveform.SetChannelConfig()']]],
-  ['setdefaultconfig',['setDefaultConfig',['../structnew_r_b_s_1_1_models_1_1_c_a_e_n_d_p_p___dgtz_params__t.html#ad91b067887c31a2a0d49c75c048cbf67',1,'newRBS.Models.CAENDPP_DgtzParams_t.setDefaultConfig()'],['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a0962aaed2f8642bb123dda5cf05d3353',1,'newRBS.Models.CAEN_x730.SetDefaultConfig()']]],
-  ['setmeasurementmode',['SetMeasurementMode',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a34f882c6e49f5d47175fc65d05169464',1,'newRBS::Models::CAEN_x730']]],
-  ['setwaveformconfig',['SetWaveformConfig',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a7cd7d21ed37c4a644267780b75b6d739',1,'newRBS.Models.CAEN_x730.SetWaveformConfig()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ad0a46ac87a38d06f48d44de88d48f153',1,'newRBS.Models.MeasureWaveform.SetWaveformConfig()']]],
-  ['spectrumxcal',['SpectrumXCal',['../classnew_r_b_s_1_1_database_1_1_measurement.html#ad006468d24648ed1a70796e691cb0663',1,'newRBS::Database::Measurement']]],
-  ['spectrumy',['SpectrumY',['../classnew_r_b_s_1_1_database_1_1_measurement.html#a9dc6c7f60ebaf014dc05bcd860d26c04',1,'newRBS::Database::Measurement']]],
-  ['startacquisition',['StartAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#af74091e860764cb29d248e6af6c7d9f3',1,'newRBS.Models.CAEN_x730.StartAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#af59884dca552b1281ee7ea93b6cd8c5c',1,'newRBS.Models.MeasureWaveform.StartAcquisition()']]],
-  ['startacquisitions',['StartAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#aca60954e4054616a0f6b44db2263a177',1,'newRBS::Models::MeasureSpectra']]],
-  ['stopacquisition',['StopAcquisition',['../classnew_r_b_s_1_1_models_1_1_c_a_e_n__x730.html#a221bb43d103bd9d4c4ee224718d13889',1,'newRBS.Models.CAEN_x730.StopAcquisition()'],['../classnew_r_b_s_1_1_models_1_1_measure_waveform.html#ae407fee612f9a8ab2f0d1378ab1fe5a9',1,'newRBS.Models.MeasureWaveform.StopAcquisition()']]],
-  ['stopacquisitions',['StopAcquisitions',['../classnew_r_b_s_1_1_models_1_1_measure_spectra.html#a3ad1caa5b25dc3f134d4de7daf0937ac',1,'newRBS::Models::MeasureSpectra']]]
+  ['offlineupdateworkerinterval',['OfflineUpdateWorkerInterval',['../classnew_r_b_s_1_1_my_globals.html#af778f0efdbd256c22eccab7b81a2b5d7',1,'newRBS::MyGlobals']]],
+  ['onmeasurementlistchanged',['OnMeasurementListChanged',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#ae0d63f5d46e734b2aed65d723b216944',1,'newRBS::ViewModels::MeasurementListViewModel']]],
+  ['onselectablemeasurementmodified',['OnSelectableMeasurementModified',['../classnew_r_b_s_1_1_view_models_1_1_measurement_list_view_model.html#a2b6a6d1b53320491346656a98a88cee2',1,'newRBS::ViewModels::MeasurementListViewModel']]]
 ];

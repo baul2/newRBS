@@ -23,22 +23,105 @@
                 </GroupBox>
                 <GroupBox Header="Layers">
                     <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" x:Name="test">
                             <Button Content="Add" Command="{Binding AddLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Remove" Command="{Binding RemoveLayerCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Move up" Command="{Binding MoveLayerUpCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Move down" Command="{Binding MoveLayerDownCommand}" Margin="5" Padding="3" MinWidth="50"/>
                         </StackPanel>
-                        <DataGrid ItemsSource="{Binding LayersViewSource.View}" SelectedItem="{Binding SelectedLayer, Mode=TwoWay}" AutoGenerateColumns="True" MinWidth="300" CanUserAddRows="false"/>
+                        <DataGrid ItemsSource="{Binding LayersViewSource.View}" SelectedItem="{Binding SelectedLayer, Mode=TwoWay}" 
+                                  MinWidth="300" CanUserAddRows="False" 
+                                  AlternationCount="2" 
+                                  HorizontalGridLinesBrush ="WhiteSmoke" 
+                                  VerticalGridLinesBrush="LightGray" 
+                                  AutoGenerateColumns="False">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="{x:Type DataGridRow}">
+                                    <Style.Triggers>
+                                        <Trigger Property="AlternationIndex" Value="0">
+                                            <Setter Property="Background" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="AlternationIndex" Value="1">
+                                            <Setter Property="Background" Value="WhiteSmoke" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding Path=Selectable}" Value="False">
+                                            <DataTrigger.Setters>
+                                                <Setter Property="Background" Value="WhiteSmoke" />
+                                            </DataTrigger.Setters>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="LayerIndex" Binding="{Binding LayerIndex}"/>
+                                <DataGridTextColumn Header="LayerName" Binding="{Binding LayerName}"/>
+                                <DataGridTextColumn Header="Density (g/cm³)" Binding="{Binding Density}"/>
+                                <DataGridTextColumn Header="Thickness (nm)" Binding="{Binding Thickness}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Elements" MinHeight="250" >
+                <GroupBox Header="LayerElements" MinHeight="250" >
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Button Content="Add" Command="{Binding AddElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
                             <Button Content="Remove" Command="{Binding RemoveElementCommand}" Margin="5" Padding="3" MinWidth="50"/>
                         </StackPanel>
-                        <DataGrid ItemsSource="{Binding Elements}" SelectedItem="{Binding SelectedElement, Mode=TwoWay}" AutoGenerateColumns="True" MinWidth="300" CanUserAddRows="false"/>
+                        <DataGrid ItemsSource="{Binding LayerElements}" SelectedItem="{Binding SelectedLayerElement, Mode=TwoWay}" 
+                                  MinWidth="300" CanUserAddRows="False" 
+                                  AlternationCount="2" 
+                                  HorizontalGridLinesBrush ="WhiteSmoke" 
+                                  VerticalGridLinesBrush="LightGray" 
+                                  AutoGenerateColumns="False">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="{x:Type DataGridRow}">
+                                    <Style.Triggers>
+                                        <Trigger Property="AlternationIndex" Value="0">
+                                            <Setter Property="Background" Value="White" />
+                                        </Trigger>
+                                        <Trigger Property="AlternationIndex" Value="1">
+                                            <Setter Property="Background" Value="WhiteSmoke" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding Path=Selectable}" Value="False">
+                                            <DataTrigger.Setters>
+                                                <Setter Property="Background" Value="WhiteSmoke" />
+                                            </DataTrigger.Setters>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridComboBoxColumn Header="Element" DisplayMemberPath="DisplayName" MinWidth="100">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedElement, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Elements}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedElement, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
+                                <DataGridComboBoxColumn Header="Isotope" DisplayMemberPath="IsotopeDisplayName" MinWidth="100">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedIsotope, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding Path=Isotopes}"/>
+                                            <Setter Property="SelectedItem" Value="{Binding Path=SelectedIsotope, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
+                                <DataGridTextColumn Header="StoichiometricFactor" Binding="{Binding LayerElement.StoichiometricFactor}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>

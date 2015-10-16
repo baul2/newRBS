@@ -23,6 +23,9 @@ using newRBS.Database;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.SimulateSpectrumView"/>. They calculate the simulate spectra (<see cref="Measurement.SpectrumYSimulated"/>) based on the corresponding <see cref="Sample.Material"/>.
+    /// </summary>
     public class SimulateSpectrumViewModel : ViewModelBase
     {
         private bool? _DialogResult;
@@ -30,76 +33,79 @@ namespace newRBS.ViewModels
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
         public ICommand StartSimulationCommand { get; set; }
+        public ICommand CancelCommand { get; set; }
 
         private DatabaseDataContext Database;
 
-        private ObservableCollection<AreaData> _MeasuredSpectrumData = new ObservableCollection<AreaData>();
-        public ObservableCollection<AreaData> MeasuredSpectrumData
-        { get { return _MeasuredSpectrumData; } set { _MeasuredSpectrumData = value; RaisePropertyChanged(); } }
+        /// <summary>
+        /// The selected <see cref="Measurement"/>.
+        /// </summary>
+        public Measurement SelectedMeasurement { get; set; }
 
-        private ObservableCollection<AreaData> _SimulatedSpectrumData = new ObservableCollection<AreaData>();
-        public ObservableCollection<AreaData> SimulatedSpectrumData
-        { get { return _SimulatedSpectrumData; } set { _SimulatedSpectrumData = value; RaisePropertyChanged(); } }
+        public Sample SelectedSample { get; set; }
 
-        public ObservableCollection<Sample> Samples { get; set; }
-        private Sample _SelectedSample;
-        public Sample SelectedSample
-        {
-            get { return _SelectedSample; }
-            set { _SelectedSample = value; SelectedSampleChanged(); RaisePropertyChanged(); }
-        }
+        public Material SelectedMaterial { get; set; }
 
-        public ObservableCollection<Measurement> Measurements { get; set; }
-        private Measurement _SelectedMeasurement;
-        public Measurement SelectedMeasurement
-        {
-            get { return _SelectedMeasurement; }
-            set { _SelectedMeasurement = value; SelectedMeasurementChanged(); RaisePropertyChanged(); }
-        }
+        /// <summary>
+        /// The ion fluence of the simulation.
+        /// </summary>
+        public double IonFluence { get; set; }
 
-        public SimulateSpectrumViewModel()
+        /// <summary>
+        /// Constructor of the class. Sets up commands, initializes variables and checks whether a <see cref="Sample"/> and <see cref="Material"/> belongs to the <see cref="SelectedMeasurement"/>.
+        /// </summary>
+        /// <param name="MeasurementID"></param>
+        public SimulateSpectrumViewModel(int MeasurementID)
         {
             StartSimulationCommand = new RelayCommand(() => _StartSimulationCommand(), () => true);
+            CancelCommand = new RelayCommand(() => _CancelCommand(), () => true); 
 
             Database = MyGlobals.Database;
 
-            Measurements = new ObservableCollection<Measurement>();
+            SelectedMeasurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
+            SelectedSample = SelectedMeasurement.Sample;
+            SelectedMaterial = SelectedSample.Material;
 
-            Samples = new ObservableCollection<Sample>(Database.Samples.ToList());
-            Samples.Remove(Samples.First(x => x.SampleName == "(undefined)"));
-            //SelectedSample = Samples.FirstOrDefault();
+            if (SelectedSample.SampleName == "(undefined)" || SelectedMaterial.MaterialName == "(undefined)")
+            {
+                MessageBox.Show("A sample (with a material) must be assigned to the measurement!", "Error");
+                DialogResult = false;
+            }
+
+            IonFluence = 1E14;
         }
 
-        private void SelectedSampleChanged()
+        /// <summary>
+        /// Function that calculates the atomic density of an <see cref="LayerElement"/> inside a <see cref="Layer"/>.
+        /// </summary>
+        /// <param name="layer">The <see cref="Layer"/> containing the <see cref="LayerElement"/>.</param>
+        /// <param name="layerElement">The <see cref="LayerElement"/> which atomic density is calulated.</param>
+        /// <returns></returns>
+        private double CalculateAtomicDensity(Layer layer, LayerElement layerElement)
         {
-            Measurements.Clear();
+            double MassOfMolecule = 0;
+            foreach (LayerElement l in layer.LayerElements)
+                MassOfMolecule += l.Isotope.Mass * l.StoichiometricFactor;
 
-            List<Measurement> measurementList = Database.Measurements.Where(x => x.SampleID == SelectedSample.SampleID).ToList();
+            double NumberOfMolecules = layer.Density / MassOfMolecule / 1.66053904E-24;
 
-            if (measurementList == null) return;
+            double NumberOfAtomsInMolecule = layer.LayerElements.Select(x => x.StoichiometricFactor).ToList().Sum();
 
-            foreach (Measurement measurement in measurementList)
-                Measurements.Add(measurement);
+            double AtomicDensityOfElement = NumberOfMolecules * layerElement.StoichiometricFactor;
+            Console.WriteLine("Atomic density of " + layerElement.Isotope.Element.LongName+ ": " + AtomicDensityOfElement);
+            return AtomicDensityOfElement;
         }
 
-        private void SelectedMeasurementChanged()
-        {
-            MeasuredSpectrumData.Clear();
-            float[] spectrumX = SelectedMeasurement.SpectrumXCal;
-            int[] spectrumY = SelectedMeasurement.SpectrumY;
-            for (int i = 0; i < spectrumY.Count(); i++)
-                MeasuredSpectrumData.Add(new AreaData { x1 = spectrumX[i], y1 = spectrumY[i], x2 = spectrumX[i], y2 = 0 });
-
-            //plotModel.InvalidatePlot(true);
-        }
-
-        private void _StartSimulationCommand()
+        /// <summary>
+        /// Function that populates <see cref="DataSimpleMeasurement"/> and <see cref="DataSimpleMeasurement"/> and start the simulation.
+        /// </summary>
+        public void _StartSimulationCommand()
         {
             DataSimpleMeasurement simpleMeasurement = new DataSimpleMeasurement();
-            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.IncomingIonAtomicNumber;
-            simpleMeasurement.MassNoIncIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
+            simpleMeasurement.AtomicNoIncIon = SelectedMeasurement.Isotope.AtomicNumber;
+            simpleMeasurement.MassNoIncIon = (int)SelectedMeasurement.Isotope.Mass;
             simpleMeasurement.IonEnergy = SelectedMeasurement.IncomingIonEnergy;
-            simpleMeasurement.IonFluence = 6e13;
+            simpleMeasurement.IonFluence = IonFluence;
             simpleMeasurement.SolidAngle = SelectedMeasurement.SolidAngle;
             simpleMeasurement.IncAngleTheta = SelectedMeasurement.IncomingIonAngle;
             simpleMeasurement.IncAnglePhi = 0.0;
@@ -109,35 +115,35 @@ namespace newRBS.ViewModels
             simpleMeasurement.ConstEloss = 1;
             simpleMeasurement.ChannelMin = 0;
             simpleMeasurement.ChannelMax = (uint)(SelectedMeasurement.NumOfChannels - 1);
-            simpleMeasurement.CaliEnergyPerChannel = SelectedMeasurement.EnergyCalSlope;
+            simpleMeasurement.CaliEnergyPerChannel = SelectedMeasurement.EnergyCalLinear;
             simpleMeasurement.CaliEnergyPerChannelSquare = 0.0;
             simpleMeasurement.CaliEnergyPerChannelCube = 0.0;
-            simpleMeasurement.CaliEnergyOffset = SelectedMeasurement.EnergyCalOffset;
+            simpleMeasurement.CaliEnergyOffset = -SelectedMeasurement.EnergyCalOffset / SelectedMeasurement.EnergyCalLinear; // My E-Cal: ECal=Offset+x*Slope; Emanuels E-Cal: ECal=(x-Offset)*Slope
             simpleMeasurement.OdeInInitPrec = 1e-8;
             simpleMeasurement.OdeInMaxPrec = 1e-10;
             simpleMeasurement.OdeOutInitPrec = 1e-8;
             simpleMeasurement.OdeOutMaxPrec = 1e-10;
 
             double layerStart = 0;
-            Console.WriteLine(SelectedSample.Material.Layers.Count);
+            Console.WriteLine("Material count: " + SelectedSample.Material.Layers.Count);
             for (int i = 0; i < SelectedSample.Material.Layers.Count; i++)
             {
                 Layer layer = SelectedSample.Material.Layers.FirstOrDefault(x => x.LayerIndex == i);
                 Console.WriteLine("Try to add layer: {0}", layer.LayerName);
-                foreach (Element element in layer.Elements)
+                foreach (LayerElement layerElement in layer.LayerElements)
                 {
-                    Console.WriteLine("Try to add element: {0}", element.ElementName);
+                    Console.WriteLine("Try to add element: {0}", layerElement.Isotope.Element.ShortName);
                     DataSimpleMaterial newSimpleMaterial = new DataSimpleMaterial();
-                    newSimpleMaterial.AtomicNoInitialTarget = (int)element.AtomicNumber;
-                    newSimpleMaterial.MassNoInitialTarget = (int)element.MassNumber;
+                    newSimpleMaterial.AtomicNoInitialTarget = layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoInitialTarget = (int)layerElement.Isotope.Mass;
                     newSimpleMaterial.LayerBegin = layerStart;
                     newSimpleMaterial.LayerEnd = layerStart + layer.Thickness;
-                    newSimpleMaterial.AtomicDensity = 2.1937e22; // TODO: calculate actual atomic density
+                    newSimpleMaterial.AtomicDensity = CalculateAtomicDensity(layer, layerElement);
                     newSimpleMaterial.QValue = 0.0;
-                    newSimpleMaterial.AtomicNoRemainTarget = (int)element.AtomicNumber;
-                    newSimpleMaterial.MassNoRemainTarget = (int)element.MassNumber;
-                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.IncomingIonAtomicNumber;
-                    newSimpleMaterial.MassNoDetIon = (int)ElementData.AtomicMass[SelectedMeasurement.IncomingIonAtomicNumber - 1];
+                    newSimpleMaterial.AtomicNoRemainTarget = layerElement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoRemainTarget = (int)layerElement.Isotope.Mass;
+                    newSimpleMaterial.AtomicNoDetIon = SelectedMeasurement.Isotope.AtomicNumber;
+                    newSimpleMaterial.MassNoDetIon = (int)SelectedMeasurement.Isotope.Mass;
                     newSimpleMaterial.RbsActive = true;
                     newSimpleMaterial.NraActive = false;
 
@@ -146,19 +152,28 @@ namespace newRBS.ViewModels
                 layerStart += layer.Thickness;
             }
 
+            DialogResult = false;
+
             simpleMeasurement.Calculate();
 
             DataMatrix resultMatrix = simpleMeasurement.CalcedSpectrum;
 
-            SimulatedSpectrumData.Clear();
-            for (int i = 0; i < SelectedMeasurement.NumOfChannels; i++)
-            {
-                SimulatedSpectrumData.Add(new AreaData { x1 = i, y1 = resultMatrix[2, i], x2 = i, y2 = 0 });
-                //Console.WriteLine(resultMatrix[2, i]);
-            }
+            int[] spectrumYCalc = new int[SelectedMeasurement.NumOfChannels];
 
-            MeasuredSpectrumData.Add(new AreaData());
-            MeasuredSpectrumData.RemoveAt(MeasuredSpectrumData.Count() - 1);
+            for (int i = 0; i < SelectedMeasurement.NumOfChannels; i++)
+                spectrumYCalc[i] = (int)resultMatrix[2, i];
+
+            SelectedMeasurement.SpectrumYSimulated = spectrumYCalc;
+
+            Database.SubmitChanges();
+        }
+
+        /// <summary>
+        /// Function that closes the window.
+        /// </summary>
+        public void _CancelCommand()
+        {
+            DialogResult = false;
         }
     }
 }

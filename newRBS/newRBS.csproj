@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -159,6 +160,7 @@
       <DependentUpon>Database.dbml</DependentUpon>
     </Compile>
     <Compile Include="Database\DatabasePartialMethods.cs" />
+    <Compile Include="HelperClasses.cs" />
     <Compile Include="Models\Coulombo.cs" />
     <Compile Include="Models\EpsaraSharp\Data.cs" />
     <Compile Include="Models\EpsaraSharp\DataBeam.cs" />
@@ -174,12 +176,15 @@
     <Compile Include="Models\EpsaraSharp\DataVector.cs" />
     <Compile Include="Models\EpsaraSharp\EpsaraSharp.DataMeasurementForallCallbackNative.cs" />
     <Compile Include="Models\EpsaraSharp\PhyscoreOdeInputParameter.cs" />
+    <Compile Include="Models\Gonio.cs" />
     <Compile Include="Models\MeasureWaveform.cs" />
     <Compile Include="Models\CAEN_x730.cs" />
     <Compile Include="Models\CAEN_x730_Enums.cs" />
     <Compile Include="Models\CAEN_x730_Structs.cs" />
+    <Compile Include="ViewModels\CalculateViewModel.cs" />
     <Compile Include="ViewModels\EnergyCalibrationViewModel.cs" />
-    <Compile Include="ViewModels\ChannelConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\ConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\GoniometerViewModel.cs" />
     <Compile Include="ViewModels\MeasurementImportViewModel.cs" />
     <Compile Include="ViewModels\MaterialEditorViewModel.cs" />
     <Compile Include="ViewModels\MeasurementInfoViewModel.cs" />
@@ -190,22 +195,23 @@
     <Compile Include="ViewModels\SampleEditorViewModel.cs" />
     <Compile Include="ViewModels\SimulateSpectrumViewModel.cs" />
     <Compile Include="ViewModels\UserEditorViewModel.cs" />
-    <Compile Include="ViewModels\Utils\AreaData.cs" />
     <Compile Include="ViewModels\Utils\AsyncObservableCollection.cs" />
     <Compile Include="ViewModels\Utils\CheckedListItem.cs" />
     <Compile Include="ViewModels\Utils\DialogCloser.cs" />
-    <Compile Include="ViewModels\Utils\ElementClass.cs" />
-    <Compile Include="ViewModels\Utils\ElementData.cs" />
     <Compile Include="ViewModels\Utils\FilterClass.cs" />
     <Compile Include="ViewModels\Utils\MeasurementInfoClass.cs" />
-    <Compile Include="ViewModels\Utils\NameValueClass.cs" />
-    <Compile Include="ViewModels\Utils\SelectableMeasurement.cs" />
     <Compile Include="ViewModels\Utils\TreeViewHelper.cs" />
+    <Compile Include="Views\CalculateView.xaml.cs">
+      <DependentUpon>CalculateView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\EnergyCalibrationView.xaml.cs">
       <DependentUpon>EnergyCalibrationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ChannelConfigurationView.xaml.cs">
-      <DependentUpon>ChannelConfigurationView.xaml</DependentUpon>
+    <Compile Include="Views\ConfigurationView.xaml.cs">
+      <DependentUpon>ConfigurationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GoniometerView.xaml.cs">
+      <DependentUpon>GoniometerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MeasurementImportView.xaml.cs">
       <DependentUpon>MeasurementImportView.xaml</DependentUpon>
@@ -244,6 +250,9 @@
     <Compile Include="Views\Utils\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Utils\ChannelDialog.xaml.cs">
+      <DependentUpon>ChannelDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Utils\NewLogInDialog .xaml.cs">
       <DependentUpon>NewLogInDialog .xaml</DependentUpon>
     </Compile>
@@ -256,11 +265,19 @@
     <Compile Include="Views\Utils\ProjectSelector.xaml.cs">
       <DependentUpon>ProjectSelector.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\CalculateView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\EnergyCalibrationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ChannelConfigurationView.xaml">
+    <Page Include="Views\ConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GoniometerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -319,6 +336,10 @@
     <Page Include="Views\Utils\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Utils\ChannelDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Utils\NewLogInDialog .xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -394,6 +415,30 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\5.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\144.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\HorizontalTilt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\VerticalTilt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Translation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Rotation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Logo.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\newRBS.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

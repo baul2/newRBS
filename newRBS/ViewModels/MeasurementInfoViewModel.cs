@@ -18,9 +18,36 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using newRBS.Database;
+using System.Data.Linq;
 
 namespace newRBS.ViewModels
 {
+    /// <summary>
+    /// Class that contains a bool (<see cref="Selected"/>) and a <see cref="Measurement"/>.
+    /// </summary>
+    /// <remarks>
+    /// It is usefull as a datagrid items, where individual <see cref="Measurement"/>s can be checked.
+    /// </remarks>
+    public class SelectableMeasurement : ViewModelBase
+    {
+        private bool _Selected;
+        public bool Selected
+        {
+            get { return _Selected; }
+            set { if (_Selected != value) { _Selected = value; RaisePropertyChanged(); } }
+        }
+
+        private Measurement _Measurement;
+        public Measurement Measurement
+        {
+            get { return _Measurement; }
+            set { _Measurement = value; RaisePropertyChanged(); }
+        }
+    }
+
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.MeasurementInfoView"/>. They show and modify the properties of the selected <see cref="Measurement"/>.
+    /// </summary>
     public class MeasurementInfoViewModel : ViewModelBase
     {
         public ICommand SaveCommand { get; set; }
@@ -32,8 +59,15 @@ namespace newRBS.ViewModels
 
         private DatabaseDataContext Database;
 
+        /// <summary>
+        /// Instance of the <see cref="MeasurementInfoClass"/>, containing all information of the <see cref="Measurement"/>.
+        /// </summary>
         public MeasurementInfoClass MeasurementInfo { get; set; }
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands and initiates <see cref="MeasurementInfo"/>.
+        /// </summary>
+        /// <param name="MeasurementID"></param>
         public MeasurementInfoViewModel(int MeasurementID)
         {
             SaveCommand = new RelayCommand(() => _SaveCommand(), () => true);
@@ -44,12 +78,19 @@ namespace newRBS.ViewModels
             MeasurementInfo.Measurement = Database.Measurements.FirstOrDefault(x => x.MeasurementID == MeasurementID);
         }
 
+        /// <summary>
+        /// Function that saves the changes to the database and closes the window.
+        /// </summary>
         public void _SaveCommand()
         {
-            Database.SubmitChanges();
+            Database.SubmitChanges(ConflictMode.ContinueOnConflict);
+
             DialogResult = true;
         }
 
+        /// <summary>
+        /// Function that closes the window.
+        /// </summary>
         public void _CancelCommand()
         {
             DialogResult = true;

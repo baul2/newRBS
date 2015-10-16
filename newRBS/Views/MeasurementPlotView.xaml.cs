@@ -15,14 +15,16 @@ using System.Windows.Shapes;
 
 namespace newRBS.Views
 {
-    /// <summary>
-    /// Interaction logic for SpectraPlotView.xaml
-    /// </summary>
-    public partial class SpectraPlotView : UserControl
+    public partial class MeasurementPlotView : UserControl
     {
-        public SpectraPlotView()
+        public MeasurementPlotView()
         {
             InitializeComponent();
+        }
+
+        public void MySizeChanged(Object o, SizeChangedEventArgs e)
+        {
+            Console.WriteLine("Size changed");
         }
     }
 }

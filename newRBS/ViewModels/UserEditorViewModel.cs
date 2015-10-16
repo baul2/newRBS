@@ -21,22 +21,31 @@ using GalaSoft.MvvmLight.Command;
 using Microsoft.Practices.ServiceLocation;
 using newRBS.ViewModels.Utils;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace newRBS.ViewModels
 {
-    public class MyUser : ViewModelBase
-    {
-        public string UserName { get; set; }
-        public string LoginName { get; set; }
-        public string Database { get; set; }
-    }
-
+    /// <summary>
+    /// Class that is the view model of <see cref="Views.UserEditorView"/>. They can add or remove users and their corresponding databases.
+    /// </summary>
     public class UserEditorViewModel : ViewModelBase
     {
+        public ICommand AddUserCommand { get; set; }
+        public ICommand RemoveUserCommand { get; set; }
+        public ICommand DownloadDatabaseCommand { get; set; }
+
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
+
         private bool? _DialogResult;
         public bool? DialogResult
         { get { return _DialogResult; } set { _DialogResult = value; RaisePropertyChanged(); } }
 
+        /// <summary>
+        /// List of <see cref="MyUser"/> for the datagrid.
+        /// </summary>
         public ObservableCollection<MyUser> Users { get; set; }
 
         private MyUser _SelectedUser;
@@ -46,24 +55,26 @@ namespace newRBS.ViewModels
             set { _SelectedUser = value; RaisePropertyChanged(); }
         }
 
-        public ICommand AddUserCommand { get; set; }
-        public ICommand RemoveUserCommand { get; set; }
-
         private Server server;
         private SqlConnection sqlConnection;
 
         private Views.Utils.LogIn AdminLogIn;
 
+        /// <summary>
+        /// Constructor of the class. Sets up the commands, variables and the sql-connection.
+        /// </summary>
+        /// <param name="adminLogIn">Login data of the admin account.</param>
         public UserEditorViewModel(Views.Utils.LogIn adminLogIn)
         {
             AddUserCommand = new RelayCommand(() => _AddUserCommand(), () => true);
             RemoveUserCommand = new RelayCommand(() => _RemoveUserCommand(), () => true);
+            DownloadDatabaseCommand = new RelayCommand(() => _BackupDatabaseCommand(), () => true);
 
             AdminLogIn = adminLogIn;
 
             sqlConnection = new SqlConnection(@"Data Source = " + adminLogIn.IPAdress + ", " + adminLogIn.Port + "; Network Library = DBMSSOCN; User ID = " + adminLogIn.UserName + "; Password = " + adminLogIn.Password + "; ");
             //ServerConnection serverConnection = new ServerConnection(sqlConnection);
-            ServerConnection serverConnection = new ServerConnection(adminLogIn.IPAdress + ", " + adminLogIn.Port); 
+            ServerConnection serverConnection = new ServerConnection(adminLogIn.IPAdress + ", " + adminLogIn.Port);
             server = new Server(serverConnection);
             server.ConnectionContext.LoginSecure = false;
             server.ConnectionContext.Login = adminLogIn.UserName;
@@ -71,7 +82,7 @@ namespace newRBS.ViewModels
 
             try
             {
-                Console.WriteLine(server.Information.Version);   // connection is established
+                string temp = server.Information.Version.ToString();   // connection is established
             }
             catch (ConnectionFailureException e)
             {
@@ -85,12 +96,15 @@ namespace newRBS.ViewModels
             FillUserList();
         }
 
+        /// <summary>
+        /// Funtion that retrieves the users from the database and fills <see cref="Users"/>.
+        /// </summary>
         public void FillUserList()
         {
             Users.Clear();
             foreach (Microsoft.SqlServer.Management.Smo.Database db in server.Databases)
             {
-                if (!db.Name.Contains("_db")) continue; 
+                if (!db.Name.Contains("_db")) continue;
 
                 //Run the EnumLoginMappings method and return details of database user-login mappings to a DataTable object variable. 
                 DataTable d;
@@ -104,7 +118,7 @@ namespace newRBS.ViewModels
                         {
                             case "UserName": { myUser.UserName = (string)r[c]; break; }
                             case "LoginName": { myUser.LoginName = (string)r[c]; break; }
-                            default: Console.WriteLine("unknown"); break;
+                            default: break;
                         }
                     }
                     if (!myUser.LoginName.Contains("admin"))
@@ -113,7 +127,10 @@ namespace newRBS.ViewModels
             }
         }
 
-        private void _AddUserCommand()
+        /// <summary>
+        /// Function that adds a new user with a new database (copied from admin account).
+        /// </summary>
+        public void _AddUserCommand()
         {
             Views.Utils.NewLogInDialog newLogInDialog = new Views.Utils.NewLogInDialog("Please enter the new user login data!");
 
@@ -132,6 +149,8 @@ namespace newRBS.ViewModels
                 user.Login = newLogInDialog.logIn.UserName;
                 user.Create();
 
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Created new User '" + user.Login + "'");
+
                 // Creating database permission Sets
                 DatabasePermissionSet databasePermissionSet = new DatabasePermissionSet();
                 databasePermissionSet.Add(DatabasePermission.Insert);
@@ -142,8 +161,9 @@ namespace newRBS.ViewModels
                 // Granting Database Permission Sets to Roles
                 db.Grant(databasePermissionSet, newLogInDialog.logIn.UserName);
 
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Granted permissions to User '" + user.Login + "'");
+
                 // Copy database
-                Console.WriteLine(AdminLogIn.UserName + "_db");
                 Microsoft.SqlServer.Management.Smo.Database adminDB = server.Databases[AdminLogIn.UserName + "_db"];
                 Transfer transfer = new Transfer(adminDB);
 
@@ -158,11 +178,16 @@ namespace newRBS.ViewModels
                 transfer.CopySchema = true;
                 transfer.TransferData();
 
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Copied default database to User '" + user.Login + "'");
+
                 FillUserList();
             }
         }
 
-        private void _RemoveUserCommand()
+        /// <summary>
+        /// Function that removes a user and the corresponding database.
+        /// </summary>
+        public void _RemoveUserCommand()
         {
             if (SelectedUser == null) return;
 
@@ -172,7 +197,7 @@ namespace newRBS.ViewModels
             {
                 server.KillDatabase(SelectedUser.UserName + "_db");
 
-                SqlCommand cmd = new SqlCommand("DROP LOGIN ["+SelectedUser.UserName+"];", sqlConnection);
+                SqlCommand cmd = new SqlCommand("DROP LOGIN [" + SelectedUser.UserName + "];", sqlConnection);
                 // In addition, you can use this command:
                 // EXEC sp_droplogin 'someuser';
 
@@ -180,15 +205,17 @@ namespace newRBS.ViewModels
                 {
                     sqlConnection.Open();
                     cmd.ExecuteNonQuery();
+
+                    trace.Value.TraceEvent(TraceEventType.Information, 0, "Deleted User '" + SelectedUser.UserName + "'");
                 }
                 catch (SqlException ex)
                 {
                     if (ex.Number == 15151)
-                        Console.WriteLine("Login does not exist.");
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Can't deleted User '" + SelectedUser.UserName + "' - user does not exist.");
                     else if (ex.Number == 15007)
-                        Console.WriteLine("Login already logged on.");
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Can't deleted User '" + SelectedUser.UserName + "' - user is still logged in.");
                     else
-                        Console.WriteLine("{0}: {1}", ex.Number, ex.Message);
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Can't deleted User '" + SelectedUser.UserName + "' - " + ex.Number + ": " + ex.Message);
                 }
                 finally
                 {
@@ -196,6 +223,56 @@ namespace newRBS.ViewModels
                     sqlConnection.Close();
                 }
             }
+        }
+
+        /// <summary>
+        /// Function that performes a backup of the 'test_db' database. Needs still more work.
+        /// </summary>
+        public void _BackupDatabaseCommand()
+        {
+            string script = "USE test_db; GO BACKUP DATABASE test_db TO DISK = 'test_db.Bak' WITH FORMAT, MEDIANAME = 'Z_SQLServerBackups', NAME = 'Full Backup of test_db'; GO ";
+
+            try
+            {
+                sqlConnection.Open();
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = sqlConnection;
+
+                    var scripts = script.Split(new string[] { " GO " }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var splitScript in scripts)
+                    {
+                        Console.WriteLine(splitScript);
+                        command.CommandText = splitScript;
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+        }
+
+        /// <summary>
+        /// Function that splits a 'Microsoft SQL Server Management Studio' script in individual sql commands.
+        /// </summary>
+        /// <param name="sqlScript">Script that has to be splitted at every 'GO'.</param>
+        /// <returns>List of sql commands.</returns>
+        private static IEnumerable<string> SplitSqlStatements(string sqlScript)
+        {
+            // Split by "GO" statements
+            var statements = Regex.Split(
+                    sqlScript,
+                    @"^\s*GO\s* ($ | \-\- .*$)",
+                    RegexOptions.Multiline |
+                    RegexOptions.IgnorePatternWhitespace |
+                    RegexOptions.IgnoreCase);
+
+            // Remove empties, trim, and return
+            return statements
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim(' ', '\r', '\n'));
         }
     }
 }

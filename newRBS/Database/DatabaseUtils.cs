@@ -18,6 +18,7 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
+using System.Reflection;
 
 namespace newRBS.Database
 {
@@ -31,7 +32,8 @@ namespace newRBS.Database
         public static event EventHandlerMeasurement EventMeasurementUpdate;
         public static event EventHandlerMeasurement EventMeasurementRemove;
 
-        private static TraceSource trace = new TraceSource("DatabaseUtils");
+        private static string className = MethodBase.GetCurrentMethod().DeclaringType.Name;
+        private static readonly Lazy<TraceSource> trace = new Lazy<TraceSource>(() => TraceSources.Create(className));
 
         /// <summary>
         /// Function that sends an event (<see cref="EventMeasurementNew"/>) if new <see cref="Measurement"/> has been added to the database. The event argument is the new measurement.
@@ -78,7 +80,6 @@ namespace newRBS.Database
             Views.Utils.InputDialog inputDialog = new Views.Utils.InputDialog("Enter new sample name:", "");
             if (inputDialog.ShowDialog() == true)
             {
-                Console.WriteLine(inputDialog.Answer);
                 if (inputDialog.Answer == "") return null;
 
                 return AddNewSample(inputDialog.Answer);
@@ -100,7 +101,7 @@ namespace newRBS.Database
 
                 if (sample != null)
                 {
-                    Console.WriteLine("Sample already exists!");
+                    trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't create new sample: sample already exists");
 
                     MessageBoxResult result = MessageBox.Show("Sample already exists in database!", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -108,14 +109,14 @@ namespace newRBS.Database
                 }
 
                 // New sample
-                Console.WriteLine("new sample");
-
                 Sample newSample = new Sample();
                 newSample.SampleName = SampleName;
                 newSample.MaterialID = 1;
 
                 Database.Samples.InsertOnSubmit(newSample);
                 Database.SubmitChanges();
+
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "New sample '" + newSample.SampleName + "' created");
 
                 return newSample.SampleID;
             }
@@ -142,15 +143,20 @@ namespace newRBS.Database
 
                             XmlAttributes attrs = new XmlAttributes();
                             attrs.XmlIgnore = true;
-
+                            
                             xOver.Add(typeof(Measurement), "Sample", attrs);
                             xOver.Add(typeof(Measurement), "SampleID", attrs);
                             xOver.Add(typeof(Measurement), "SampleRemark", attrs);
+                            xOver.Add(typeof(Measurement), "Measurement_Projects", attrs);
+                            xOver.Add(typeof(Measurement), "Isotope", attrs);
                             xOver.Add(typeof(Measurement), "SpectrumYByte", attrs);
-                            xOver.Add(typeof(Measurement), "SpectrumYCalculatedByte", attrs);
+                            xOver.Add(typeof(Measurement), "SpectrumYModifiedByte", attrs);
+                            xOver.Add(typeof(Measurement), "SpectrumYSimulatedByte", attrs);
 
                             XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
                             SerializerObj.Serialize(WriteFileStream, Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList());
+
+                            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", measurementIDs) + " exported to a newRBS data file (.xml)");
                             break;
                         }
                     case ".dat":
@@ -178,23 +184,22 @@ namespace newRBS.Database
                             List<Measurement> MeasurementsToExport = Database.Measurements.Where(x => measurementIDs.Contains(x.MeasurementID)).ToList();
 
                             if (!MeasurementsToExport.Any())
-                            { trace.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
+                            { trace.Value.TraceEvent(TraceEventType.Warning, 0, "Can't save Measurement: MeasurementIDs not found"); tw.Close(); return; }
 
-                            NumberFormatInfo point = new NumberFormatInfo();
-                            point.NumberDecimalSeparator = ".";
+                            NumberFormatInfo point = new NumberFormatInfo { NumberDecimalSeparator = "." };
 
                             foreach (var measurement in MeasurementsToExport)
                             {
                                 strName += "\t" + measurement.MeasurementName;
                                 strData += "\t" + String.Format("{0:dd.MM.yyyy HH:mm}", measurement.StartTime); ;
                                 strRemark += "\t" + measurement.Sample.SampleName;
-                                strProjectile += "\t" + measurement.IncomingIonAtomicNumber.ToString(point);
+                                strProjectile += "\t" + measurement.Isotope.AtomicNumber.ToString(point);
                                 strEnergy += "\t" + measurement.IncomingIonEnergy.ToString(point);
                                 strScatteringAngle += "\t" + measurement.OutcomingIonAngle.ToString(point);
                                 strIncidentAngle += "\t 0.00";
                                 strExitAngle += "\t" + (180 - measurement.OutcomingIonAngle).ToString(point);
-                                strEnergyChannel += "\t" + measurement.EnergyCalSlope.ToString(point);
-                                strOffset += "\t" + measurement.EnergyCalOffset.ToString(point);
+                                strEnergyChannel += "\t" + measurement.EnergyCalLinear.ToString(point);
+                                strOffset += "\t" + (-measurement.EnergyCalOffset / measurement.EnergyCalLinear).ToString(point);
                                 strSolidAngle += "\t" + measurement.SolidAngle.ToString(point);
                                 strCharge += "\t" + measurement.CurrentCharge.ToString(point);
                                 strRealTime += "\t" + (measurement.CurrentDuration - new DateTime(2000, 01, 01)).TotalSeconds.ToString(point);
@@ -238,6 +243,8 @@ namespace newRBS.Database
                                 tw.WriteLine(dataLine);
                             }
 
+                            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", measurementIDs) + " exported to a Spektrenverwaltung data file (.dat)");
+
                             break;
                         }
                 }
@@ -268,17 +275,22 @@ namespace newRBS.Database
                         XmlAttributes attrs = new XmlAttributes();
                         attrs.XmlIgnore = true;
 
+                        // Define the fields that shall not be imported
                         xOver.Add(typeof(Measurement), "Sample", attrs);
                         xOver.Add(typeof(Measurement), "SampleID", attrs);
                         xOver.Add(typeof(Measurement), "SampleRemark", attrs);
+                        xOver.Add(typeof(Measurement), "Measurement_Projects", attrs);
+                        xOver.Add(typeof(Measurement), "Isotope", attrs);
                         xOver.Add(typeof(Measurement), "SpectrumYByte", attrs);
-                        xOver.Add(typeof(Measurement), "SpectrumYCalculatedByte", attrs);
+                        xOver.Add(typeof(Measurement), "SpectrumYModifiedByte", attrs);
+                        xOver.Add(typeof(Measurement), "SpectrumYSimulatedByte", attrs);
 
                         XmlSerializer SerializerObj = new XmlSerializer(typeof(List<Measurement>), xOver);
                         using (FileStream ReadFileStream = new FileStream(FileName, FileMode.Open))
                         {
                             newMeasurements = (List<Measurement>)SerializerObj.Deserialize(ReadFileStream);
                         }
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements loaded from .xml file");
                         break;
                     }
                 case ".dat":
@@ -290,7 +302,6 @@ namespace newRBS.Database
                             string[] lineParts = textReader.ReadLine().Split('\t');
 
                             int numSpectra = lineParts.Count() - 1;
-                            Console.WriteLine("Number of spectra: {0}", numSpectra);
 
                             for (int i = 0; i < numSpectra; i++)
                             {
@@ -312,7 +323,11 @@ namespace newRBS.Database
                                         case "Remark":
                                             { newMeasurements[i].SampleRemark = lineParts[i + 1]; break; }
                                         case "Projectile":
-                                            { newMeasurements[i].IncomingIonAtomicNumber = Int32.Parse(lineParts[i + 1]); break; }
+                                            {
+                                                using (DatabaseDataContext Database = MyGlobals.Database)
+                                                {
+                                                    newMeasurements[i].IncomingIonIsotopeID = Database.Isotopes.FirstOrDefault(x=>x.AtomicNumber == Int32.Parse(lineParts[i + 1])).IsotopeID; break; }
+                                            }
                                         case "Energy":
                                             { newMeasurements[i].IncomingIonEnergy = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Scattering angle":
@@ -322,9 +337,9 @@ namespace newRBS.Database
                                         case "Exit angle":
                                             { break; }
                                         case "Energy / Channel":
-                                            { newMeasurements[i].EnergyCalSlope = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].EnergyCalLinear = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Offset":
-                                            { newMeasurements[i].EnergyCalOffset = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
+                                            { newMeasurements[i].EnergyCalOffset = -newMeasurements[i].EnergyCalLinear * Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Solid angle":
                                             { newMeasurements[i].SolidAngle = Convert.ToDouble(lineParts[i + 1].Replace(".", ",")); break; }
                                         case "Charge":
@@ -340,20 +355,24 @@ namespace newRBS.Database
                                         case "":
                                             { break; }
                                         default:
-                                            { spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
+                                            { Console.WriteLine(line); spectraY[i].Add(Int32.Parse(lineParts[i + 1].Replace(" ", ""))); break; }
                                     }
                                 }
                             }
 
                             for (int i = 0; i < numSpectra; i++)
                             {
+                                newMeasurements[i].IsTestMeasurement = false;
                                 newMeasurements[i].SpectrumY = spectraY[i].ToArray();
                                 newMeasurements[i].NumOfChannels = spectraY[i].Count();
                                 newMeasurements[i].Orientation = "(undefined)";
                                 newMeasurements[i].StopType = "Charge (µC)";
                                 newMeasurements[i].Chamber = "(undefined)";
+                                newMeasurements[i].Progress = 1;
+                                newMeasurements[i].EnergyCalQuadratic = 0;
                             }
                         }
+                        trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements loaded from .dat file");
                         break;
                     }
             }
@@ -370,9 +389,16 @@ namespace newRBS.Database
 
             using (DatabaseDataContext Database = MyGlobals.Database)
             {
+                var projects = Database.Measurement_Projects.Where(x => MeasurementIDs.Contains(x.MeasurementID));
+                if (projects.ToList().Count > 0)
+                    if (MessageBox.Show("Selected measurements belong to projects. Delete them nevertheless?", "Confirm deletion", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                        return;
+                Database.Measurement_Projects.DeleteAllOnSubmit(projects);
                 Database.Measurements.DeleteAllOnSubmit(Database.Measurements.Where(x => MeasurementIDs.Contains(x.MeasurementID)));
                 Database.SubmitChanges();
             }
+
+            trace.Value.TraceEvent(TraceEventType.Information, 0, "Measurements " + string.Join(", ", MeasurementIDs) + " deleted from the database");
         }
 
         /// <summary>
@@ -386,7 +412,7 @@ namespace newRBS.Database
         {
             using (FileStream fileStream = File.Create(FileName))
             {
-                var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().plotModel;
+                var plotModel = SimpleIoc.Default.GetInstance<ViewModels.MeasurementPlotViewModel>().MeasurementsPlotModel;
                 switch (Path.GetExtension(FileName))
                 {
                     case ".png":
@@ -461,6 +487,7 @@ namespace newRBS.Database
                             break;
                         }
                 }
+                trace.Value.TraceEvent(TraceEventType.Information, 0, "Plot of selected measurements exported");
             }
         }
     }
